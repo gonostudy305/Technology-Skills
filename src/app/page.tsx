@@ -3,40 +3,68 @@ import { getArticlesList } from "@/lib/contents";
 
 export default async function Home() {
   const articles = await getArticlesList();
+  const sortedArticles = articles.sort((a, b) => a.title.localeCompare(b.title));
 
   return (
-    <main className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-4xl mx-auto bg-white shadow-sm rounded-xl p-8 border border-slate-100">
-        <h1 className="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-          📚 Knowledge Base
-          <span className="text-blue-500 font-light text-xl mt-1">(File-based)</span>
-        </h1>
-        
-        <p className="text-slate-500 mb-8 border-b pb-6">
-          Kéo thả các file HTML xuất ra từ Gemini vào thư mục <code className="bg-slate-100 px-2 py-1 rounded text-sm text-pink-600">content/</code> (nằm ngay mục gốc của source code) để trang web tự động cập nhật danh sách!
-        </p>
+    <main className="min-h-screen bg-[#F8F9FA] px-4 py-16 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto space-y-12">
+        {/* Header Section */}
+        <header className="border-b border-zinc-200 pb-10">
+          <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-zinc-900 mb-4 transition-all">
+            Tech Directory
+          </h1>
+          <p className="text-lg text-zinc-500 max-w-2xl leading-relaxed">
+            Kho lưu trữ tài nguyên chuyên sâu. Đồng bộ trực tiếp từ các file HTML và Markdown qua Github Repo.
+          </p>
+        </header>
 
-        {articles.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
-            <p>Chưa có bài viết nào! Hãy thêm file <code className="text-black text-sm">.html</code> vào thư mục <code className="text-black text-sm">content/</code></p>
+        {/* Content Directory */}
+        <section>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xs uppercase tracking-widest font-semibold text-zinc-400">
+              Nội dung ({articles.length} bài)
+            </h2>
           </div>
-        ) : (
-          <ul className="grid gap-4 mt-6">
-            {articles.map((article) => (
-              <li key={article.slug} className="group">
-                <Link prefetch href={`/articles/${article.slug}`} className="block p-5 rounded-lg border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all duration-200 bg-slate-50 hover:bg-white relative overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 transform -translate-x-full group-hover:translate-x-0 transition-transform"></div>
-                  <h2 className="text-xl font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
-                    {article.title}
-                  </h2>
-                  <p className="text-sm text-slate-400 mt-2 font-mono">
-                    /{article.slug}.html
-                  </p>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+
+          {articles.length === 0 ? (
+            <div className="text-center py-20 px-6 border border-dashed border-zinc-200 bg-white rounded-2xl shadow-sm">
+              <p className="text-zinc-500 font-medium">Chưa có bài viết nào học thuật ở đây.</p>
+              <p className="text-sm text-zinc-400 mt-2">Kéo file .md hoặc .html vào thư mục content/</p>
+            </div>
+          ) : (
+            <ul className="grid gap-4">
+              {sortedArticles.map((article) => (
+                <li key={article.slug} className="group relative">
+                  {/* Clean, minimalist card style */}
+                  <Link prefetch href={`/articles/${article.slug}`} className="block p-6 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:shadow-sm transition-all duration-300 bg-white/50 hover:bg-white overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2">
+                    
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+                      <h3 className="font-serif text-xl sm:text-2xl font-semibold text-zinc-800 group-hover:text-indigo-700 transition-colors">
+                        {article.title}
+                      </h3>
+                      
+                      <span className="shrink-0 flex items-center justify-center font-mono text-[10px] tracking-wider uppercase px-2 py-1 bg-zinc-100 text-zinc-500 rounded border border-zinc-200">
+                        .{article.type}
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex items-center text-sm text-zinc-400 gap-2">
+                      <span className="font-mono opacity-80 shrink-0 truncate max-w-full">
+                        {article.slug}
+                      </span>
+                    </div>
+                    
+                    {/* Interaction Indicator */}
+                    <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none text-indigo-400">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
       </div>
     </main>
   );

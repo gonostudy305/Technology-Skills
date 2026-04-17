@@ -17,20 +17,40 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="bg-white border-b border-slate-200 py-4 px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm relative">
-        <Link href="/" className="text-blue-500 hover:text-blue-700 flex items-center gap-2 font-medium transition-colors bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm hover:shadow border border-slate-200">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-          Quay lại trang chủ
-        </Link>
-        <span className="text-slate-400 font-mono text-sm hidden md:inline-flex px-3 py-1 bg-slate-100 rounded-lg">
-          {params.slug}.{article.type}
-        </span>
-      </div>
+    <div className="min-h-screen bg-zinc-50 flex flex-col">
+      {/* Top Navbar */}
+      <nav className="w-full bg-white/80 backdrop-blur-md border-b border-zinc-200 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <Link href="/" className="text-zinc-500 hover:text-zinc-900 flex items-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:underline">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Quay lại danh mục
+          </Link>
+          <div className="font-mono text-xs font-semibold tracking-wider text-zinc-400 bg-zinc-100 px-2 py-1 rounded">
+            {params.slug}.{article.type}
+          </div>
+        </div>
+      </nav>
       
-      <div className={`w-full ${article.type === "md" ? "max-w-4xl mx-auto p-8 prose prose-slate prose-img:rounded-xl prose-a:text-blue-600 bg-white shadow-sm mt-8 mb-8 rounded-xl" : ""}`}
-        dangerouslySetInnerHTML={{ __html: article.content }} 
-      />
-    </main>
+      {/* Reading Content Area */}
+      <main className="flex-1 w-full bg-white pb-24 shadow-sm border-x border-zinc-100 max-w-4xl mx-auto">
+        <article>
+          {article.type === "md" ? (
+            <div className="px-6 py-12 sm:px-12 sm:py-20 max-w-[700px] mx-auto prose prose-academic w-full">
+              {/* Note: In Markdown context, title is inside the raw HTML string generated, but we apply `prose-academic` which makes h1 serif */}
+              <div dangerouslySetInnerHTML={{ __html: article.content }} />
+            </div>
+          ) : (
+            <div className="w-full">
+               {/* HTML from Canvas often has its own layout, so we just wrap it loosely */}
+               <div dangerouslySetInnerHTML={{ __html: article.content }} />
+            </div>
+          )}
+        </article>
+      </main>
+
+      <footer className="w-full max-w-4xl mx-auto py-10 px-4 text-center">
+        <p className="text-xs text-zinc-400 font-mono">End of document. Knowledge is power.</p>
+      </footer>
+    </div>
   );
 }
