@@ -80,6 +80,7 @@ export default function HtmlRenderer({
 
       const isModuleScript =
         /^\s*import\s.+from\s+["']/m.test(scripts) || /^\s*export\s/m.test(scripts);
+      const previousOnload = window.onload;
 
       inlineScriptEl = document.createElement("script");
       inlineScriptEl.type = isModuleScript ? "module" : "text/javascript";
@@ -87,6 +88,19 @@ export default function HtmlRenderer({
       inlineScriptEl.dataset.kbInjected = "true";
 
       containerRef.current?.appendChild(inlineScriptEl);
+
+      // Some legacy content sets window.onload for initial UI state.
+      if (
+        document.readyState !== "loading" &&
+        typeof window.onload === "function" &&
+        window.onload !== previousOnload
+      ) {
+        try {
+          window.onload.call(window, new Event("load"));
+        } catch (error) {
+          console.warn("[Article load handler error]", error);
+        }
+      }
     };
 
     void runScripts();

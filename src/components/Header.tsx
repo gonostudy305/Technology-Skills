@@ -63,19 +63,19 @@ export default function Header() {
             </nav>
           </div>
 
-          <div className="hidden items-center gap-2 sm:flex">
+          <div className="hidden items-center gap-2 xl:flex">
             <ThemeToggle />
 
             <button
               type="button"
-              className="inline-flex h-8 items-center rounded-full border border-orange-200 bg-orange-50 px-4 text-sm font-medium text-orange-700 transition hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+              className="inline-flex h-8 items-center whitespace-nowrap rounded-full border border-orange-200 bg-orange-50 px-4 text-sm font-medium text-orange-700 transition hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
               Cộng đồng
             </button>
 
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
               aria-label="Search"
               onClick={handleSearchClick}
             >
@@ -84,14 +84,14 @@ export default function Header() {
 
             <Link
               href="/hoc-phan"
-              className="inline-flex h-9 items-center rounded-lg bg-sky-700 px-4 text-sm font-semibold text-white transition hover:bg-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-sky-700 px-4 text-sm font-semibold text-white transition hover:bg-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               Xem Học Phần
             </Link>
 
             <button
               type="button"
-              className="rounded px-2 py-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="whitespace-nowrap rounded px-2 py-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               Đóng góp
             </button>
@@ -99,7 +99,7 @@ export default function Header() {
 
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 xl:hidden"
             aria-label="Open navigation menu"
             onClick={handleToggleMobileMenu}
           >
@@ -109,33 +109,34 @@ export default function Header() {
       </div>
 
       {isMobileMenuOpen ? (
-        <div className="border-t border-zinc-200 bg-[#f6f2ea] px-4 py-4 sm:hidden">
-          <nav className="grid gap-2" aria-label="Mobile navigation">
+        <div className="border-t border-zinc-200 bg-[#f6f2ea] px-4 py-4 xl:hidden">
+          <nav className="grid grid-cols-2 gap-2" aria-label="Mobile navigation">
             {NAV_ITEMS.map((item) => (
-              <button
+              <Link
                 key={item}
-                type="button"
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm font-medium text-zinc-700"
+                href={item === "Học phần" ? "/hoc-phan" : "#"}
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-center text-sm font-medium text-zinc-700 shadow-sm"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item}
-              </button>
+              </Link>
             ))}
           </nav>
 
-          <div className="mt-3 grid grid-cols-3 gap-2">
-            <ThemeToggle className="w-full justify-center rounded-lg" />
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3 border-t border-zinc-200 pt-4">
+            <ThemeToggle className="rounded-lg bg-white px-4 py-2 shadow-sm border border-zinc-200" />
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700"
+              className="inline-flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 shadow-sm"
             >
               Cộng đồng
             </button>
             <Link
               href="/hoc-phan"
-              className="inline-flex items-center justify-center rounded-lg bg-sky-700 px-3 py-2 text-sm font-semibold text-white"
+              className="inline-flex items-center justify-center rounded-lg bg-sky-700 px-4 py-2 text-sm font-semibold text-white shadow-md active:scale-95 transition-transform"
+              onClick={() => setIsMobileMenuOpen(false)}
             >
-              Lộ trình học
+              Xem Học Phần
             </Link>
           </div>
         </div>
