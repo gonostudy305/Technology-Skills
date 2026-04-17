@@ -365,6 +365,43 @@
             color: #d1d5db;
         }
 
+        .docker-sim-visual {
+            margin-bottom: 20px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            background: var(--bg-soft);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .docker-sim-visual img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .docker-sim-visual:hover img {
+            transform: scale(1.02);
+        }
+
+        .docker-sim-visual::after {
+            content: "QUY TRÌNH DOCKER: BUILD - SHIP - RUN";
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            color: #93c5fd;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
         .docker-sim-footer {
             border-top: 1px solid rgba(71, 83, 110, 0.42);
             padding-top: 12px;
@@ -647,6 +684,8 @@
                         </div>
                     </div>
 
+                    <div id="docker-main-visual" class="docker-sim-visual" style="display:none"></div>
+
                     <div class="docker-sim-panels">
                         <article class="docker-sim-panel intuitive" id="docker-intuitive-panel">
                             <h2 id="docker-cach-hieu-truc-quan">
@@ -741,6 +780,7 @@ docker run -p 5000:5000 my-flask-app
                 icon: "i",
                 title: "Docker Hoạt Động Như Thế Nào?",
                 badge: null,
+                image: "images/docker_workflow.png",
                 intuitive: `
 Hãy tưởng tượng bạn là một đầu bếp muốn gửi công thức và nguyên liệu nấu một món ăn phức tạp cho người bạn ở nước ngoài.
 Thay vì chỉ gửi giấy hướng dẫn (code) và hy vọng họ có đủ đúng loại nồi, đúng loại gia vị ở nhiệt độ phòng chuẩn xác, bạn quyết định đóng gói toàn bộ: cái bếp, xoong nồi, nguyên liệu đã sơ chế, và tờ giấy hướng dẫn vào một thùng hàng container chuyên dụng.
@@ -955,6 +995,7 @@ Các phần mở rộng này bản chất cũng chạy dưới dạng Docker Con
             mainTitle: document.getElementById("docker-main-title"),
             mainIcon: document.getElementById("docker-main-icon"),
             mainBadge: document.getElementById("docker-main-badge"),
+            mainVisual: document.getElementById("docker-main-visual"),
             intuitiveContent: document.getElementById("docker-intuitive-content"),
             technicalContent: document.getElementById("docker-technical-content")
         };
@@ -1035,6 +1076,14 @@ Các phần mở rộng này bản chất cũng chạy dưới dạng Docker Con
             } else {
                 elements.mainBadge.style.display = "none";
                 elements.mainBadge.textContent = "";
+            }
+
+            if (activeContent.image) {
+                elements.mainVisual.style.display = "block";
+                elements.mainVisual.innerHTML = `<img src="${escapeHtml(activeContent.image)}" alt="${escapeHtml(activeContent.title)}" loading="lazy">`;
+            } else {
+                elements.mainVisual.style.display = "none";
+                elements.mainVisual.innerHTML = "";
             }
 
             elements.intuitiveContent.innerHTML = renderParagraphGroup(

@@ -602,9 +602,9 @@
                     (lưu custom roles) + <strong>Gemini API</strong> (mô phỏng sự cố).
                     Khi chạy standalone (ngoài Google Canvas), bạn cần: (1) tạo Firebase project và thay <code
                         class="bg-slate-800 px-1 rounded">__firebase_config</code> bằng config thật,
-                    (2) bật Anonymous Auth trong Firebase Console, (3) thêm Gemini API key vào biến <code
-                        class="bg-slate-800 px-1 rounded">apiKey</code> trong hàm <code
-                        class="bg-slate-800 px-1 rounded">callGemini</code>.
+                    (2) bật Anonymous Auth trong Firebase Console, (3) <strong>không nhúng Gemini API key trực tiếp vào
+                        client-side</strong> — thay vào đó, tạo một proxy endpoint (ví dụ: Cloud Function hoặc Next.js
+                    API route) nhận prompt từ client rồi gọi Gemini API ở server-side để tránh lộ key.
                 </p>
             </div>
         </div>
