@@ -91,15 +91,15 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
   const pageContainerClassName = hasEmbeddedSidebarLayout
     ? "mx-auto w-full max-w-[1540px] px-2 sm:px-4 lg:px-6"
-    : "mx-auto w-full max-w-[1180px] px-3 sm:px-5 lg:px-8";
+    : "mx-auto w-full max-w-[1380px] px-3 sm:px-5 lg:px-8";
 
   const tocTopClassName = hasEmbeddedSidebarLayout
     ? "mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm"
     : "mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden";
 
   const articleGridClassName = hasEmbeddedSidebarLayout
-    ? "mt-4 grid gap-4"
-    : "mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]";
+    ? "mt-6 grid gap-4"
+    : "mt-6 grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)_280px] xl:grid-cols-[280px_minmax(0,1fr)_320px] items-start";
 
   const htmlContentPaddingClassName = hasEmbeddedSidebarLayout
     ? "article-rich-content px-1 py-1 sm:px-2 sm:py-2"
@@ -170,6 +170,61 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         ) : null}
 
         <section className={articleGridClassName}>
+          {!hasEmbeddedSidebarLayout ? (
+            <aside className="hidden space-y-4 self-start lg:sticky lg:top-20 lg:block">
+              {/* Left Sidebar Menu */}
+              <section className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 shadow-sm">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">Lộ Trình Thực Thi</h2>
+                <nav className="mt-3" aria-label="Lộ trình học tập">
+                  <ul className="space-y-2">
+                    <li>
+                      <div className="flex flex-col rounded-lg bg-white border-l-4 border-blue-500 shadow-sm p-3">
+                        <span className="text-[10px] font-semibold text-blue-600 uppercase">Giai đoạn 0</span>
+                        <span className="text-sm font-medium text-blue-900 mt-1">Đánh nhanh thắng nhanh (Quick Win)</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex flex-col rounded-lg hover:bg-white p-3 transition border-l-4 border-transparent hover:border-zinc-300">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Giai đoạn 1</span>
+                        <span className="text-sm font-medium text-zinc-700 mt-1">Phân tích yêu cầu & Nguồn dữ liệu</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex flex-col rounded-lg hover:bg-white p-3 transition border-l-4 border-transparent hover:border-zinc-300">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Giai đoạn 2</span>
+                        <span className="text-sm font-medium text-zinc-700 mt-1">Tích hợp & Điều phối (Orchestration)</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex flex-col rounded-lg hover:bg-white p-3 transition border-l-4 border-transparent hover:border-zinc-300">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Giai đoạn 3</span>
+                        <span className="text-sm font-medium text-zinc-700 mt-1">Lớp biến đổi dữ liệu (Transformation)</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex flex-col rounded-lg hover:bg-white p-3 transition border-l-4 border-transparent hover:border-zinc-300">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Giai đoạn 4</span>
+                        <span className="text-sm font-medium text-zinc-700 mt-1">Kiểm thử tự động (Data Quality)</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex flex-col rounded-lg hover:bg-white p-3 transition border-l-4 border-transparent hover:border-zinc-300">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Giai đoạn 5</span>
+                        <span className="text-sm font-medium text-zinc-700 mt-1">Quản lý biến động (SCD)</span>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="flex flex-col rounded-lg hover:bg-white p-3 transition border-l-4 border-transparent hover:border-zinc-300">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase">Giai đoạn 6</span>
+                        <span className="text-sm font-medium text-zinc-700 mt-1">Văn hóa dữ liệu & Governance</span>
+                      </div>
+                    </li>
+                  </ul>
+                </nav>
+              </section>
+            </aside>
+          ) : null}
+
           <article className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             {article.type === "md" ? (
               <div className="article-rich-content prose prose-academic max-w-none px-4 py-9 sm:px-8 lg:px-10">

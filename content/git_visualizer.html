@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git Master Visualizer - AI Powered</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+        :root {
+            --git-blue: #2f81f7;
+            --git-green: #238636;
+            --git-orange: #d29922;
+            --git-red: #f85149;
+            --git-bg: #0d1117;
+            --git-card: #161b22;
+            --git-border: #30363d;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #010409;
+            color: #c9d1d9;
+        }
+
+        .glass-panel {
+            background: var(--git-card);
+            border: 1px solid var(--git-border);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .terminal-window {
+            background: #000;
+            border: 1px solid #30363d;
+            font-family: 'Fira Code', monospace;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .commit-node {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+            cursor: pointer;
+        }
+
+        .commit-node:hover {
+            transform: scale(1.2);
+            filter: brightness(1.2) drop-shadow(0 0 8px currentColor);
+        }
+
+        .path-line {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            transition: all 0.5s ease;
+        }
+
+        .file-travel {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-git {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-git:active {
+            transform: scale(0.95);
+        }
+
+        .btn-git:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .ai-glow {
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60% {
+                content: '...';
+            }
+
+            80%,
+            100% {
+                content: '';
+            }
+        }
+
+        /* Markdown-like styling for AI chat */
+        .ai-chat-content code {
+            background: #30363d;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4">
+
+    <div class="max-w-[1600px] mx-auto">
+        <!-- Dashboard Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white flex items-center gap-3">
+                    <svg class="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            d="M23.235 12.551l-10.37-10.37c-.413-.413-1.082-.413-1.495 0l-2.43 2.43 3.518 3.518c.37-.116.793-.037 1.104.274.31.31.39.733.274 1.104l3.418 3.418c.37-.116.793-.037 1.104.274.453.453.453 1.187 0 1.64-.453.453-1.187.453-1.64 0-.31-.31-.39-.733-.274-1.104l-3.35-3.35v6.52c.28.12.518.346.643.642.274.647.012 1.393-.585 1.73-.598.336-1.355.197-1.792-.31-.437-.507-.35-1.267.202-1.673.23-.17.5-.247.766-.233v-6.52l-3.418-3.418c-.31.116-.733.037-1.104-.274-.31-.31-.39-.733-.274-1.104l-3.518-3.518-7.14 7.14c-.413.413-.413 1.082 0 1.495l10.37 10.37c.413.413 1.082.413 1.495 0l10.37-10.37c.413-.413.413-1.082 0-1.495z" />
+                    </svg>
+                    Git Visualizer ✨ AI Mentoring
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Học Git cùng trợ lý AI thông minh dựa trên Google Gemini</p>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="generateAIScenario()"
+                    class="flex items-center gap-2 px-4 py-2 bg-purple-900/40 hover:bg-purple-800/60 border border-purple-500/50 rounded-full text-xs font-bold text-purple-200 transition-all">
+                    <span>✨ Thử thách AI</span>
+                </button>
+                <div class="h-10 w-[1px] bg-slate-700"></div>
+                <div class="text-right">
+                    <p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Branch Hiện Tại</p>
+                    <p id="branch-badge" class="text-blue-400 font-mono font-bold">main</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-6">
+            <!-- WORKING DIRECTORY -->
+            <div class="glass-panel p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400">Working Dir</h2>
+                    <span class="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-500">Untracked</span>
+                </div>
+                <div id="working-dir"
+                    class="h-40 border-2 border-dashed border-slate-700 rounded-xl flex flex-col items-center justify-center gap-2 bg-slate-900/30">
+                    <div id="file-icon"
+                        class="w-10 h-10 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 opacity-40">
+                        📄
+                    </div>
+                    <p id="working-text" class="text-[11px] text-slate-600 text-center px-4">Git chưa theo dõi file này.
+                    </p>
+                    <button onclick="createFile()" id="btn-create"
+                        class="mt-1 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-bold rounded-lg transition-all">
+                        + Tạo File
+                    </button>
+                </div>
+            </div>
+
+            <!-- STAGING AREA -->
+            <div class="glass-panel p-5 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-orange-400">Staging Area</h2>
+                </div>
+                <div id="staging-area"
+                    class="h-40 border-2 border-dashed border-orange-900/30 rounded-xl flex flex-col items-center justify-center gap-2 bg-orange-950/10">
+                    <div id="staging-status-icon" class="text-2xl opacity-20">📥</div>
+                    <p id="staging-text" class="text-[11px] text-slate-600 text-center px-4 italic">Đợi `git add`...</p>
+                </div>
+            </div>
+
+            <!-- LOCAL REPOSITORY -->
+            <div class="xl:col-span-2 glass-panel p-5 relative border-blue-900/30 bg-blue-950/5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-blue-400">Local Repository</h2>
+                    <span class="text-[10px] text-blue-300 font-mono">HEAD -> <span id="head-hash">none</span></span>
+                </div>
+                <div class="relative h-40 bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden"
+                    id="local-graph-container">
+                    <svg id="local-svg" class="w-full h-full">
+                        <g id="local-links"></g>
+                        <g id="local-nodes"></g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Command Center -->
+            <div class="lg:col-span-4 glass-panel p-6 flex flex-col gap-4">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Bảng Điều Khiển Git</h3>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-init" onclick="gitInit()"
+                        class="btn-git py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-[11px] font-bold">git
+                        init</button>
+                    <button id="btn-add" onclick="gitAdd()" disabled
+                        class="btn-git py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[11px] font-bold">git
+                        add .</button>
+                </div>
+
+                <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-[10px] text-slate-500 font-bold uppercase">Commit Message</label>
+                        <button onclick="suggestCommitMessage()" id="btn-ai-msg"
+                            class="text-[10px] text-purple-400 hover:text-purple-300 flex items-center gap-1 font-bold">
+                            <span>✨ AI Gợi ý</span>
+                        </button>
+                    </div>
+                    <input type="text" id="commit-msg" placeholder="Ví dụ: feat: thêm giao diện..."
+                        class="w-full bg-slate-900 text-xs p-2 rounded border border-slate-700 focus:outline-none text-slate-200 mb-2">
+                    <button id="btn-commit" onclick="gitCommit()" disabled
+                        class="btn-git w-full py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg text-[11px] font-bold">git
+                        commit</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="gitBranch()"
+                        class="btn-git py-2 bg-purple-600 rounded-lg text-[11px] font-bold text-white">git
+                        branch</button>
+                    <button onclick="gitCheckout()"
+                        class="btn-git py-2 bg-purple-600 rounded-lg text-[11px] font-bold text-white">git
+                        checkout</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="btn-push" onclick="gitPush()" disabled
+                        class="btn-git py-2 bg-blue-600 rounded-lg text-[11px] font-bold text-white">git push</button>
+                    <button id="btn-merge" onclick="gitMerge()" disabled
+                        class="btn-git py-2 bg-pink-600 rounded-lg text-[11px] font-bold text-white">git merge</button>
+                </div>
+
+                <!-- AI Mentor Panel -->
+                <div class="mt-auto p-4 bg-purple-950/20 border border-purple-500/20 rounded-xl ai-glow">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg">🤖</span>
+                        <h4 class="text-xs font-bold text-purple-300 uppercase tracking-tighter">AI Git Mentor</h4>
+                    </div>
+                    <div id="mentor-box"
+                        class="text-[11px] text-slate-300 leading-relaxed max-h-24 overflow-y-auto ai-chat-content">
+                        Bấm <b>git init</b> để bắt đầu. Nếu bạn thắc mắc lệnh này làm gì, hãy hỏi tôi!
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <input type="text" id="ai-input" placeholder="Hỏi AI về Git..."
+                            class="flex-1 bg-slate-900/50 text-[10px] px-2 py-1.5 rounded border border-purple-500/30 focus:outline-none">
+                        <button onclick="askMentor()"
+                            class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1 rounded-lg text-[10px] font-bold transition-all">Hỏi</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal & Remote -->
+            <div class="lg:col-span-8 flex flex-col gap-6">
+                <!-- Terminal -->
+                <div class="terminal-window h-40 flex flex-col">
+                    <div class="bg-slate-800 px-4 py-1.5 flex items-center justify-between rounded-t-lg">
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">zsh —
+                            git-visualizer</span>
+                    </div>
+                    <div id="terminal-body" class="p-4 text-xs overflow-y-auto flex-1 font-mono space-y-1">
+                        <div class="flex gap-2">
+                            <span class="text-green-500">➜</span>
+                            <span class="text-blue-400">~/git-tutorial</span>
+                            <span class="text-slate-500">ls -a</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remote -->
+                <div class="glass-panel p-5 bg-slate-900/20">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-bold text-slate-500 flex items-center gap-2">
+                            ☁️ GitHub Remote (origin)
+                        </h2>
+                        <span id="remote-sync" class="text-[10px] text-slate-600 uppercase font-bold">Chưa đồng
+                            bộ</span>
+                    </div>
+                    <div class="h-40 bg-slate-950 rounded-xl border border-slate-800 relative overflow-hidden">
+                        <svg id="remote-svg" class="w-full h-full">
+                            <g id="remote-links"></g>
+                            <g id="remote-nodes"></g>
+                        </svg>
+                        <div id="remote-empty"
+                            class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                            <span class="text-3xl">📁</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Modal for Scenarios -->
+    <div id="ai-modal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-purple-500/50 p-6 rounded-2xl max-w-lg w-full shadow-2xl">
+            <h3 class="text-xl font-bold text-purple-400 mb-4 flex items-center gap-2">
+                ✨ Thử thách AI mới
+            </h3>
+            <div id="ai-scenario-content" class="text-slate-300 text-sm leading-relaxed mb-6 space-y-2 ai-chat-content">
+                Đang tạo kịch bản...
+            </div>
+            <button onclick="closeAIModal()"
+                class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold transition-all">Bắt
+                đầu thực hành</button>
+        </div>
+    </div>
+
+    <script>
+        // --- PRO GIT STATE ---
+        const state = {
+            isInitialized: false,
+            hasFile: false,
+            isStaged: false,
+            currentBranch: 'main',
+            branches: ['main'],
+            localCommits: [],
+            remoteCommits: [],
+            colors: { main: '#2f81f7', feature: '#238636', hotfix: '#f85149', dev: '#d29922' },
+            head: null
+        };
+
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        // --- COMMANDS ---
+
+        function updateUI() {
+            document.getElementById('btn-init').disabled = state.isInitialized;
+            document.getElementById('btn-add').disabled = !state.hasFile || state.isStaged || !state.isInitialized;
+            document.getElementById('btn-commit').disabled = !state.isStaged;
+            document.getElementById('btn-push').disabled = state.localCommits.length === 0 || state.localCommits.length === state.remoteCommits.length;
+            document.getElementById('btn-merge').disabled = state.currentBranch !== 'main' || state.branches.length < 2;
+
+            document.getElementById('branch-badge').innerText = state.currentBranch;
+            document.getElementById('branch-badge').style.color = state.colors[state.currentBranch];
+            document.getElementById('head-hash').innerText = state.head || 'none';
+
+            renderGraph('local');
+            renderGraph('remote');
+        }
+
+        function createFile() {
+            state.hasFile = true;
+            logTerminal("Created index.html", "success");
+            updateUI();
+            document.getElementById('file-icon').classList.replace('text-slate-500', 'text-blue-500');
+            document.getElementById('file-icon').classList.remove('opacity-40');
+            document.getElementById('working-text').innerText = "File index.html sẵn sàng.";
+        }
+
+        function gitInit() {
+            state.isInitialized = true;
+            logTerminal("git init", "command");
+            logTerminal("Initialized empty Git repository", "info");
+            updateUI();
+        }
+
+        function gitAdd() {
+            state.isStaged = true;
+            logTerminal("git add .", "command");
+            document.getElementById('staging-area').classList.add('bg-orange-500/20');
+            document.getElementById('staging-text').innerText = "1 file đã staged.";
+            updateUI();
+        }
+
+        function gitCommit() {
+            const msg = document.getElementById('commit-msg').value.trim() || "chore: update";
+            const hash = Math.random().toString(16).substring(2, 8);
+            const parent = state.localCommits.filter(c => c.branch === state.currentBranch).pop();
+
+            const newCommit = { hash, message: msg, branch: state.currentBranch, parentId: parent ? parent.hash : null };
+            state.localCommits.push(newCommit);
+            state.head = hash;
+            state.isStaged = false;
+            document.getElementById('commit-msg').value = "";
+            logTerminal(`git commit -m "${msg}"`, "command");
+            logTerminal(`[${state.currentBranch} ${hash}] ${msg}`, "success");
+            updateUI();
+        }
+
+        function gitPush() {
+            logTerminal("git push origin " + state.currentBranch, "command");
+            setTimeout(() => {
+                state.remoteCommits = JSON.parse(JSON.stringify(state.localCommits));
+                document.getElementById('remote-sync').innerText = "Đã đồng bộ";
+                document.getElementById('remote-sync').classList.add('text-green-500');
+                updateUI();
+            }, 500);
+        }
+
+        function gitBranch() {
+            const name = prompt("Tên branch mới:");
+            if (name && !state.branches.includes(name)) {
+                state.branches.push(name);
+                state.colors[name] = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                logTerminal(`git branch ${name}`, "command");
+                updateUI();
+            }
+        }
+
+        function gitCheckout() {
+            const name = prompt(`Chuyển tới: (${state.branches.join(', ')})`);
+            if (state.branches.includes(name)) {
+                state.currentBranch = name;
+                const last = state.localCommits.filter(c => c.branch === name).pop();
+                state.head = last ? last.hash : null;
+                logTerminal(`git checkout ${name}`, "command");
+                updateUI();
+            }
+        }
+
+        function gitMerge() {
+            const from = prompt(`Gộp vào main từ: (${state.branches.filter(b => b !== 'main').join(', ')})`);
+            if (from && state.branches.includes(from)) {
+                const hash = Math.random().toString(16).substring(2, 8);
+                const parent = state.localCommits.filter(c => c.branch === 'main').pop();
+                const fromLast = state.localCommits.filter(c => c.branch === from).pop();
+
+                state.localCommits.push({
+                    hash, message: `Merge branch '${from}'`, branch: 'main',
+                    parentId: parent ? parent.hash : null, isMerge: true, mergeParent: fromLast?.hash
+                });
+                state.head = hash;
+                logTerminal(`git merge ${from}`, "command");
+                updateUI();
+            }
+        }
+
+        // --- GEMINI AI INTEGRATIONS ---
+
+        async function callGemini(prompt, systemInstruction = "Bạn là chuyên gia Git mentor.") {
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+            try {
+                const response = await fetch(`${GEMINI_API_URL}?key=`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                return result.candidates[0].content.parts[0].text;
+            } catch (err) {
+                console.error(err);
+                return "Xin lỗi, tôi không thể kết nối với AI lúc này.";
+            }
+        }
+
+        async function askMentor() {
+            const input = document.getElementById('ai-input');
+            const q = input.value.trim();
+            if (!q) return;
+
+            const mentorBox = document.getElementById('mentor-box');
+            mentorBox.innerHTML = "<span class='loading-dots'>Đang suy nghĩ</span>";
+            input.value = "";
+
+            const repoStateStr = JSON.stringify({
+                init: state.isInitialized,
+                staged: state.isStaged,
+                branch: state.currentBranch,
+                commitCount: state.localCommits.length
+            });
+
+            const prompt = `Trạng thái Git hiện tại: ${repoStateStr}. Người dùng hỏi: "${q}". Hãy trả lời ngắn gọn, dễ hiểu và chuyên nghiệp.`;
+            const answer = await callGemini(prompt, "Bạn là một Git Mentor vui tính, chuyên nghiệp. Hãy giải thích các lệnh Git và giúp người dùng hiểu rõ quy trình làm việc.");
+
+            mentorBox.innerHTML = formatAIResponse(answer);
+        }
+
+        async function suggestCommitMessage() {
+            const btn = document.getElementById('btn-ai-msg');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "✨ Đang nghĩ...";
+
+            const prompt = "Hãy gợi ý 3 thông điệp commit ngắn gọn theo chuẩn Conventional Commits cho một thay đổi giả định (ví dụ thêm UI, fix bug). Chỉ trả về danh sách, không giải thích.";
+            const suggestions = await callGemini(prompt, "Bạn là một AI giúp viết commit message chuyên nghiệp.");
+
+            const lines = suggestions.split('\n').filter(l => l.trim().length > 5);
+            const choice = lines[0] || "feat: cập nhật mã nguồn";
+            document.getElementById('commit-msg').value = choice.replace(/^[0-9.-]\s*/, '').trim();
+
+            btn.innerHTML = originalText;
+        }
+
+        async function generateAIScenario() {
+            const modal = document.getElementById('ai-modal');
+            const content = document.getElementById('ai-scenario-content');
+            modal.classList.remove('hidden');
+            content.innerHTML = "<span class='loading-dots'>AI đang soạn kịch bản</span>";
+
+            const prompt = "Hãy tạo một kịch bản thử thách Git ngắn (khoảng 3 bước) cho người mới bắt đầu. Ví dụ: 'Tạo branch mới, sửa file, commit và merge'. Trình bày đẹp bằng markdown.";
+            const scenario = await callGemini(prompt, "Bạn là người thiết kế bài tập thực hành Git.");
+            content.innerHTML = formatAIResponse(scenario);
+        }
+
+        function formatAIResponse(text) {
+            // Simple markdown-ish bold and code formatting
+            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function closeAIModal() {
+            document.getElementById('ai-modal').classList.add('hidden');
+        }
+
+        // --- GRAPHICS ---
+
+        function renderGraph(target) {
+            const commits = target === 'local' ? state.localCommits : state.remoteCommits;
+            const nodesGroup = document.getElementById(`${target}-nodes`);
+            const linksGroup = document.getElementById(`${target}-links`);
+            nodesGroup.innerHTML = ''; linksGroup.innerHTML = '';
+
+            const posMap = {};
+            const counters = {};
+
+            commits.forEach(c => {
+                if (!counters[c.branch]) counters[c.branch] = 0;
+                counters[c.branch]++;
+                const x = counters[c.branch] * 60;
+                const y = c.branch === 'main' ? 40 : 100;
+                posMap[c.hash] = { x, y };
+
+                if (c.parentId && posMap[c.parentId]) {
+                    drawLine(linksGroup, posMap[c.parentId].x, posMap[c.parentId].y, x, y, state.colors[c.branch]);
+                }
+                if (c.isMerge && posMap[c.mergeParent]) {
+                    drawLine(linksGroup, posMap[c.mergeParent].x, posMap[c.mergeParent].y, x, y, state.colors[c.branch], true);
+                }
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x); circle.setAttribute("cy", y); circle.setAttribute("r", "10");
+                circle.setAttribute("fill", state.colors[c.branch]);
+                circle.setAttribute("class", "commit-node");
+                if (state.head === c.hash && target === 'local') circle.setAttribute("stroke", "#fff"), circle.setAttribute("stroke-width", "3");
+                nodesGroup.appendChild(circle);
+            });
+        }
+
+        function drawLine(g, x1, y1, x2, y2, color, dash = false) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", x1); line.setAttribute("y1", y1); line.setAttribute("x2", x2); line.setAttribute("y2", y2);
+            line.setAttribute("stroke", color); line.setAttribute("stroke-width", "2");
+            if (dash) line.setAttribute("stroke-dasharray", "4,2");
+            g.appendChild(line);
+        }
+
+        function logTerminal(text, type) {
+            const body = document.getElementById('terminal-body');
+            const div = document.createElement('div');
+            const colors = { command: 'text-blue-400', success: 'text-green-400', info: 'text-slate-500' };
+            div.innerHTML = `<span class="${colors[type] || 'text-slate-300'}">${text}</span>`;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        window.onload = updateUI;
+    </script>
+</body>
+
+</html>
