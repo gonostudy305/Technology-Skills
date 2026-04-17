@@ -4,9 +4,17 @@ import { getArticlesList } from "@/lib/contents";
 import {
   buildSubjectDirectory,
   getSubjectStatusMeta,
-} from "@/lib/subjects"; export const metadata: Metadata = {
-  title: "Học phần | HTTT UEL Hub",
-  description: "Tra cứu học phần HTTT UEL và mở rộng nội dung theo từng môn học.",
+} from "@/lib/subjects";
+
+export const metadata: Metadata = {
+  title: "Danh mục học phần | HTTT UEL Hub",
+  description: "Khám phá kiến thức chuyên ngành HTTT UEL thông qua các tài liệu học tập, mô phỏng trực quan và bài viết chuyên sâu về Thương mại điện tử, KDS và Hệ thống thông tin.",
+  keywords: ["Danh mục", "Học phần", "Sinh viên HTTT", "Đại học Kinh tế Luật", "Tài liệu", "Case study"],
+  openGraph: {
+    title: "Danh mục học phần | HTTT UEL Hub",
+    description: "Khám phá kiến thức chuyên ngành HTTT qua tài liệu học tập, mô phỏng trực quan và bài viết chuyên sâu.",
+    type: "website",
+  }
 };
 
 
@@ -40,7 +48,7 @@ export default async function CurriculumPage({
 
         {/* Breadcrumb & Simple Title Block (Coursera style) */}
         <section className="mb-10">
-          <div className="text-sm font-medium text-zinc-500 mb-6 flex items-center gap-2">
+          <div className="text-sm font-medium text-zinc-600 mb-6 flex items-center gap-2">
             <Link href="/" className="hover:underline text-blue-600">Trang chủ</Link>
             <i className="fa-solid fa-chevron-right text-[10px]" />
             <span className="text-zinc-900">Danh mục học phần HTTT</span>
@@ -66,7 +74,7 @@ export default async function CurriculumPage({
             </div>
 
             <form action="/curriculum" className="relative w-full max-w-sm">
-              <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" />
+              <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" />
               <input
                 name="q"
                 defaultValue={searchParams.q ?? ""}
@@ -80,11 +88,11 @@ export default async function CurriculumPage({
         {/* Course Grid */}
         {filteredSubjects.length === 0 ? (
           <div className="py-20 text-center">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 text-zinc-400 mb-4">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 text-zinc-600 mb-4">
               <i className="fa-solid fa-ghost text-2xl" />
             </div>
             <h3 className="text-lg font-bold text-zinc-800">Không tìm thấy kết quả</h3>
-            <p className="mt-1 text-sm text-zinc-500">Hãy thử tìm kiếm với từ khóa khác như &quot;Cơ sở dữ liệu&quot; hoặc &quot;Python&quot;.</p>
+            <p className="mt-1 text-sm text-zinc-600">Hãy thử tìm kiếm với từ khóa khác như &quot;Cơ sở dữ liệu&quot; hoặc &quot;Python&quot;.</p>
           </div>
         ) : (
           <section>
@@ -131,7 +139,7 @@ export default async function CurriculumPage({
                       </div>
 
                       <div className="mt-6 flex flex-col h-full">
-                        <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wide">
+                        <span className="text-[11px] font-medium text-zinc-600 uppercase tracking-wide">
                           Trường Đại học Kinh tế – Luật
                         </span>
 
@@ -152,7 +160,7 @@ export default async function CurriculumPage({
                             <i className="fa-solid fa-star"></i>
                             <i className="fa-solid fa-star-half-stroke"></i>
                           </div>
-                          <span className="text-xs text-zinc-500 ml-1">({subject.resources.length * 120 + 42} học viên)</span>
+                          <span className="text-xs text-zinc-600 ml-1">({subject.resources.length * 120 + 42} học viên)</span>
                         </div>
                       </div>
                     </div>

@@ -42,8 +42,27 @@ export default async function Home() {
 
   const listArticles = sortedArticles;
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "HTTT UEL Hub",
+    "url": process.env.NEXT_PUBLIC_SITE_URL || "https://httt-uel-hub.vercel.app",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${process.env.NEXT_PUBLIC_SITE_URL || "https://httt-uel-hub.vercel.app"}/curriculum?q={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <main className="min-h-screen bg-[var(--color-bg)] pb-20 pt-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <div className="mx-auto w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
         {listArticles.length === 0 ? (
           <section className="rounded-3xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-20 text-center shadow-sm">
@@ -79,7 +98,7 @@ export default async function Home() {
                       Bắt đầu lộ trình
                     </Link>
                     <form action="/curriculum" className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-1 pl-4 focus-within:border-[var(--color-accent)] focus-within:ring-4 focus-within:ring-sky-100 transition-all">
-                      <i className="fa-solid fa-magnifying-glass text-zinc-400 text-sm" />
+                      <i className="fa-solid fa-magnifying-glass text-zinc-600 text-sm" />
                       <input
                         name="q"
                         placeholder="Tìm học phần..."
@@ -145,7 +164,7 @@ export default async function Home() {
                     >
                       <div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Năm {subject.year}</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">Năm {subject.year}</span>
                           <span className={`h-2 w-2 rounded-full ${statusMeta.tone === 'teal' ? 'bg-teal-400' : statusMeta.tone === 'amber' ? 'bg-amber-400' : 'bg-zinc-300'}`} />
                         </div>
                         <h3 className="mt-4 text-lg font-bold text-[var(--color-text-primary)] transition group-hover:text-[var(--color-accent)]">
@@ -153,7 +172,7 @@ export default async function Home() {
                         </h3>
                       </div>
                       <div className="mt-6 flex items-center justify-between border-t border-zinc-50 pt-4">
-                        <span className="text-xs font-semibold text-zinc-500">{subject.resourceCount} tài nguyên</span>
+                        <span className="text-xs font-semibold text-zinc-700">{subject.resourceCount} tài nguyên</span>
                         <i className="fa-solid fa-chevron-right text-[10px] text-zinc-300 transition-colors group-hover:text-[var(--color-accent)]" />
                       </div>
                     </Link>
@@ -169,7 +188,7 @@ export default async function Home() {
                   Mới cập nhật
                 </h2>
                 <span className="h-0.5 flex-1 mx-8 bg-zinc-100 hidden md:block" />
-                <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Feed kiến thức</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">Feed kiến thức</p>
               </div>
 
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -181,11 +200,11 @@ export default async function Home() {
                   >
                     <div className="p-6">
                       <div className="flex items-center gap-2">
-                        <span className="rounded-lg bg-zinc-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                        <span className="rounded-lg bg-zinc-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-700">
                           {article.category}
                         </span>
                         <div className="h-1 w-1 rounded-full bg-zinc-200" />
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600">
                           {getTypeLabel(article.type)}
                         </span>
                       </div>
@@ -197,8 +216,8 @@ export default async function Home() {
                       </p>
                     </div>
                     <div className="flex items-center justify-between border-t border-zinc-50 px-6 py-4 bg-zinc-50/50 rounded-b-3xl">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{article.author}</span>
-                      <span className="text-[10px] font-medium text-zinc-400">{formatDateVi(article.updatedAt, "Gần đây")}</span>
+                      <span className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest">{article.author}</span>
+                      <span className="text-[10px] font-medium text-zinc-700">{formatDateVi(article.updatedAt, "Gần đây")}</span>
                     </div>
                   </Link>
                 ))}

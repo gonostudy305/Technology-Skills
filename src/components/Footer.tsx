@@ -20,7 +20,7 @@ export default function Footer() {
               href="#" 
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 hover:text-orange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-2 py-1 flex items-center justify-center gap-2 text-sm font-medium"
+              className="text-zinc-700 hover:text-orange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-2 py-1 flex items-center justify-center gap-2 text-sm font-medium"
               aria-label="Zalo Official Channel"
             >
               <i className="fa-solid fa-comment-dots text-lg" aria-hidden="true"></i> Zalo OOA
@@ -29,7 +29,7 @@ export default function Footer() {
               href="https://github.com" 
               target="_blank"
               rel="noopener noreferrer"
-              className="text-zinc-400 hover:text-zinc-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-2 py-1 flex items-center justify-center gap-2 text-sm font-medium"
+              className="text-zinc-700 hover:text-zinc-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-2 py-1 flex items-center justify-center gap-2 text-sm font-medium"
               aria-label="GitHub Repository"
             >
               <i className="fa-brands fa-github text-lg" aria-hidden="true"></i> GitHub
@@ -38,10 +38,10 @@ export default function Footer() {
           
         </div>
         <div className="mt-8 border-t border-zinc-100 pt-8 flex items-center justify-between">
-          <p className="text-center text-sm text-zinc-500">
+          <p className="text-center text-sm text-zinc-700">
             &copy; {currentYear} HTTT UEL Community. Built for K2005, K2006, K2007.
           </p>
-          <div className="flex gap-4 text-sm text-zinc-500">
+          <div className="flex gap-4 text-sm text-zinc-700">
             <Link href="/privacy" className="hover:text-zinc-900">Privacy</Link>
             <Link href="/terms" className="hover:text-zinc-900">Terms</Link>
           </div>

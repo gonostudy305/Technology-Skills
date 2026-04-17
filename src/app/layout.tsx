@@ -11,8 +11,28 @@ const beVietnam = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "HTTT UEL Hub",
-  description: "Knowledge base and interactive simulations for UEL students",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://httt-uel-hub.vercel.app'),
+  title: {
+    default: "HTTT UEL Hub - Nền tảng Tri thức mở sinh viên HTTT",
+    template: "%s | HTTT UEL Hub",
+  },
+  description: "Nền tảng học tập, thảo luận, case study và simulations trực quan dành riêng cho sinh viên Khoa Hệ thống Thông tin trường Đại học Kinh tế – Luật.",
+  keywords: ["HTTT", "UEL", "Hệ thống thông tin", "Sinh viên", "Tài liệu học tập", "Đại học Kinh tế Luật", "Simulation", "Case Study"],
+  openGraph: {
+    title: "HTTT UEL Hub - Nền tảng tri thức mở",
+    description: "Nền tảng tri thức mở và simulation tương tác cho sinh viên HTTT UEL.",
+    url: "/",
+    siteName: "HTTT UEL Hub",
+    locale: "vi_VN",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/",
+  }
 };
 
 export default function RootLayout({

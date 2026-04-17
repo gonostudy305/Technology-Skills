@@ -75,7 +75,7 @@ export default function Header() {
 
             <button
               type="button"
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-zinc-700 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
               aria-label="Search"
               onClick={handleSearchClick}
             >
@@ -91,7 +91,7 @@ export default function Header() {
 
             <button
               type="button"
-              className="whitespace-nowrap rounded px-2 py-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="whitespace-nowrap rounded px-2 py-1 text-sm font-medium text-zinc-700 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               Đóng góp
             </button>

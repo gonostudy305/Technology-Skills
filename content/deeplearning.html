@@ -572,252 +572,251 @@
                 <div id="dl-content" class="dl-content"></div>
             </section>
         </div>
-    </main>
 
-    <script>
-        const architecturesData = [
-            {
-                id: "mlp",
-                category: "1. Feedforward & Basic",
-                name: "Multilayer Perceptron (MLP)",
-                concept: "Giống như một dây chuyền nhà máy đơn giản: Nguyên liệu đi vào đầu này, đi qua các trạm kiểm duyệt (không được quay lui), và ra thành phẩm ở đầu kia.",
-                technical: "Mạng nơ-ron tiến (Feedforward Neural Network) với ít nhất 3 lớp (Input, Hidden, Output). Sử dụng backpropagation để cập nhật trọng số. Không có giả định về cấu trúc không gian hay thời gian của dữ liệu.",
-                differentiator: "Là nền tảng cơ bản nhất. Khác với CNN hay RNN, MLP coi mọi điểm dữ liệu đầu vào là độc lập, không nắm bắt được chuỗi hay cấu trúc hình ảnh 2D tốt."
-            },
-            {
-                id: "autoencoder",
-                category: "1. Feedforward & Basic",
-                name: "Autoencoder (AE)",
-                concept: "Giống như việc bạn cố tóm tắt một cuốn sách dày thành 1 trang giấy (mã hóa), sau đó yêu cầu một người khác dựa vào 1 trang giấy đó để viết lại cuốn sách y như cũ (giải mã).",
-                technical: "Mạng nơ-ron không giám sát gồm Encoder (nén dữ liệu vào latent space) và Decoder (tái tạo dữ liệu từ latent space). Mục tiêu là tối thiểu hóa loss tái tạo.",
-                differentiator: "Học cách nén dữ liệu hiệu quả thay vì phân loại. Là tiền đề cho các mô hình Generative sau này."
-            },
-            {
-                id: "cnn_basic",
-                category: "2. CNN – Convolutional",
-                name: "CNN cơ bản",
-                concept: "Thay vì nhìn toàn bộ bức tranh bằng một mắt, CNN dùng một chiếc kính lúp trượt dọc theo bức tranh để tìm các đặc điểm nhỏ (cạnh, góc), rồi ghép chúng lại thành hình khối phức tạp hơn.",
-                technical: "Sử dụng phép tích chập (Convolution) với các filter/kernel để trích xuất đặc trưng cục bộ, kết hợp Pooling để giảm chiều dữ liệu và đạt tính bất biến với phép dịch chuyển.",
-                differentiator: "Khai thác triệt để cấu trúc không gian 2D/3D của dữ liệu. Số lượng tham số ít hơn nhiều so với MLP nhờ cơ chế chia sẻ trọng số."
-            },
-            {
-                id: "resnet",
-                category: "2. CNN – Convolutional",
-                name: "ResNet (Residual Network)",
-                concept: "Trong một tổ chức quá nhiều cấp bậc, thông tin truyền từ sếp xuống nhân viên thường bị tam sao thất bản. ResNet tạo ra đường dây nóng cho phép thông tin truyền thẳng qua các cấp mà không bị biến dạng.",
-                technical: "Giới thiệu Residual Block với Skip Connection F(x) + x. Giúp gradient dễ dàng chảy ngược qua hàng trăm lớp, giải quyết triệt để bài toán vanishing gradient.",
-                differentiator: "Cho phép huấn luyện các mạng cực kỳ sâu mà vẫn duy trì hoặc tăng độ chính xác."
-            },
-            {
-                id: "yolo",
-                category: "2. CNN – Convolutional",
-                name: "YOLO (You Only Look Once)",
-                concept: "Thay vì cử nhiều nhóm đi rà soát từng khu vực, YOLO chia ảnh thành lưới và dự đoán mọi vật thể cùng vị trí của chúng ngay trong một cái liếc mắt.",
-                technical: "Single-stage Object Detection. Đưa bài toán phát hiện vật thể về hồi quy trực tiếp bounding box và class probability từ full image trong một lần forward.",
-                differentiator: "Tốc độ cực kỳ nhanh, phù hợp real-time processing."
-            },
-            {
-                id: "rnn_basic",
-                category: "3. RNN – Recurrent",
-                name: "Vanilla RNN",
-                concept: "Giống như việc bạn đọc một câu văn: Bạn hiểu từ hiện tại dựa trên trí nhớ về những từ đã đọc trước đó.",
-                technical: "Mạng nơ-ron có vòng lặp, duy trì hidden state theo thời gian. Đầu vào tại timestep t và hidden state t-1 dùng để tính toán đầu ra tại t.",
-                differentiator: "Xử lý dữ liệu dạng chuỗi có độ dài tùy ý."
-            },
-            {
-                id: "lstm",
-                category: "3. RNN – Recurrent",
-                name: "LSTM (Long Short-Term Memory)",
-                concept: "RNN bình thường bị não cá vàng khi câu quá dài. LSTM giống như một cuốn sổ tay có cơ chế chọn lọc giữ lại thông tin quan trọng, xóa rác và cập nhật kiến thức mới.",
-                technical: "Cải tiến của RNN với Cell State và 3 cổng (Forget/Input/Output gate), giúp giải quyết vanishing gradient trên chuỗi dài.",
-                differentiator: "Học phụ thuộc xa (long-term dependencies) tốt hơn hẳn RNN truyền thống."
-            },
-            {
-                id: "transformer",
-                category: "4. Transformer Family",
-                name: "Transformer (Gốc)",
-                concept: "Thay vì đọc từng chữ từ trái sang phải, mô hình nhìn bao quát toàn bộ câu cùng một lúc và tính mức chú ý giữa các token.",
-                technical: "Kiến trúc Encoder-Decoder loại bỏ recurrence. Cốt lõi là Self-Attention đa đầu kết hợp Positional Encoding.",
-                differentiator: "Tính toán song song vượt trội so với RNN, là xương sống của kỷ nguyên GenAI hiện tại."
-            },
-            {
-                id: "bert",
-                category: "4. Transformer Family",
-                name: "BERT",
-                concept: "Học hiểu ngôn ngữ bằng cách điền vào chỗ trống, nhìn cả hai chiều trái-phải của từ bị che.",
-                technical: "Bidirectional Encoder Representations from Transformers. Dùng phần Encoder, pre-train bằng MLM và NSP.",
-                differentiator: "Hiểu ngữ cảnh hai chiều sâu sắc, phù hợp các bài toán NLU."
-            },
-            {
-                id: "gpt",
-                category: "4. Transformer Family",
-                name: "GPT Family",
-                concept: "Giống tính năng autocomplete rất thông minh: đọc những gì đã viết và sinh token tiếp theo hợp lý nhất.",
-                technical: "Kiến trúc autoregressive, dùng Decoder, dự đoán token x_t dựa trên các token trước đó.",
-                differentiator: "Vô đối trong nhiều tác vụ sinh văn bản (NLG)."
-            },
-            {
-                id: "gan",
-                category: "5. Generative Models",
-                name: "GAN",
-                concept: "Cuộc chiến giữa Kẻ làm giả (Generator) và Cảnh sát (Discriminator). Qua thời gian, Generator sinh dữ liệu ngày càng giống thật.",
-                technical: "Hai mạng nơ-ron huấn luyện đối kháng bằng minimax game.",
-                differentiator: "Tạo ảnh sắc nét nhưng khó huấn luyện ổn định."
-            },
-            {
-                id: "diffusion",
-                category: "5. Generative Models",
-                name: "Diffusion Models",
-                concept: "Thêm nhiễu dần vào dữ liệu rồi học đảo ngược quá trình đó để khôi phục mẫu từ nhiễu.",
-                technical: "Forward process thêm Gaussian noise theo từng bước, reverse process học khử nhiễu dần (thường bằng U-Net).",
-                differentiator: "Ổn định hơn GAN, đa dạng mẫu tốt, rất mạnh trong text-to-image."
-            },
-            {
-                id: "gnn",
-                category: "6. Hybrid & Specialized",
-                name: "GNN (Graph Neural Network)",
-                concept: "Để hiểu một nút trong mạng, phải nhìn cả quan hệ với các nút lân cận.",
-                technical: "Xử lý dữ liệu đồ thị bằng message passing để cập nhật embedding nút.",
-                differentiator: "Phù hợp nhất cho dữ liệu mạng lưới: social graph, phân tử, giao thông."
-            },
-            {
-                id: "rl_dqn",
-                category: "7. Reinforcement Learning",
-                name: "DQN (Deep Q-Network)",
-                concept: "Dạy AI bằng thưởng-phạt để học hành động tối ưu trong từng trạng thái.",
-                technical: "Kết hợp Q-learning với deep neural network, dùng experience replay và target network để ổn định train.",
-                differentiator: "Giải quyết state space lớn, mở đường cho Deep RL như AlphaGo."
+        <script>
+            const architecturesData = [
+                {
+                    id: "mlp",
+                    category: "1. Feedforward & Basic",
+                    name: "Multilayer Perceptron (MLP)",
+                    concept: "Giống như một dây chuyền nhà máy đơn giản: Nguyên liệu đi vào đầu này, đi qua các trạm kiểm duyệt (không được quay lui), và ra thành phẩm ở đầu kia.",
+                    technical: "Mạng nơ-ron tiến (Feedforward Neural Network) với ít nhất 3 lớp (Input, Hidden, Output). Sử dụng backpropagation để cập nhật trọng số. Không có giả định về cấu trúc không gian hay thời gian của dữ liệu.",
+                    differentiator: "Là nền tảng cơ bản nhất. Khác với CNN hay RNN, MLP coi mọi điểm dữ liệu đầu vào là độc lập, không nắm bắt được chuỗi hay cấu trúc hình ảnh 2D tốt."
+                },
+                {
+                    id: "autoencoder",
+                    category: "1. Feedforward & Basic",
+                    name: "Autoencoder (AE)",
+                    concept: "Giống như việc bạn cố tóm tắt một cuốn sách dày thành 1 trang giấy (mã hóa), sau đó yêu cầu một người khác dựa vào 1 trang giấy đó để viết lại cuốn sách y như cũ (giải mã).",
+                    technical: "Mạng nơ-ron không giám sát gồm Encoder (nén dữ liệu vào latent space) và Decoder (tái tạo dữ liệu từ latent space). Mục tiêu là tối thiểu hóa loss tái tạo.",
+                    differentiator: "Học cách nén dữ liệu hiệu quả thay vì phân loại. Là tiền đề cho các mô hình Generative sau này."
+                },
+                {
+                    id: "cnn_basic",
+                    category: "2. CNN – Convolutional",
+                    name: "CNN cơ bản",
+                    concept: "Thay vì nhìn toàn bộ bức tranh bằng một mắt, CNN dùng một chiếc kính lúp trượt dọc theo bức tranh để tìm các đặc điểm nhỏ (cạnh, góc), rồi ghép chúng lại thành hình khối phức tạp hơn.",
+                    technical: "Sử dụng phép tích chập (Convolution) với các filter/kernel để trích xuất đặc trưng cục bộ, kết hợp Pooling để giảm chiều dữ liệu và đạt tính bất biến với phép dịch chuyển.",
+                    differentiator: "Khai thác triệt để cấu trúc không gian 2D/3D của dữ liệu. Số lượng tham số ít hơn nhiều so với MLP nhờ cơ chế chia sẻ trọng số."
+                },
+                {
+                    id: "resnet",
+                    category: "2. CNN – Convolutional",
+                    name: "ResNet (Residual Network)",
+                    concept: "Trong một tổ chức quá nhiều cấp bậc, thông tin truyền từ sếp xuống nhân viên thường bị tam sao thất bản. ResNet tạo ra đường dây nóng cho phép thông tin truyền thẳng qua các cấp mà không bị biến dạng.",
+                    technical: "Giới thiệu Residual Block với Skip Connection F(x) + x. Giúp gradient dễ dàng chảy ngược qua hàng trăm lớp, giải quyết triệt để bài toán vanishing gradient.",
+                    differentiator: "Cho phép huấn luyện các mạng cực kỳ sâu mà vẫn duy trì hoặc tăng độ chính xác."
+                },
+                {
+                    id: "yolo",
+                    category: "2. CNN – Convolutional",
+                    name: "YOLO (You Only Look Once)",
+                    concept: "Thay vì cử nhiều nhóm đi rà soát từng khu vực, YOLO chia ảnh thành lưới và dự đoán mọi vật thể cùng vị trí của chúng ngay trong một cái liếc mắt.",
+                    technical: "Single-stage Object Detection. Đưa bài toán phát hiện vật thể về hồi quy trực tiếp bounding box và class probability từ full image trong một lần forward.",
+                    differentiator: "Tốc độ cực kỳ nhanh, phù hợp real-time processing."
+                },
+                {
+                    id: "rnn_basic",
+                    category: "3. RNN – Recurrent",
+                    name: "Vanilla RNN",
+                    concept: "Giống như việc bạn đọc một câu văn: Bạn hiểu từ hiện tại dựa trên trí nhớ về những từ đã đọc trước đó.",
+                    technical: "Mạng nơ-ron có vòng lặp, duy trì hidden state theo thời gian. Đầu vào tại timestep t và hidden state t-1 dùng để tính toán đầu ra tại t.",
+                    differentiator: "Xử lý dữ liệu dạng chuỗi có độ dài tùy ý."
+                },
+                {
+                    id: "lstm",
+                    category: "3. RNN – Recurrent",
+                    name: "LSTM (Long Short-Term Memory)",
+                    concept: "RNN bình thường bị não cá vàng khi câu quá dài. LSTM giống như một cuốn sổ tay có cơ chế chọn lọc giữ lại thông tin quan trọng, xóa rác và cập nhật kiến thức mới.",
+                    technical: "Cải tiến của RNN với Cell State và 3 cổng (Forget/Input/Output gate), giúp giải quyết vanishing gradient trên chuỗi dài.",
+                    differentiator: "Học phụ thuộc xa (long-term dependencies) tốt hơn hẳn RNN truyền thống."
+                },
+                {
+                    id: "transformer",
+                    category: "4. Transformer Family",
+                    name: "Transformer (Gốc)",
+                    concept: "Thay vì đọc từng chữ từ trái sang phải, mô hình nhìn bao quát toàn bộ câu cùng một lúc và tính mức chú ý giữa các token.",
+                    technical: "Kiến trúc Encoder-Decoder loại bỏ recurrence. Cốt lõi là Self-Attention đa đầu kết hợp Positional Encoding.",
+                    differentiator: "Tính toán song song vượt trội so với RNN, là xương sống của kỷ nguyên GenAI hiện tại."
+                },
+                {
+                    id: "bert",
+                    category: "4. Transformer Family",
+                    name: "BERT",
+                    concept: "Học hiểu ngôn ngữ bằng cách điền vào chỗ trống, nhìn cả hai chiều trái-phải của từ bị che.",
+                    technical: "Bidirectional Encoder Representations from Transformers. Dùng phần Encoder, pre-train bằng MLM và NSP.",
+                    differentiator: "Hiểu ngữ cảnh hai chiều sâu sắc, phù hợp các bài toán NLU."
+                },
+                {
+                    id: "gpt",
+                    category: "4. Transformer Family",
+                    name: "GPT Family",
+                    concept: "Giống tính năng autocomplete rất thông minh: đọc những gì đã viết và sinh token tiếp theo hợp lý nhất.",
+                    technical: "Kiến trúc autoregressive, dùng Decoder, dự đoán token x_t dựa trên các token trước đó.",
+                    differentiator: "Vô đối trong nhiều tác vụ sinh văn bản (NLG)."
+                },
+                {
+                    id: "gan",
+                    category: "5. Generative Models",
+                    name: "GAN",
+                    concept: "Cuộc chiến giữa Kẻ làm giả (Generator) và Cảnh sát (Discriminator). Qua thời gian, Generator sinh dữ liệu ngày càng giống thật.",
+                    technical: "Hai mạng nơ-ron huấn luyện đối kháng bằng minimax game.",
+                    differentiator: "Tạo ảnh sắc nét nhưng khó huấn luyện ổn định."
+                },
+                {
+                    id: "diffusion",
+                    category: "5. Generative Models",
+                    name: "Diffusion Models",
+                    concept: "Thêm nhiễu dần vào dữ liệu rồi học đảo ngược quá trình đó để khôi phục mẫu từ nhiễu.",
+                    technical: "Forward process thêm Gaussian noise theo từng bước, reverse process học khử nhiễu dần (thường bằng U-Net).",
+                    differentiator: "Ổn định hơn GAN, đa dạng mẫu tốt, rất mạnh trong text-to-image."
+                },
+                {
+                    id: "gnn",
+                    category: "6. Hybrid & Specialized",
+                    name: "GNN (Graph Neural Network)",
+                    concept: "Để hiểu một nút trong mạng, phải nhìn cả quan hệ với các nút lân cận.",
+                    technical: "Xử lý dữ liệu đồ thị bằng message passing để cập nhật embedding nút.",
+                    differentiator: "Phù hợp nhất cho dữ liệu mạng lưới: social graph, phân tử, giao thông."
+                },
+                {
+                    id: "rl_dqn",
+                    category: "7. Reinforcement Learning",
+                    name: "DQN (Deep Q-Network)",
+                    concept: "Dạy AI bằng thưởng-phạt để học hành động tối ưu trong từng trạng thái.",
+                    technical: "Kết hợp Q-learning với deep neural network, dùng experience replay và target network để ổn định train.",
+                    differentiator: "Giải quyết state space lớn, mở đường cho Deep RL như AlphaGo."
+                }
+            ];
+
+            const summaryStats = [
+                {
+                    name: "CNN (Convolutional)",
+                    count: "~25",
+                    usage: "Thị giác máy tính, xử lý ảnh/video, không gian 2D/3D.",
+                    trend: "Vẫn sống khỏe nhờ hiệu năng cao trên edge và chi phí thấp."
+                },
+                {
+                    name: "RNN (Recurrent)",
+                    count: "~15",
+                    usage: "Xử lý chuỗi, chuỗi thời gian, tín hiệu.",
+                    trend: "Đang bị Transformer thay thế trong NLP, rút về bài toán chuỗi hẹp."
+                },
+                {
+                    name: "Transformer",
+                    count: "~25+",
+                    usage: "NLP, đa phương thức, vision, âm thanh.",
+                    trend: "Kiến trúc bá chủ hiện tại, tối ưu context length và attention."
+                },
+                {
+                    name: "Generative",
+                    count: "~20",
+                    usage: "Sinh ảnh, văn bản, âm thanh, video, thiết kế thuốc.",
+                    trend: "Diffusion dẫn đầu ảnh/video, GPT dẫn đầu văn bản."
+                },
+                {
+                    name: "Khác (Hybrid, RL, GNN)",
+                    count: "~15+",
+                    usage: "Tối ưu hóa, robot, phân tử, đồ thị.",
+                    trend: "Xu hướng kết hợp đa kiến trúc để giải bài toán chuyên ngành."
+                }
+            ];
+
+            const categories = [
+                { id: "all", name: "Tổng quan (Dashboard)" },
+                { id: "1. Feedforward & Basic", name: "1. Feedforward & Basic" },
+                { id: "2. CNN – Convolutional", name: "2. CNN" },
+                { id: "3. RNN – Recurrent", name: "3. RNN" },
+                { id: "4. Transformer Family", name: "4. Transformer" },
+                { id: "5. Generative Models", name: "5. Generative" },
+                { id: "6. Hybrid & Specialized", name: "6. Hybrid & Specialized" },
+                { id: "7. Reinforcement Learning", name: "7. Reinforcement Learning" }
+            ];
+
+            const state = {
+                activeCategory: "all",
+                selectedModel: null,
+                searchTerm: "",
+                isCompareMode: false,
+                compareModels: [null, null]
+            };
+
+            const el = {
+                categoryList: document.getElementById("dl-category-list"),
+                compareToggle: document.getElementById("dl-compare-toggle"),
+                search: document.getElementById("dl-search"),
+                pageTitle: document.getElementById("dl-page-title"),
+                content: document.getElementById("dl-content")
+            };
+
+            function setState(partial) {
+                Object.assign(state, partial);
+                render();
             }
-        ];
 
-        const summaryStats = [
-            {
-                name: "CNN (Convolutional)",
-                count: "~25",
-                usage: "Thị giác máy tính, xử lý ảnh/video, không gian 2D/3D.",
-                trend: "Vẫn sống khỏe nhờ hiệu năng cao trên edge và chi phí thấp."
-            },
-            {
-                name: "RNN (Recurrent)",
-                count: "~15",
-                usage: "Xử lý chuỗi, chuỗi thời gian, tín hiệu.",
-                trend: "Đang bị Transformer thay thế trong NLP, rút về bài toán chuỗi hẹp."
-            },
-            {
-                name: "Transformer",
-                count: "~25+",
-                usage: "NLP, đa phương thức, vision, âm thanh.",
-                trend: "Kiến trúc bá chủ hiện tại, tối ưu context length và attention."
-            },
-            {
-                name: "Generative",
-                count: "~20",
-                usage: "Sinh ảnh, văn bản, âm thanh, video, thiết kế thuốc.",
-                trend: "Diffusion dẫn đầu ảnh/video, GPT dẫn đầu văn bản."
-            },
-            {
-                name: "Khác (Hybrid, RL, GNN)",
-                count: "~15+",
-                usage: "Tối ưu hóa, robot, phân tử, đồ thị.",
-                trend: "Xu hướng kết hợp đa kiến trúc để giải bài toán chuyên ngành."
+            function safeHtml(input) {
+                return String(input)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
             }
-        ];
 
-        const categories = [
-            { id: "all", name: "Tổng quan (Dashboard)" },
-            { id: "1. Feedforward & Basic", name: "1. Feedforward & Basic" },
-            { id: "2. CNN – Convolutional", name: "2. CNN" },
-            { id: "3. RNN – Recurrent", name: "3. RNN" },
-            { id: "4. Transformer Family", name: "4. Transformer" },
-            { id: "5. Generative Models", name: "5. Generative" },
-            { id: "6. Hybrid & Specialized", name: "6. Hybrid & Specialized" },
-            { id: "7. Reinforcement Learning", name: "7. Reinforcement Learning" }
-        ];
+            function filteredData() {
+                const term = state.searchTerm.trim().toLowerCase();
+                return architecturesData.filter((item) => {
+                    const byCategory = state.activeCategory === "all" || item.category === state.activeCategory;
+                    const byTerm =
+                        !term ||
+                        item.name.toLowerCase().includes(term) ||
+                        item.concept.toLowerCase().includes(term) ||
+                        item.technical.toLowerCase().includes(term);
+                    return byCategory && byTerm;
+                });
+            }
 
-        const state = {
-            activeCategory: "all",
-            selectedModel: null,
-            searchTerm: "",
-            isCompareMode: false,
-            compareModels: [null, null]
-        };
+            function renderCategories() {
+                el.categoryList.innerHTML = categories
+                    .map((cat) => {
+                        const active = !state.isCompareMode && state.activeCategory === cat.id;
+                        return `<button type="button" class="dl-category-btn ${active ? "active" : ""}" data-category="${safeHtml(cat.id)}">${safeHtml(cat.name)}</button>`;
+                    })
+                    .join("");
 
-        const el = {
-            categoryList: document.getElementById("dl-category-list"),
-            compareToggle: document.getElementById("dl-compare-toggle"),
-            search: document.getElementById("dl-search"),
-            pageTitle: document.getElementById("dl-page-title"),
-            content: document.getElementById("dl-content")
-        };
-
-        function setState(partial) {
-            Object.assign(state, partial);
-            render();
-        }
-
-        function safeHtml(input) {
-            return String(input)
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\"/g, "&quot;")
-                .replace(/'/g, "&#39;");
-        }
-
-        function filteredData() {
-            const term = state.searchTerm.trim().toLowerCase();
-            return architecturesData.filter((item) => {
-                const byCategory = state.activeCategory === "all" || item.category === state.activeCategory;
-                const byTerm =
-                    !term ||
-                    item.name.toLowerCase().includes(term) ||
-                    item.concept.toLowerCase().includes(term) ||
-                    item.technical.toLowerCase().includes(term);
-                return byCategory && byTerm;
-            });
-        }
-
-        function renderCategories() {
-            el.categoryList.innerHTML = categories
-                .map((cat) => {
-                    const active = !state.isCompareMode && state.activeCategory === cat.id;
-                    return `<button type="button" class="dl-category-btn ${active ? "active" : ""}" data-category="${safeHtml(cat.id)}">${safeHtml(cat.name)}</button>`;
-                })
-                .join("");
-
-            el.categoryList.querySelectorAll(".dl-category-btn").forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    setState({
-                        activeCategory: btn.getAttribute("data-category") || "all",
-                        isCompareMode: false,
-                        selectedModel: null
+                el.categoryList.querySelectorAll(".dl-category-btn").forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        setState({
+                            activeCategory: btn.getAttribute("data-category") || "all",
+                            isCompareMode: false,
+                            selectedModel: null
+                        });
                     });
                 });
-            });
-        }
-
-        function pickForCompare(modelId) {
-            const model = architecturesData.find((item) => item.id === modelId);
-            if (!model) return;
-
-            if (!state.compareModels[0]) {
-                state.compareModels[0] = model;
-            } else if (!state.compareModels[1] && state.compareModels[0].id !== model.id) {
-                state.compareModels[1] = model;
             }
 
-            render();
-        }
+            function pickForCompare(modelId) {
+                const model = architecturesData.find((item) => item.id === modelId);
+                if (!model) return;
 
-        function removeCompareAt(index) {
-            state.compareModels[index] = null;
-            render();
-        }
+                if (!state.compareModels[0]) {
+                    state.compareModels[0] = model;
+                } else if (!state.compareModels[1] && state.compareModels[0].id !== model.id) {
+                    state.compareModels[1] = model;
+                }
 
-        function renderDashboard() {
-            const summaryCards = summaryStats
-                .map(
-                    (stat) => `
+                render();
+            }
+
+            function removeCompareAt(index) {
+                state.compareModels[index] = null;
+                render();
+            }
+
+            function renderDashboard() {
+                const summaryCards = summaryStats
+                    .map(
+                        (stat) => `
             <article class="dl-summary-card">
               <h3>${safeHtml(stat.name)}</h3>
               <span class="count">${safeHtml(stat.count)}</span>
@@ -825,10 +824,10 @@
               <p><strong>Xu hướng:</strong> ${safeHtml(stat.trend)}</p>
             </article>
           `,
-                )
-                .join("");
+                    )
+                    .join("");
 
-            return `
+                return `
         <section class="dl-hero" id="tong-quan-kien-truc">
           <h2>Không có kiến trúc nào là tuyệt đối</h2>
           <p>Theo thực tế, mỗi họ kiến trúc sinh ra để xử lý một kiểu dữ liệu khác nhau: không gian với CNN, thời gian với RNN, ngữ cảnh toàn cục với Transformer. Bạn nên chọn mô hình theo cấu trúc dữ liệu và ràng buộc vận hành.</p>
@@ -836,17 +835,17 @@
         </section>
         <section class="dl-summary-grid">${summaryCards}</section>
       `;
-        }
-
-        function renderCards() {
-            const data = filteredData();
-            if (data.length === 0) {
-                return `<section class="dl-hero"><h2>Không tìm thấy kiến trúc phù hợp</h2><p>Hãy đổi từ khóa tìm kiếm hoặc chọn lại nhóm kiến trúc ở thanh bên trái.</p></section>`;
             }
 
-            const cards = data
-                .map(
-                    (item) => `
+            function renderCards() {
+                const data = filteredData();
+                if (data.length === 0) {
+                    return `<section class="dl-hero"><h2>Không tìm thấy kiến trúc phù hợp</h2><p>Hãy đổi từ khóa tìm kiếm hoặc chọn lại nhóm kiến trúc ở thanh bên trái.</p></section>`;
+                }
+
+                const cards = data
+                    .map(
+                        (item) => `
             <article class="dl-card">
               <h3>${safeHtml(item.name)}</h3>
               <div class="meta">${safeHtml(item.category)}</div>
@@ -854,16 +853,16 @@
               <button type="button" data-open="${safeHtml(item.id)}">Xem chi tiết</button>
             </article>
           `,
-                )
-                .join("");
+                    )
+                    .join("");
 
-            return `<section class="dl-grid">${cards}</section>`;
-        }
+                return `<section class="dl-grid">${cards}</section>`;
+            }
 
-        function renderDetail() {
-            if (!state.selectedModel) return "";
-            const m = state.selectedModel;
-            return `
+            function renderDetail() {
+                if (!state.selectedModel) return "";
+                const m = state.selectedModel;
+                return `
         <section class="dl-detail" id="chi-tiet-kien-truc">
           <div class="category">${safeHtml(m.category)}</div>
           <h2>${safeHtml(m.name)}</h2>
@@ -881,15 +880,15 @@
           </article>
         </section>
       `;
-        }
+            }
 
-        function renderCompareMode() {
-            const renderSlot = (model, idx) => {
-                if (!model) {
-                    return `<article class="dl-compare-slot"><p>Trống - chọn mô hình từ kho bên dưới để so sánh.</p></article>`;
-                }
+            function renderCompareMode() {
+                const renderSlot = (model, idx) => {
+                    if (!model) {
+                        return `<article class="dl-compare-slot"><p>Trống - chọn mô hình từ kho bên dưới để so sánh.</p></article>`;
+                    }
 
-                return `
+                    return `
           <article class="dl-compare-slot filled">
             <h3>${safeHtml(model.name)}</h3>
             <p><strong>Nhóm:</strong> ${safeHtml(model.category)}</p>
@@ -898,16 +897,16 @@
             <button type="button" data-remove-compare="${idx}" class="dl-compare-toggle" style="margin-top:10px">Bỏ khỏi so sánh</button>
           </article>
         `;
-            };
+                };
 
-            const pool = architecturesData
-                .map((m) => {
-                    const selected = state.compareModels.some((item) => item && item.id === m.id);
-                    return `<button type="button" data-pick-compare="${safeHtml(m.id)}" class="${selected ? "active" : ""}">${safeHtml(m.name)}</button>`;
-                })
-                .join("");
+                const pool = architecturesData
+                    .map((m) => {
+                        const selected = state.compareModels.some((item) => item && item.id === m.id);
+                        return `<button type="button" data-pick-compare="${safeHtml(m.id)}" class="${selected ? "active" : ""}">${safeHtml(m.name)}</button>`;
+                    })
+                    .join("");
 
-            return `
+                return `
         <section class="dl-compare-wrap" id="so-sanh-kien-truc">
           <div class="dl-compare-help">Chọn 2 mô hình để so sánh trực tiếp theo trục trực giác, kỹ thuật và điểm khác biệt.</div>
           <div class="dl-compare-grid">
@@ -917,113 +916,121 @@
           <div class="dl-pool">${pool}</div>
         </section>
       `;
-        }
+            }
 
-        function bindDynamicEvents() {
-            el.content.querySelectorAll("[data-open]").forEach((btn) => {
-                btn.addEventListener("click", () => {
-                    const model = architecturesData.find((m) => m.id === btn.getAttribute("data-open"));
-                    if (!model) return;
-                    setState({ selectedModel: model });
+            function bindDynamicEvents() {
+                el.content.querySelectorAll("[data-open]").forEach((btn) => {
+                    btn.addEventListener("click", () => {
+                        const model = architecturesData.find((m) => m.id === btn.getAttribute("data-open"));
+                        if (!model) return;
+                        setState({ selectedModel: model });
+                    });
+                });
+
+                el.content.querySelectorAll("[data-pick-compare]").forEach((btn) => {
+                    btn.addEventListener("click", () => pickForCompare(btn.getAttribute("data-pick-compare") || ""));
+                });
+
+                el.content.querySelectorAll("[data-remove-compare]").forEach((btn) => {
+                    btn.addEventListener("click", () => removeCompareAt(Number(btn.getAttribute("data-remove-compare"))));
+                });
+            }
+
+            function render() {
+                renderCategories();
+
+                const title = state.isCompareMode
+                    ? "Công cụ đối chiếu kiến trúc"
+                    : categories.find((cat) => cat.id === state.activeCategory)?.name || "Khám phá";
+
+                el.pageTitle.textContent = title;
+                el.compareToggle.classList.toggle("active", state.isCompareMode);
+
+                if (state.isCompareMode || state.activeCategory === "all") {
+                    el.search.value = state.searchTerm;
+                }
+
+                el.search.parentElement.style.display = state.isCompareMode ? "none" : "block";
+
+                let html = "";
+                if (state.isCompareMode) {
+                    html = renderCompareMode();
+                } else if (state.activeCategory === "all") {
+                    html = renderDashboard();
+                } else {
+                    html = `${renderCards()}${renderDetail()}`;
+                }
+
+                el.content.innerHTML = html;
+                bindDynamicEvents();
+            }
+
+            el.compareToggle.addEventListener("click", () => {
+                setState({
+                    isCompareMode: !state.isCompareMode,
+                    selectedModel: null,
+                    activeCategory: !state.isCompareMode ? state.activeCategory : "all"
                 });
             });
 
-            el.content.querySelectorAll("[data-pick-compare]").forEach((btn) => {
-                btn.addEventListener("click", () => pickForCompare(btn.getAttribute("data-pick-compare") || ""));
+            el.search.addEventListener("input", (event) => {
+                setState({ searchTerm: event.target.value });
             });
 
-            el.content.querySelectorAll("[data-remove-compare]").forEach((btn) => {
-                btn.addEventListener("click", () => removeCompareAt(Number(btn.getAttribute("data-remove-compare"))));
-            });
-        }
+            render();
+        </script>
 
-        function render() {
-            renderCategories();
-
-            const title = state.isCompareMode
-                ? "Công cụ đối chiếu kiến trúc"
-                : categories.find((cat) => cat.id === state.activeCategory)?.name || "Khám phá";
-
-            el.pageTitle.textContent = title;
-            el.compareToggle.classList.toggle("active", state.isCompareMode);
-
-            if (state.isCompareMode || state.activeCategory === "all") {
-                el.search.value = state.searchTerm;
-            }
-
-            el.search.parentElement.style.display = state.isCompareMode ? "none" : "block";
-
-            let html = "";
-            if (state.isCompareMode) {
-                html = renderCompareMode();
-            } else if (state.activeCategory === "all") {
-                html = renderDashboard();
-            } else {
-                html = `${renderCards()}${renderDetail()}`;
-            }
-
-            el.content.innerHTML = html;
-            bindDynamicEvents();
-        }
-
-        el.compareToggle.addEventListener("click", () => {
-            setState({
-                isCompareMode: !state.isCompareMode,
-                selectedModel: null,
-                activeCategory: !state.isCompareMode ? state.activeCategory : "all"
-            });
-        });
-
-        el.search.addEventListener("input", (event) => {
-            setState({ searchTerm: event.target.value });
-        });
-
-        render();
-    </script>
-
-    <!-- Static Learning Summary — safe zone, outside JS-managed DOM -->
-    <section class="dl-root" style="margin-top: 24px;">
-        <div
-            style="border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; background: var(--bg-card);">
-            <h2 style="margin: 0 0 20px; font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">
-                🎯 Bạn nên thử gì tiếp theo?
-            </h2>
-
+        <!-- Static Learning Summary — safe zone, outside JS-managed DOM -->
+        <section class="dl-root" style="margin-top: 24px;">
             <div
-                style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 24px;">
-                <div
-                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
-                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">Bài
-                        tập 1: Train MLP trên MNIST</h3>
-                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Dùng đoạn
-                        code bên dưới, thay đổi số hidden units (128 → 256 → 512) và quan sát accuracy thay đổi. Giải
-                        thích tại sao thêm neurons không phải lúc nào cũng tốt hơn.</p>
-                </div>
-                <div
-                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
-                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">Bài
-                        tập 2: So sánh MLP vs CNN</h3>
-                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Thay lớp
-                        Linear bằng Conv2d + MaxPool2d trên cùng tập MNIST. So sánh accuracy và thời gian train — bạn sẽ
-                        hiểu ngay lý do CNN sinh ra.</p>
-                </div>
-                <div
-                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
-                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">Bài
-                        tập 3: Khám phá Hugging Face</h3>
-                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Vào
-                        <strong>huggingface.co/models</strong>, tìm model BERT tiếng Việt
-                        (<code>vinai/phobert-base</code>), chạy thử pipeline phân loại cảm xúc với 5 câu review Shopee.
-                    </p>
-                </div>
-            </div>
+                style="border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; background: var(--bg-card);">
+                <h2 style="margin: 0 0 20px; font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">
+                    🎯 Bạn nên thử gì tiếp theo?
+                </h2>
 
-            <div
-                style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
-                <h3 style="margin: 0 0 12px; font-size: 0.875rem; font-weight: 700; color: var(--accent-orange);">
-                    Starter Code: MLP phân loại chữ số viết tay (PyTorch)</h3>
-                <pre
-                    style="margin: 0; padding: 16px; border-radius: 8px; background: #1e293b; color: #e2e8f0; font-family: monospace; font-size: 0.82rem; overflow-x: auto; white-space: pre; line-height: 1.6;">import torch
+                <div
+                    style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 24px;">
+                    <div
+                        style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                        <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">
+                            Bài
+                            tập 1: Train MLP trên MNIST</h3>
+                        <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Dùng
+                            đoạn
+                            code bên dưới, thay đổi số hidden units (128 → 256 → 512) và quan sát accuracy thay đổi.
+                            Giải
+                            thích tại sao thêm neurons không phải lúc nào cũng tốt hơn.</p>
+                    </div>
+                    <div
+                        style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                        <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">
+                            Bài
+                            tập 2: So sánh MLP vs CNN</h3>
+                        <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Thay
+                            lớp
+                            Linear bằng Conv2d + MaxPool2d trên cùng tập MNIST. So sánh accuracy và thời gian train —
+                            bạn sẽ
+                            hiểu ngay lý do CNN sinh ra.</p>
+                    </div>
+                    <div
+                        style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                        <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">
+                            Bài
+                            tập 3: Khám phá Hugging Face</h3>
+                        <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Vào
+                            <strong>huggingface.co/models</strong>, tìm model BERT tiếng Việt
+                            (<code>vinai/phobert-base</code>), chạy thử pipeline phân loại cảm xúc với 5 câu review
+                            Shopee.
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                    <h3 style="margin: 0 0 12px; font-size: 0.875rem; font-weight: 700; color: var(--accent-orange);">
+                        Starter Code: MLP phân loại chữ số viết tay (PyTorch)</h3>
+                    <pre
+                        style="margin: 0; padding: 16px; border-radius: 8px; background: #1e293b; color: #e2e8f0; font-family: monospace; font-size: 0.82rem; overflow-x: auto; white-space: pre; line-height: 1.6;">import torch
 import torch.nn as nn
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
@@ -1062,18 +1069,20 @@ for epoch in range(3):
         total_loss += loss.item()
     print(f"Epoch {epoch+1}, Loss: {total_loss/len(train_loader):.4f}")
 # Kỳ vọng: loss giảm dần qua 3 epoch → model đang học!</pre>
-            </div>
+                </div>
 
-            <div
-                style="margin-top: 16px; padding: 14px; border-left: 3px solid var(--accent-blue); border-radius: 0 10px 10px 0; background: rgba(3, 105, 161, 0.06);">
-                <p style="margin: 0; font-size: 0.875rem; color: var(--text-primary);">
-                    <strong>Lộ trình tiếp theo:</strong> Sau khi hiểu MLP → CNN → RNN, hãy đọc paper gốc "Attention Is
-                    All You Need" (2017) — đây là bài báo tạo ra Transformer và thay đổi toàn bộ ngành AI. Tìm từ khóa
-                    <code>"Vaswani et al 2017 PDF"</code>.
-                </p>
+                <div
+                    style="margin-top: 16px; padding: 14px; border-left: 3px solid var(--accent-blue); border-radius: 0 10px 10px 0; background: rgba(3, 105, 161, 0.06);">
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-primary);">
+                        <strong>Lộ trình tiếp theo:</strong> Sau khi hiểu MLP → CNN → RNN, hãy đọc paper gốc "Attention
+                        Is
+                        All You Need" (2017) — đây là bài báo tạo ra Transformer và thay đổi toàn bộ ngành AI. Tìm từ
+                        khóa
+                        <code>"Vaswani et al 2017 PDF"</code>.
+                    </p>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
 </body>
 

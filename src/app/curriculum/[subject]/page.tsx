@@ -59,8 +59,37 @@ export default async function SubjectPage({
 
   const statusMeta = getSubjectStatusMeta(subject.status);
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Trang chủ",
+        "item": process.env.NEXT_PUBLIC_SITE_URL || "https://httt-uel-hub.vercel.app"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Curriculum",
+        "item": `${process.env.NEXT_PUBLIC_SITE_URL || "https://httt-uel-hub.vercel.app"}/curriculum`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": subject.name,
+        "item": `${process.env.NEXT_PUBLIC_SITE_URL || "https://httt-uel-hub.vercel.app"}/curriculum/${subject.slug}`
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-[var(--color-bg)] px-4 py-8 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <div className="mx-auto w-full max-w-[1080px] space-y-6">
         <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
           <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--color-text-secondary)]">
@@ -111,7 +140,7 @@ export default async function SubjectPage({
                     href={resource.routePath}
                     className="group block rounded-xl border border-zinc-200 bg-zinc-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm"
                   >
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-700">
                       <span>{resource.kind === "sim" ? "Simulation" : "Bài viết"}</span>
                       <span>•</span>
                       <span>{resource.category ?? "Kiến thức"}</span>

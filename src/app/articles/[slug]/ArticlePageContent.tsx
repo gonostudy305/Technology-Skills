@@ -53,11 +53,26 @@ export async function generateArticleMetadataBySlug(
     "Bài viết chia sẻ góc nhìn chuyên sâu và kinh nghiệm thực chiến.";
   const category = normalizeCategoryLabel(meta?.category);
 
+  // Auto-discover the canonical path if it belongs to a curriculum subject
+  let canonicalPath = `/articles/${slug}`;
+  try {
+    const { getCanonicalArticlePath } = await import("@/lib/subjects");
+    const subjPath = getCanonicalArticlePath(slug);
+    if (subjPath) {
+      canonicalPath = subjPath;
+    }
+  } catch (e) {
+    // Ignore if not available
+  }
+
   return {
     title: `${title} | HTTT UEL Hub`,
     description,
-    keywords: [category, "UEL", "HTTT", "Knowledge Base", slug],
+    keywords: [category, "UEL", "HTTT", "Knowledge Base", slug, "Đại học Kinh tế Luật", "Sinh viên Hệ thống thông tin"],
     authors: [{ name: meta?.author ?? "Minh Tuấn" }],
+    alternates: {
+      canonical: canonicalPath,
+    },
     openGraph: {
       title,
       description,
@@ -157,8 +172,25 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
     ? "article-rich-content px-1 py-1 sm:px-2 sm:py-2"
     : "article-rich-content article-reading px-3 py-4 sm:px-6 sm:py-7";
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": articleTitle,
+    "description": articleSummary,
+    "author": {
+      "@type": "Person",
+      "name": articleAuthor
+    },
+    "datePublished": articleMeta?.updatedAt ?? articleMeta?.dateStr ?? new Date().toISOString(),
+    "dateModified": articleMeta?.updatedAt ?? articleMeta?.dateStr ?? new Date().toISOString()
+  };
+
   return (
     <div className="min-h-screen bg-[#f5f1ea] pb-14 pt-5 sm:pt-7">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {isReadingLayout ? <ReadingProgressBar /> : null}
 
       <div className={pageContainerClassName}>
@@ -172,14 +204,14 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
             </Link>
             {articleSubject && (
               <>
-                <span aria-hidden="true" className="text-zinc-400">/</span>
+                <span aria-hidden="true" className="text-zinc-600">/</span>
                 <Link
                   href="/curriculum"
                   className="font-medium text-zinc-600 transition hover:text-zinc-900"
                 >
                   Năm {articleSubject.year}
                 </Link>
-                <span aria-hidden="true" className="text-zinc-400">/</span>
+                <span aria-hidden="true" className="text-zinc-600">/</span>
                 <Link
                   href={`/curriculum/${articleSubject.slug}`}
                   className="font-medium text-zinc-600 transition hover:text-zinc-900"
@@ -190,11 +222,11 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
             )}
             {!articleSubject && (
               <>
-                <span aria-hidden="true" className="text-zinc-400">/</span>
+                <span aria-hidden="true" className="text-zinc-600">/</span>
                 <span>{articleCategory}</span>
               </>
             )}
-            <span aria-hidden="true" className="text-zinc-400">/</span>
+            <span aria-hidden="true" className="text-zinc-600">/</span>
             <span className="home-line-clamp-1 max-w-[460px] font-medium text-zinc-900">
               {articleTitle}
             </span>
@@ -215,7 +247,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
 
             <div className="min-w-0">
               <p className="font-medium text-zinc-800">{articleAuthor}</p>
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-zinc-700">
                 {articleUpdatedAt} · {readingMinutes} phút đọc · {articleViews}{" "}
                 lượt xem
               </p>
@@ -237,7 +269,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
 
         {articleToc.length > 0 && isReadingLayout ? (
           <section className={tocTopClassName}>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-700">
               Mục lục nội dung
             </h2>
             <nav className="mt-3" aria-label="Mục lục bài viết">
@@ -263,7 +295,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
         <section className={articleGridClassName}>
           {isReadingLayout && articleToc.length > 0 ? (
             <aside className="hidden self-start rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:block">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-700">
                 Mục lục nội dung
               </h2>
               <nav className="mt-3" aria-label="Mục lục bài viết">
@@ -311,14 +343,14 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
             </h2>
             <Link
               href="/curriculum"
-              className="text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
+              className="text-sm font-medium text-zinc-700 transition hover:text-zinc-900"
             >
               Xem tất cả
             </Link>
           </div>
 
           {relatedArticles.length === 0 ? (
-            <p className="mt-4 text-sm text-zinc-500">
+            <p className="mt-4 text-sm text-zinc-700">
               Chưa có bài viết liên quan trong kho nội dung.
             </p>
           ) : (
@@ -335,7 +367,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
                       href={relatedHref}
                       className="group block rounded-xl border border-zinc-200 bg-zinc-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm"
                     >
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-700">
                         {normalizeCategoryLabel(relatedArticle.category)}
                       </span>
                       <h3 className="mt-2 home-line-clamp-2 text-lg font-semibold leading-tight text-zinc-900 transition group-hover:text-sky-700">
@@ -344,7 +376,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
                       <p className="mt-2 home-line-clamp-2 text-sm leading-relaxed text-zinc-600">
                         {relatedArticle.summary}
                       </p>
-                      <p className="mt-3 text-xs text-zinc-500">
+                      <p className="mt-3 text-xs text-zinc-700">
                         {formatDateVi(
                           relatedArticle.updatedAt ?? relatedArticle.dateStr,
                         )}{" "}
