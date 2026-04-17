@@ -4,262 +4,847 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docker Playbook: Triển Khai Ứng Dụng Nhất Quán Từ Dev Đến Prod</title>
+    <title>Docker Desktop Knowledge Map: Mô Phỏng Tương Tác</title>
     <meta name="description"
-        content="Docker Playbook giúp bạn nắm workflow build image, quản lý container, networking, volumes, Compose và checklist production để triển khai ổn định.">
+        content="Bản mô phỏng Docker Desktop với sidebar tương tác, giải thích trực quan và kỹ thuật cho từng tính năng: Containers, Images, Volumes, Kubernetes, Docker Hub, Scout, Models, MCP Toolkit và Extensions.">
     <meta name="category" content="Nền tảng">
     <meta name="author" content="Minh Tuấn">
     <style>
-        .docker-playbook {
+        .docker-sim-root {
+            --bg-main: #0f111a;
+            --bg-panel: #1e212b;
+            --bg-soft: #161924;
+            --line: #2a3040;
+            --text-main: #d1d5db;
+            --text-soft: #9ca3af;
+            --title: #f8fafc;
+            --brand: #3b82f6;
+            --brand-soft: rgba(59, 130, 246, 0.2);
             font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-            color: #1f2937;
-            line-height: 1.75;
-            max-width: 100%;
-        }
-
-        .docker-playbook .hero {
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 20px;
-            background: linear-gradient(145deg, #ecfeff, #ffffff);
-            margin-bottom: 20px;
-        }
-
-        .docker-playbook section {
-            margin-top: 20px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 18px;
-            background: #ffffff;
-        }
-
-        .docker-playbook h2 {
-            font-size: 1.3rem;
-            margin: 0 0 10px;
-            color: #111827;
-        }
-
-        .docker-playbook h3 {
-            font-size: 1rem;
-            margin: 14px 0 6px;
-            color: #111827;
-        }
-
-        .docker-playbook p,
-        .docker-playbook ul,
-        .docker-playbook ol {
-            margin: 0;
-        }
-
-        .docker-playbook p+p,
-        .docker-playbook p+ul,
-        .docker-playbook p+ol,
-        .docker-playbook ul+p,
-        .docker-playbook ol+p {
-            margin-top: 8px;
-        }
-
-        .docker-playbook ul,
-        .docker-playbook ol {
-            padding-left: 20px;
-        }
-
-        .docker-playbook .code {
-            margin-top: 10px;
-            border-radius: 10px;
-            border: 1px solid #d1d5db;
-            background: #0f172a;
-            color: #e2e8f0;
-            padding: 12px;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            white-space: pre;
-        }
-
-        .docker-playbook .table-wrap {
-            overflow-x: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .docker-playbook table {
+            color: var(--text-main);
             width: 100%;
-            border-collapse: collapse;
-            min-width: 660px;
         }
 
-        .docker-playbook th,
-        .docker-playbook td {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 10px;
-            text-align: left;
-            vertical-align: top;
-            font-size: 0.92rem;
+        .docker-sim-shell {
+            position: relative;
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+            min-height: 78vh;
+            background: radial-gradient(circle at top right, #17203f 0%, #121827 43%, #0f111a 100%);
+            box-shadow: 0 22px 44px rgba(8, 12, 24, 0.52);
         }
 
-        .docker-playbook th {
-            background: #f9fafb;
+        .docker-sim-mobile-topbar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: rgba(30, 33, 43, 0.94);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(8px);
+        }
+
+        .docker-sim-mobile-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #e5e7eb;
             font-weight: 700;
-            color: #111827;
+            letter-spacing: 0.01em;
         }
 
-        .docker-playbook .note {
-            margin-top: 10px;
-            border-left: 4px solid #06b6d4;
-            background: #ecfeff;
-            color: #155e75;
+        .docker-sim-mobile-logo {
+            width: 26px;
+            height: 26px;
             border-radius: 8px;
-            padding: 10px;
-            font-size: 0.93rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            font-size: 0.72rem;
+            font-weight: 800;
+            border: 1px solid rgba(59, 130, 246, 0.55);
         }
 
-        @media (max-width: 640px) {
+        .docker-sim-mobile-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid #394257;
+            background: #111827;
+            color: #d1d5db;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: border-color 0.2s ease;
+        }
 
-            .docker-playbook .hero,
-            .docker-playbook section {
-                padding: 14px;
+        .docker-sim-mobile-toggle:hover {
+            border-color: rgba(59, 130, 246, 0.72);
+        }
+
+        .docker-sim-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.56);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            z-index: 35;
+        }
+
+        .docker-sim-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .docker-sim-sidebar {
+            border-right: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(30, 33, 43, 0.98), rgba(20, 23, 33, 0.98));
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            z-index: 40;
+        }
+
+        .docker-sim-brand {
+            padding: 18px 18px 14px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .docker-sim-brand-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: 1px solid rgba(59, 130, 246, 0.6);
+            background: rgba(59, 130, 246, 0.16);
+            color: #93c5fd;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .docker-sim-brand span {
+            color: var(--title);
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 0.01em;
+        }
+
+        .docker-sim-nav {
+            padding: 10px;
+            display: grid;
+            gap: 6px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .docker-sim-nav-btn {
+            border: 1px solid transparent;
+            background: transparent;
+            border-radius: 10px;
+            padding: 8px 9px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            color: var(--text-soft);
+            min-width: 0;
+        }
+
+        .docker-sim-nav-btn:hover {
+            background: rgba(31, 41, 55, 0.62);
+            border-color: rgba(99, 115, 141, 0.45);
+            color: #e5e7eb;
+        }
+
+        .docker-sim-nav-btn.active {
+            background: var(--brand-soft);
+            border-color: rgba(59, 130, 246, 0.62);
+            color: #bfdbfe;
+        }
+
+        .docker-sim-nav-left {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .docker-sim-icon-chip {
+            width: 18px;
+            height: 18px;
+            border-radius: 5px;
+            border: 1px solid #47536e;
+            background: rgba(30, 41, 59, 0.7);
+            color: #9ca3af;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .docker-sim-nav-btn.active .docker-sim-icon-chip {
+            border-color: rgba(59, 130, 246, 0.8);
+            background: rgba(59, 130, 246, 0.24);
+            color: #bfdbfe;
+        }
+
+        .docker-sim-nav-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            line-height: 1.35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .docker-sim-badge {
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border-radius: 999px;
+            border: 1px solid rgba(59, 130, 246, 0.55);
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.14);
+            padding: 2px 6px;
+            flex-shrink: 0;
+        }
+
+        .docker-sim-main {
+            min-width: 0;
+            overflow-y: auto;
+            background: linear-gradient(180deg, rgba(15, 17, 26, 0.98), rgba(15, 17, 26, 1));
+        }
+
+        .docker-sim-main-inner {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 26px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .docker-sim-main-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(71, 83, 110, 0.45);
+            padding-bottom: 16px;
+        }
+
+        .docker-sim-main-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            border: 1px solid rgba(59, 130, 246, 0.62);
+            color: #bfdbfe;
+            background: rgba(59, 130, 246, 0.16);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .docker-sim-main-head h1 {
+            margin: 0;
+            font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+            line-height: 1.32;
+            color: var(--title);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .docker-sim-main-head .docker-sim-badge {
+            font-size: 0.62rem;
+            transform: translateY(1px);
+        }
+
+        .docker-sim-panels {
+            display: grid;
+            gap: 16px;
+        }
+
+        .docker-sim-panel {
+            border-radius: 14px;
+            border: 1px solid #2f3749;
+            background: rgba(30, 33, 43, 0.52);
+            padding: 16px;
+        }
+
+        .docker-sim-panel.intuitive {
+            border-color: rgba(59, 130, 246, 0.35);
+            background: linear-gradient(165deg, rgba(30, 58, 138, 0.2), rgba(20, 23, 33, 0.78));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .docker-sim-panel.intuitive::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: rgba(59, 130, 246, 0.85);
+        }
+
+        .docker-sim-panel h2 {
+            margin: 0;
+            font-size: 1.06rem;
+            color: #e2e8f0;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .docker-sim-panel-note {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            border: 1px solid rgba(96, 165, 250, 0.6);
+            background: rgba(59, 130, 246, 0.2);
+            color: #bfdbfe;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.62rem;
+            font-weight: 800;
+        }
+
+        .docker-sim-body {
+            margin-top: 12px;
+            display: grid;
+            gap: 9px;
+        }
+
+        .docker-sim-paragraph {
+            margin: 0;
+            font-size: 0.94rem;
+            line-height: 1.78;
+            color: #cbd5e1;
+        }
+
+        .docker-sim-panel.technical .docker-sim-paragraph {
+            color: #9ca3af;
+        }
+
+        .docker-sim-bullet {
+            border-left: 2px solid #3b4457;
+            padding-left: 10px;
+            margin-left: 2px;
+            color: #d1d5db;
+        }
+
+        .docker-sim-footer {
+            border-top: 1px solid rgba(71, 83, 110, 0.42);
+            padding-top: 12px;
+            color: #64748b;
+            font-size: 0.75rem;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 980px) {
+            .docker-sim-shell {
+                grid-template-columns: 1fr;
+                min-height: auto;
             }
 
-            .docker-playbook h2 {
-                font-size: 1.15rem;
+            .docker-sim-mobile-topbar {
+                display: flex;
+            }
+
+            .docker-sim-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: min(85vw, 300px);
+                transform: translateX(-102%);
+                transition: transform 0.28s ease;
+                border-right: 1px solid var(--line);
+                border-top-right-radius: 14px;
+                border-bottom-right-radius: 14px;
+                box-shadow: 0 24px 42px rgba(2, 6, 23, 0.62);
+            }
+
+            .docker-sim-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .docker-sim-main-inner {
+                padding: 16px;
+                gap: 14px;
+            }
+
+            .docker-sim-main {
+                min-height: 72vh;
+            }
+
+            .docker-sim-main-head {
+                padding-bottom: 12px;
+            }
+
+            .docker-sim-brand {
+                padding-top: 16px;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .docker-sim-main-head {
+                align-items: flex-start;
+            }
+
+            .docker-sim-main-icon {
+                width: 40px;
+                height: 40px;
+                border-radius: 10px;
+            }
+
+            .docker-sim-panel {
+                padding: 13px;
+            }
+
+            .docker-sim-paragraph {
+                font-size: 0.9rem;
+            }
+
+            .docker-sim-nav-title {
+                font-size: 0.78rem;
+            }
+
+            .docker-sim-mobile-brand {
+                font-size: 0.95rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <main class="docker-playbook">
-        <div class="hero">
-            <p><strong>TL;DR:</strong> Docker giúp đóng gói ứng dụng thành image bất biến để chạy nhất quán từ máy dev
-                đến production. Để vận hành ổn định, bạn cần chuẩn Dockerfile, phân tách config bằng biến môi trường,
-                quản lý state qua volume và theo dõi container bằng healthcheck + logs tập trung.</p>
-        </div>
-
-        <section>
-            <h2>1. Docker là gì và vì sao cần dùng?</h2>
-            <p>Docker là nền tảng containerization cho phép bạn đóng gói source code, runtime, dependency và cấu hình
-                vào một image duy nhất.</p>
-            <h3>Lợi ích chính</h3>
-            <ul>
-                <li>Triển khai nhất quán giữa dev, staging và production.</li>
-                <li>Khởi động nhanh, tiết kiệm tài nguyên hơn VM truyền thống.</li>
-                <li>Dễ scale theo dịch vụ với Compose hoặc Kubernetes.</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>2. Cấu trúc Dockerfile chuẩn</h2>
-            <h3>Nguyên tắc</h3>
-            <ul>
-                <li>Dùng base image nhỏ, rõ version.</li>
-                <li>Tận dụng layer cache (COPY package trước source).</li>
-                <li>Không chạy bằng root trong production.</li>
-            </ul>
-            <div class="code">FROM node:20-alpine
-                WORKDIR /app
-                COPY package*.json ./
-                RUN npm ci --omit=dev
-                COPY . .
-                ENV NODE_ENV=production
-                EXPOSE 3000
-                CMD ["npm", "run", "start"]</div>
-        </section>
-
-        <section>
-            <h2>3. Runtime: Container, Network, Volume</h2>
-            <h3>Container</h3>
-            <p>Chỉ nên chạy một tiến trình chính cho mỗi container để dễ quan sát và scale.</p>
-            <h3>Network</h3>
-            <p>Đặt service vào network riêng, chỉ expose cổng public thật sự cần thiết.</p>
-            <h3>Volume</h3>
-            <p>Dữ liệu trạng thái (database, uploads, logs) phải nằm ngoài container để tránh mất dữ liệu khi recreate.
-            </p>
-        </section>
-
-        <section>
-            <h2>4. Docker Compose cho môi trường nhiều dịch vụ</h2>
-            <p>Compose giúp khai báo stack theo mã, chạy đồng thời API, database, cache, queue với một lệnh duy nhất.
-            </p>
-            <div class="code">services:
-                api:
-                build: .
-                ports:
-                - "3000:3000"
-                env_file:
-                - .env
-                depends_on:
-                - db
-                db:
-                image: postgres:16-alpine
-                volumes:
-                - pgdata:/var/lib/postgresql/data
-                volumes:
-                pgdata:</div>
-            <div class="note"><strong>Lưu ý:</strong> `depends_on` chỉ đảm bảo thứ tự khởi chạy, không đảm bảo dịch vụ
-                đã sẵn sàng. Hãy bổ sung healthcheck hoặc retry logic ở ứng dụng.</div>
-        </section>
-
-        <section>
-            <h2>5. Bảng lỗi phổ biến và cách xử lý</h2>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Triệu chứng</th>
-                            <th>Nguyên nhân thường gặp</th>
-                            <th>Cách xử lý</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Container restart liên tục</td>
-                            <td>CMD sai, thiếu env, app crash khi boot</td>
-                            <td>Kiểm tra logs, chạy lại bằng shell, thêm healthcheck.</td>
-                        </tr>
-                        <tr>
-                            <td>Kết nối DB thất bại</td>
-                            <td>Network sai, DB chưa sẵn sàng, sai host</td>
-                            <td>Dùng tên service Compose làm host, thêm retry khi startup.</td>
-                        </tr>
-                        <tr>
-                            <td>Image build quá chậm</td>
-                            <td>Dockerfile không tối ưu cache layer</td>
-                            <td>Copy lockfile trước, dùng multi-stage build.</td>
-                        </tr>
-                        <tr>
-                            <td>Deploy xong mất dữ liệu</td>
-                            <td>Không mount volume persistent</td>
-                            <td>Tách state ra volume hoặc managed storage.</td>
-                        </tr>
-                    </tbody>
-                </table>
+    <main class="docker-sim-root">
+        <div class="docker-sim-shell" id="docker-sim-shell">
+            <div class="docker-sim-mobile-topbar">
+                <div class="docker-sim-mobile-brand">
+                    <span class="docker-sim-mobile-logo">DK</span>
+                    <span>docker.desktop</span>
+                </div>
+                <button class="docker-sim-mobile-toggle" id="docker-mobile-toggle" type="button" aria-label="Mở menu"
+                    aria-expanded="false">
+                    <span id="docker-mobile-toggle-icon">☰</span>
+                </button>
             </div>
-        </section>
 
-        <section>
-            <h2>6. Checklist production</h2>
-            <ol>
-                <li>Pin version image và dependency, tránh latest.</li>
-                <li>Bật healthcheck, log tập trung và alert cơ bản.</li>
-                <li>Không hard-code secret trong image.</li>
-                <li>Bổ sung resource limits (CPU/RAM) cho từng service.</li>
-                <li>Tự động scan lỗ hổng image trước khi phát hành.</li>
-            </ol>
-        </section>
+            <div class="docker-sim-backdrop" id="docker-backdrop"></div>
 
-        <section>
-            <h2>7. FAQ nhanh</h2>
-            <h3>Khi nào dùng Docker, khi nào dùng VM?</h3>
-            <p>Docker phù hợp ứng dụng cloud-native và microservices; VM phù hợp workload cần kernel riêng hoặc cô lập
-                mức hệ điều hành.</p>
-            <h3>Docker có thay thế hoàn toàn Kubernetes không?</h3>
-            <p>Không. Docker là nền tảng build/run container, Kubernetes là hệ điều phối container ở quy mô lớn.</p>
-            <h3>Compose có dùng được cho production không?</h3>
-            <p>Có thể ở quy mô nhỏ, nhưng hệ lớn nên dùng orchestrator chuyên dụng như Kubernetes hoặc Nomad.</p>
-        </section>
+            <section class="docker-sim-sidebar" id="docker-sidebar" role="complementary">
+                <div class="docker-sim-brand">
+                    <span class="docker-sim-brand-logo">DK</span>
+                    <span>docker.desktop</span>
+                </div>
+                <div class="docker-sim-nav" id="docker-sidebar-nav"></div>
+            </section>
+
+            <section class="docker-sim-main">
+                <div class="docker-sim-main-inner">
+                    <div class="docker-sim-main-head">
+                        <div class="docker-sim-main-icon" id="docker-main-icon">OV</div>
+                        <div>
+                            <h1 id="docker-main-title">Docker Hoạt Động Như Thế Nào?</h1>
+                            <span class="docker-sim-badge" id="docker-main-badge" style="display:none"></span>
+                        </div>
+                    </div>
+
+                    <div class="docker-sim-panels">
+                        <article class="docker-sim-panel intuitive" id="docker-intuitive-panel">
+                            <h2 id="docker-cach-hieu-truc-quan">
+                                <span class="docker-sim-panel-note">i</span>
+                                Cách hiểu trực quan
+                            </h2>
+                            <div class="docker-sim-body" id="docker-intuitive-content"></div>
+                        </article>
+
+                        <article class="docker-sim-panel technical" id="docker-technical-panel">
+                            <h2 id="docker-ban-chat-ky-thuat">
+                                <span class="docker-sim-panel-note">LT</span>
+                                Bản chất kỹ thuật và kiến thức chuyên môn
+                            </h2>
+                            <div class="docker-sim-body" id="docker-technical-content"></div>
+                        </article>
+                    </div>
+
+                    <div class="docker-sim-footer">
+                        Mô phỏng này giữ cùng tinh thần giao diện Docker Desktop: điều hướng tính năng theo sidebar,
+                        hiển thị nội dung theo tab và tối ưu responsive cho desktop/mobile.
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
+
+    <script>
+        const DOCKER_KNOWLEDGE = {
+            overview: {
+                id: "overview",
+                icon: "i",
+                title: "Docker Hoạt Động Như Thế Nào?",
+                badge: null,
+                intuitive: `
+Hãy tưởng tượng bạn là một đầu bếp muốn gửi công thức và nguyên liệu nấu một món ăn phức tạp cho người bạn ở nước ngoài.
+Thay vì chỉ gửi giấy hướng dẫn (code) và hy vọng họ có đủ đúng loại nồi, đúng loại gia vị ở nhiệt độ phòng chuẩn xác, bạn quyết định đóng gói toàn bộ: cái bếp, xoong nồi, nguyên liệu đã sơ chế, và tờ giấy hướng dẫn vào một thùng hàng container chuyên dụng.
+Khi người bạn nhận được, họ chỉ cần mở nắp và bật công tắc là món ăn được nấu y hệt như tại bếp của bạn. Đó chính là triết lý của Docker: Đóng gói một lần, chạy mọi nơi. Nó giải quyết triệt để vấn đề muôn thuở của lập trình viên: Code chạy ngon trên máy tôi, nhưng sang máy chủ lại lỗi.
+`,
+                technical: `
+Về mặt hệ thống, Docker là một nền tảng ảo hóa cấp hệ điều hành (OS-level virtualization). Khác với Máy ảo (Virtual Machines - VM) phải giả lập toàn bộ phần cứng và chạy một Hệ điều hành khách (Guest OS) cồng kềnh, Docker chia sẻ trực tiếp nhân (Kernel) của Hệ điều hành chủ (Host OS).
+Docker hoạt động dựa trên hai công nghệ cốt lõi của Linux Kernel:
+1. Namespaces: Tạo ra sự cô lập (isolation). Nó đảm bảo một Container có không gian mạng (Network), quy trình (PID), và hệ thống tệp (Mount) riêng biệt, không nhìn thấy hoặc can thiệp vào các Container khác.
+2. Control Groups (cgroups): Quản lý và giới hạn tài nguyên. Nó quy định Container này được phép dùng tối đa bao nhiêu % CPU, bao nhiêu MB RAM, tránh việc một ứng dụng ngốn hết tài nguyên hệ thống.
+Kiến trúc Docker bao gồm Docker Client (nơi bạn gõ lệnh), Docker Daemon (tiến trình nền chạy trên máy chủ để xây dựng, chạy và phân phối container) và Docker Registry (kho lưu trữ).
+`
+            },
+            askGordon: {
+                id: "askGordon",
+                icon: "AI",
+                title: "Ask Gordon",
+                badge: "BETA",
+                intuitive: `
+Gordon là chú rùa biểu tượng của Docker. Ask Gordon đóng vai trò như một người đồng nghiệp chuyên gia ngồi ngay cạnh bạn.
+Khi bạn gặp một lỗi khó hiểu, hoặc không biết cách cấu hình môi trường cho một dự án mới, thay vì phải lên mạng tìm kiếm hàng giờ, bạn có thể hỏi trực tiếp người đồng nghiệp này.
+`,
+                technical: `
+Đây là một trợ lý AI (AI-powered assistant) được tích hợp trực tiếp vào Docker Desktop. Nó được huấn luyện trên các tài liệu chính thức, best practices và các trường hợp lỗi phổ biến của Docker. Chức năng chính bao gồm:
+- Phân tích và giải thích các log lỗi (error logs) từ các container đang chạy.
+- Gợi ý cách viết và tối ưu hóa file cấu hình (Dockerfile, docker-compose.yml) nhằm giảm kích thước Image và tăng bảo mật.
+- Cung cấp ngữ cảnh (context-aware) dựa trên môi trường hiện tại của người dùng.
+`
+            },
+            containers: {
+                id: "containers",
+                icon: "CT",
+                title: "Containers",
+                badge: null,
+                intuitive: `
+Nếu bản thiết kế nhà là Image, thì Container chính là ngôi nhà đã được xây lên bằng gạch vữa, có người ở và đang hoạt động.
+Một bản thiết kế có thể dùng để xây hàng trăm ngôi nhà giống hệt nhau. Bạn có thể bật (start), tắt (stop), hoặc phá bỏ (rm) ngôi nhà này mà không làm ảnh hưởng đến bản thiết kế gốc.
+`,
+                technical: `
+Container là một thực thể đang chạy (runtime instance) của một Docker Image. Nó là một quy trình (process) chạy trên máy tính của bạn nhưng được bao bọc bởi các lớp cách ly (Namespaces và cgroups).
+Đặc tính quan trọng của Container là Ephemeral (Phù du) và Stateless (Phi trạng thái). Nghĩa là thiết kế mặc định của nó là có thể bị tiêu hủy và tạo lại bất cứ lúc nào mà không làm ảnh hưởng đến kiến trúc tổng thể.
+Mọi dữ liệu ghi đè vào hệ thống tệp của Container trong quá trình chạy sẽ bị mất khi Container bị xóa (trừ khi dùng Volumes).
+`
+            },
+            images: {
+                id: "images",
+                icon: "IM",
+                title: "Images",
+                badge: null,
+                intuitive: `
+Hãy coi Image như một chiếc đĩa CD chứa bộ cài đặt game hoặc một khuôn đúc bánh. Nó chứa mọi thứ cần thiết để tạo ra sản phẩm cuối cùng nhưng bản thân nó không chạy.
+Bạn không thể thay đổi nội dung của chiếc đĩa CD này một khi nó đã được đúc. Nếu muốn thay đổi, bạn phải đúc một chiếc đĩa mới.
+`,
+                technical: `
+Docker Image là một bản mẫu chỉ đọc (read-only template). Nó được xây dựng dựa trên kiến trúc phân lớp (Layered File System - thường dùng OverlayFS).
+Mỗi lệnh trong một Dockerfile (ví dụ: RUN apt-get install...) tạo ra một lớp mới (layer) xếp chồng lên lớp cũ.
+Điều này mang lại lợi ích về caching: nếu bạn chia sẻ chung một Base Image (như ubuntu:latest) cho nhiều ứng dụng, Docker chỉ lưu Base Image đó một lần trên ổ cứng, giúp tối ưu không gian lưu trữ và thời gian tải mạng.
+`
+            },
+            volumes: {
+                id: "volumes",
+                icon: "VL",
+                title: "Volumes",
+                badge: null,
+                intuitive: `
+Vì Container có tính chất phù du (bị xóa là mất hết dữ liệu bên trong), Volumes giống như một chiếc ổ cứng di động được cắm vào Container.
+Khi Container bị phá hủy, chiếc ổ này vẫn còn nguyên vẹn. Khi bạn tạo Container mới, bạn lại cắm ổ vào và dữ liệu vẫn tiếp tục sử dụng bình thường.
+`,
+                technical: `
+Volumes là cơ chế được khuyên dùng nhất (best practice) để duy trì dữ liệu bền vững (persistent storage) trong Docker.
+Khác với Bind Mounts (gắn trực tiếp một thư mục cụ thể trên hệ điều hành máy chủ), Volumes hoàn toàn do Docker quản lý (thường lưu ở /var/lib/docker/volumes/ trên Linux). Điều này mang lại các lợi ích:
+- Độc lập với cấu trúc thư mục của máy chủ (Host OS).
+- An toàn hơn, dễ dàng sao lưu (backup) hoặc di chuyển (migrate).
+- Hiệu suất I/O tốt hơn trên môi trường macOS hoặc Windows do được quản lý trực tiếp bởi Docker VM.
+`
+            },
+            kubernetes: {
+                id: "kubernetes",
+                icon: "K8",
+                title: "Kubernetes",
+                badge: null,
+                intuitive: `
+Nếu Docker là một chiếc xe tải chở hàng, thì Kubernetes là người kỹ sư điều hành cả một bến cảng khổng lồ.
+Khi bạn có một hệ thống lớn với hàng nghìn container cần hoạt động cùng lúc, tự động tăng số lượng khi có đông khách truy cập và tự động khởi động lại khi bị sập, bạn cần một hệ thống quản lý ở quy mô công nghiệp.
+`,
+                technical: `
+Kubernetes (K8s) là một nền tảng điều phối Container (Container Orchestration Platform) mã nguồn mở do Google thiết kế.
+Mục Kubernetes trong Docker Desktop tích hợp sẵn một cụm Kubernetes cục bộ (single-node cluster). Nó cung cấp các tính năng cao cấp như:
+- Auto-scaling: Tự động mở rộng số lượng bản sao (Replicas) của ứng dụng dựa trên tải CPU/RAM.
+- Self-healing: Tự động phát hiện và khởi động lại các Container bị lỗi (liveness/readiness probes).
+- Load Balancing và Service Discovery: Phân phối lưu lượng mạng nội bộ và cấp phát tên miền DNS động cho các microservices.
+`
+            },
+            builds: {
+                id: "builds",
+                icon: "BL",
+                title: "Builds",
+                badge: null,
+                intuitive: `
+Đây là nhà máy sản xuất của Docker. Nơi bạn theo dõi quá trình chuyển đổi từ những dòng lệnh hướng dẫn thô sơ (Dockerfile) thành một chiếc khuôn đúc hoàn chỉnh (Image).
+Bạn có thể xem máy móc đang chạy tới bước nào, mất bao lâu, và có lỗi gì ở khâu đóng gói hay không.
+`,
+                technical: `
+Giao diện này quản lý Docker Buildx, công cụ xây dựng thế hệ mới (Next-generation builder) dựa trên BuildKit. Nó cung cấp các tính năng phức tạp hơn lệnh docker build truyền thống:
+- Caching nâng cao: Quản lý bộ nhớ đệm để các lần build sau nhanh hơn.
+- Multi-platform builds: Biên dịch Image cho các kiến trúc CPU khác nhau (ví dụ: build cho cả chip Intel x86_64 và chip Apple Silicon ARM64 trên cùng một máy).
+- Phân tích chi tiết (Tracing) về thời gian tiêu tốn cho từng Layer trong quá trình build.
+`
+            },
+            dockerHub: {
+                id: "dockerHub",
+                icon: "HB",
+                title: "Docker Hub",
+                badge: null,
+                intuitive: `
+Đây là App Store của thế giới Docker. Thay vì bạn phải tự cài đặt một máy chủ cơ sở dữ liệu từ đầu, bạn chỉ cần lên đây tìm MySQL hoặc Postgres và tải bản chính thức về bằng một cú click.
+Bạn cũng có thể đẩy (push) phần mềm của mình lên đây để đồng nghiệp ở nửa vòng Trái Đất có thể kéo (pull) về dùng.
+`,
+                technical: `
+Docker Hub là một Container Registry được quản lý bởi Docker Inc. Nó là kho lưu trữ đám mây mặc định. Các thuật ngữ liên quan:
+- Repositories: Nơi chứa tập hợp các Images liên quan (thường phân biệt bằng thẻ - Tags như node:18, node:20).
+- Official Images: Các Images được Docker xác thực và duy trì, đảm bảo an toàn và chuẩn mực.
+- Rate Limiting: Cơ chế giới hạn số lượng lượt tải về (Pull) đối với người dùng miễn phí để tối ưu băng thông máy chủ.
+`
+            },
+            dockerScout: {
+                id: "dockerScout",
+                icon: "SC",
+                title: "Docker Scout",
+                badge: null,
+                intuitive: `
+Giống như một cổng quét an ninh tại sân bay. Trước khi Container của bạn được phép đưa lên hệ thống chính thức, Scout sẽ quét toàn bộ hành lý (các thư viện mã nguồn, công cụ được gói bên trong) để tìm xem có chứa lỗ hổng bảo mật nào đã được thế giới biết đến hay không.
+Nó sẽ chỉ ra lỗ hổng nằm ở đâu và gợi ý cách khắc phục.
+`,
+                technical: `
+Docker Scout là một công cụ Quản lý Cung ứng Phần mềm (Software Supply Chain Security).
+Nó phân tích thành phần của Image để tạo ra một SBOM (Software Bill of Materials - Bảng kê vật liệu phần mềm).
+Sau đó, nó đối chiếu SBOM này với các cơ sở dữ liệu lỗ hổng bảo mật toàn cầu (như danh sách CVE - Common Vulnerabilities and Exposures). Điểm mạnh của Scout là cung cấp khả năng quan sát và đề xuất khắc phục theo thời gian thực.
+`
+            },
+            models: {
+                id: "models",
+                icon: "ML",
+                title: "Models",
+                badge: null,
+                intuitive: `
+Dành riêng cho kỷ nguyên Trí tuệ nhân tạo (AI). Nếu bạn muốn chạy một mô hình ngôn ngữ lớn offline trên máy của mình, phần này giúp bạn quản lý những bộ não AI nặng hàng Gigabyte một cách gọn gàng.
+`,
+                technical: `
+Tính năng hỗ trợ xu hướng GenAI workloads. Việc chạy các mô hình Machine Learning (như LLMs: Llama, Mistral) yêu cầu quản lý các tệp weights và tensors có kích thước rất lớn.
+Tab Models tích hợp môi trường (thường kết hợp với công cụ như Ollama) để tải, phiên bản hóa (versioning), và triển khai các mô hình này dưới dạng Container có khả năng truy cập phần cứng GPU để tăng tốc tính toán.
+`
+            },
+            mcpToolkit: {
+                id: "mcpToolkit",
+                icon: "MP",
+                title: "MCP Toolkit",
+                badge: "BETA",
+                intuitive: `
+Đây là một tính năng cầu nối cấp cao. Hãy tưởng tượng bạn có một trợ lý AI thông minh và bạn muốn nó không chỉ nói chuyện mà còn trực tiếp thao tác vào các tệp tin trong Docker của bạn.
+MCP cung cấp một bộ đàm mã hóa an toàn để AI và hệ thống của bạn giao tiếp với nhau mà không sợ AI vượt rào phá hỏng dữ liệu.
+`,
+                technical: `
+MCP (Model Context Protocol) là một giao thức chuẩn hóa mã nguồn mở giúp kết nối các Mô hình AI với các Nguồn dữ liệu và Công cụ.
+MCP Toolkit trong Docker Desktop cho phép AI Agents (ví dụ tích hợp trong IDE) có thể giao tiếp an toàn với Docker Daemon nội bộ. Nó biến Docker thành một môi trường thực thi tác vụ tự động (Agentic Runtime).
+Thông qua MCP, một AI có thể đọc file cấu hình, tạo container thử nghiệm, phân tích lỗi và dọn dẹp tài nguyên trong phạm vi được kiểm soát.
+`
+            },
+            extensions: {
+                id: "extensions",
+                icon: "EX",
+                title: "Extensions",
+                badge: null,
+                intuitive: `
+Đây là các plugin gắn thêm cho Docker Desktop, tương tự Extensions trên trình duyệt.
+Nếu tính năng mặc định của Docker chưa đủ, bạn có thể cài thêm các công cụ của bên thứ ba như quản lý cơ sở dữ liệu, phân tích dung lượng ổ cứng hoặc giao diện mạng ngay trong ứng dụng.
+`,
+                technical: `
+Docker Extensions API cho phép các đối tác bên thứ ba xây dựng công cụ tích hợp trực tiếp vào GUI của Docker Desktop.
+Các phần mở rộng này bản chất cũng chạy dưới dạng Docker Container ngầm, được cấp quyền truy cập qua Socket để giao tiếp với Docker Daemon và được nhúng giao diện người dùng vào khung ứng dụng Desktop.
+Điều này mở rộng hệ sinh thái, giúp Dev/Ops thao tác với Snyk, Portainer hoặc JFrog ngay tại một nơi duy nhất.
+`
+            }
+        };
+
+        const SIDEBAR_ITEMS = [
+            { id: "overview", key: "overview" },
+            { id: "askGordon", key: "askGordon" },
+            { id: "containers", key: "containers" },
+            { id: "images", key: "images" },
+            { id: "volumes", key: "volumes" },
+            { id: "kubernetes", key: "kubernetes" },
+            { id: "builds", key: "builds" },
+            { id: "dockerHub", key: "dockerHub" },
+            { id: "dockerScout", key: "dockerScout" },
+            { id: "models", key: "models" },
+            { id: "mcpToolkit", key: "mcpToolkit" },
+            { id: "extensions", key: "extensions" }
+        ];
+
+        const state = {
+            activeTab: "overview",
+            isMobileMenuOpen: false
+        };
+
+        const elements = {
+            nav: document.getElementById("docker-sidebar-nav"),
+            sidebar: document.getElementById("docker-sidebar"),
+            backdrop: document.getElementById("docker-backdrop"),
+            mobileToggle: document.getElementById("docker-mobile-toggle"),
+            mobileToggleIcon: document.getElementById("docker-mobile-toggle-icon"),
+            mainTitle: document.getElementById("docker-main-title"),
+            mainIcon: document.getElementById("docker-main-icon"),
+            mainBadge: document.getElementById("docker-main-badge"),
+            intuitiveContent: document.getElementById("docker-intuitive-content"),
+            technicalContent: document.getElementById("docker-technical-content")
+        };
+
+        function escapeHtml(input) {
+            return String(input)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function toParagraphs(rawText) {
+            return rawText
+                .split("\n")
+                .map((line) => line.trim())
+                .filter((line) => line.length > 0);
+        }
+
+        function renderParagraphGroup(paragraphs, technicalMode) {
+            return paragraphs
+                .map((line) => {
+                    const isBullet = line.startsWith("-") || /^\d+\./.test(line);
+                    const classes = isBullet && technicalMode
+                        ? "docker-sim-paragraph docker-sim-bullet"
+                        : "docker-sim-paragraph";
+
+                    return `<p class="${classes}">${escapeHtml(line)}</p>`;
+                })
+                .join("");
+        }
+
+        function setMobileMenu(isOpen) {
+            state.isMobileMenuOpen = isOpen;
+            elements.sidebar.classList.toggle("open", isOpen);
+            elements.backdrop.classList.toggle("open", isOpen);
+            elements.mobileToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+            elements.mobileToggleIcon.textContent = isOpen ? "✕" : "☰";
+        }
+
+        function renderSidebar() {
+            elements.nav.innerHTML = SIDEBAR_ITEMS.map((item) => {
+                const data = DOCKER_KNOWLEDGE[item.key];
+                const isActive = state.activeTab === item.key;
+
+                return `
+                    <button type="button" class="docker-sim-nav-btn ${isActive ? "active" : ""}" data-key="${escapeHtml(item.key)}">
+                        <span class="docker-sim-nav-left">
+                            <span class="docker-sim-icon-chip">${escapeHtml(data.icon)}</span>
+                            <span class="docker-sim-nav-title">${escapeHtml(data.title)}</span>
+                        </span>
+                        ${data.badge ? `<span class="docker-sim-badge">${escapeHtml(data.badge)}</span>` : ""}
+                    </button>
+                `;
+            }).join("");
+
+            elements.nav.querySelectorAll("[data-key]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    state.activeTab = btn.getAttribute("data-key") || "overview";
+                    render();
+                    if (window.matchMedia("(max-width: 980px)").matches) {
+                        setMobileMenu(false);
+                    }
+                });
+            });
+        }
+
+        function renderMainContent() {
+            const activeContent = DOCKER_KNOWLEDGE[state.activeTab] || DOCKER_KNOWLEDGE.overview;
+
+            elements.mainTitle.textContent = activeContent.title;
+            elements.mainIcon.textContent = activeContent.icon;
+
+            if (activeContent.badge) {
+                elements.mainBadge.style.display = "inline-flex";
+                elements.mainBadge.textContent = activeContent.badge;
+            } else {
+                elements.mainBadge.style.display = "none";
+                elements.mainBadge.textContent = "";
+            }
+
+            elements.intuitiveContent.innerHTML = renderParagraphGroup(
+                toParagraphs(activeContent.intuitive),
+                false
+            );
+
+            elements.technicalContent.innerHTML = renderParagraphGroup(
+                toParagraphs(activeContent.technical),
+                true
+            );
+        }
+
+        function render() {
+            renderSidebar();
+            renderMainContent();
+        }
+
+        elements.mobileToggle.addEventListener("click", () => {
+            setMobileMenu(!state.isMobileMenuOpen);
+        });
+
+        elements.backdrop.addEventListener("click", () => {
+            setMobileMenu(false);
+        });
+
+        window.addEventListener("resize", () => {
+            if (!window.matchMedia("(max-width: 980px)").matches && state.isMobileMenuOpen) {
+                setMobileMenu(false);
+            }
+        });
+
+        render();
+    </script>
 </body>
 
 </html>

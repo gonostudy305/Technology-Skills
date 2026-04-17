@@ -4,350 +4,904 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DL Playbook: Từ Trực Giác Đến Kỹ Thuật Deep Learning</title>
+    <title>Deep Learning Map: Dashboard Kiến Trúc Chuyên Sâu</title>
     <meta name="description"
-        content="DL Playbook tổng hợp trực giác, công thức cốt lõi, failure modes và cách chọn kiến trúc MLP, CNN, RNN, LSTM, GRU, Transformer theo bài toán thực tế.">
+        content="Deep Learning Map trình bày trực quan và chuyên sâu các họ kiến trúc MLP, CNN, RNN, Transformer, Generative và Reinforcement Learning.">
     <meta name="category" content="Ứng dụng">
     <meta name="author" content="Minh Tuấn">
     <style>
-        .dl-playbook {
+        .dl-root {
+            --bg-main: #020617;
+            --bg-panel: #0f172a;
+            --bg-soft: #111827;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --line: #1f2937;
+            --primary: #3b82f6;
+            --primary-soft: rgba(59, 130, 246, 0.16);
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #f43f5e;
             font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-            color: #1f2937;
-            line-height: 1.75;
-            max-width: 100%;
+            color: var(--text-main);
+            width: 100%;
         }
 
-        .dl-playbook .hero {
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            padding: 20px;
-            background: linear-gradient(145deg, #eff6ff, #ffffff);
-            margin-bottom: 20px;
+        .dl-shell {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+            background: radial-gradient(circle at top right, #172554 0%, #0b1120 45%, #020617 100%);
+            min-height: 70vh;
+            box-shadow: 0 18px 38px rgba(2, 6, 23, 0.45);
         }
 
-        .dl-playbook .hero p {
+        .dl-sidebar {
+            border-right: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(7, 13, 28, 0.96));
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .dl-brand {
+            padding: 20px 18px 14px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .dl-brand h2 {
             margin: 0;
+            font-size: 1.15rem;
+            letter-spacing: 0.01em;
+            color: #bfdbfe;
+            font-weight: 700;
         }
 
-        .dl-playbook .chips {
+        .dl-brand p {
+            margin: 6px 0 0;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .dl-category-list {
+            padding: 10px;
+            display: grid;
+            gap: 6px;
+            overflow-y: auto;
+            max-height: 58vh;
+        }
+
+        .dl-category-btn {
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-muted);
+            text-align: left;
+            border-radius: 10px;
+            padding: 9px 10px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dl-category-btn:hover {
+            color: #dbeafe;
+            background: rgba(30, 41, 59, 0.55);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        .dl-category-btn.active {
+            color: #bfdbfe;
+            background: var(--primary-soft);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        .dl-sidebar-actions {
+            margin-top: auto;
+            border-top: 1px solid var(--line);
+            padding: 12px;
+        }
+
+        .dl-compare-toggle {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dl-compare-toggle:hover {
+            border-color: rgba(59, 130, 246, 0.55);
+            color: #dbeafe;
+            background: rgba(30, 41, 59, 0.48);
+        }
+
+        .dl-compare-toggle.active {
+            color: #a7f3d0;
+            border-color: rgba(16, 185, 129, 0.55);
+            background: rgba(16, 185, 129, 0.16);
+        }
+
+        .dl-main {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            max-height: 100%;
+        }
+
+        .dl-toolbar {
+            border-bottom: 1px solid var(--line);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            background: rgba(2, 6, 23, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        .dl-toolbar h1 {
+            margin: 0;
+            font-size: 1.06rem;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .dl-search-wrap {
+            position: relative;
+            min-width: min(100%, 340px);
+            flex: 1;
+            max-width: 340px;
+        }
+
+        .dl-search-input {
+            width: 100%;
+            border: 1px solid #334155;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.92);
+            color: #e2e8f0;
+            outline: none;
+            padding: 10px 14px;
+            font-size: 0.86rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .dl-search-input:focus {
+            border-color: rgba(59, 130, 246, 0.85);
+        }
+
+        .dl-content {
+            padding: 20px;
+            overflow-y: auto;
+            min-height: 0;
+            display: grid;
+            gap: 18px;
+        }
+
+        .dl-hero {
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 14px;
+            padding: 16px;
+            background: linear-gradient(160deg, rgba(30, 64, 175, 0.22), rgba(2, 6, 23, 0.7));
+        }
+
+        .dl-hero h2 {
+            margin: 0;
+            font-size: 1.22rem;
+            color: #dbeafe;
+        }
+
+        .dl-hero p {
+            margin: 10px 0 0;
+            font-size: 0.92rem;
+            color: #cbd5e1;
+            line-height: 1.75;
+        }
+
+        .dl-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+
+        .dl-card {
+            border: 1px solid #253047;
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.82);
+            transition: all 0.2s ease;
+        }
+
+        .dl-card:hover {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 10px 22px rgba(2, 6, 23, 0.42);
+            transform: translateY(-1px);
+        }
+
+        .dl-card h3 {
+            margin: 0;
+            font-size: 0.98rem;
+            color: #e2e8f0;
+            line-height: 1.45;
+        }
+
+        .dl-card .meta {
+            margin-top: 6px;
+            font-size: 0.73rem;
+            color: #60a5fa;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .dl-card p {
+            margin: 8px 0 0;
+            color: #94a3b8;
+            font-size: 0.82rem;
+            line-height: 1.65;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .dl-card button {
+            margin-top: 10px;
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            background: rgba(16, 185, 129, 0.12);
+            color: #a7f3d0;
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .dl-summary-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+
+        .dl-summary-card {
+            border: 1px solid #253047;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 13px;
+        }
+
+        .dl-summary-card h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #e2e8f0;
+        }
+
+        .dl-summary-card .count {
+            margin-top: 5px;
+            display: inline-flex;
+            border-radius: 999px;
+            border: 1px solid #334155;
+            background: rgba(30, 41, 59, 0.72);
+            color: #cbd5e1;
+            padding: 2px 9px;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .dl-summary-card p {
+            margin: 8px 0 0;
+            color: #94a3b8;
+            font-size: 0.82rem;
+            line-height: 1.65;
+        }
+
+        .dl-detail {
+            border: 1px solid rgba(148, 163, 184, 0.32);
+            border-radius: 14px;
+            padding: 14px;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.95));
+            display: grid;
+            gap: 10px;
+        }
+
+        .dl-detail h2 {
+            margin: 0;
+            font-size: 1.12rem;
+            color: #93c5fd;
+        }
+
+        .dl-detail .category {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #60a5fa;
+        }
+
+        .dl-detail .block {
+            border: 1px solid #253047;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.75);
+            padding: 11px;
+        }
+
+        .dl-detail .block h3 {
+            margin: 0;
+            font-size: 0.86rem;
+            color: #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dl-detail .block p {
+            margin: 7px 0 0;
+            font-size: 0.84rem;
+            color: #cbd5e1;
+            line-height: 1.7;
+        }
+
+        .dl-compare-wrap {
+            display: grid;
+            gap: 12px;
+        }
+
+        .dl-compare-help {
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.72);
+            padding: 10px 12px;
+            color: #cbd5e1;
+            font-size: 0.84rem;
+        }
+
+        .dl-compare-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dl-compare-slot {
+            border: 1px dashed #334155;
+            border-radius: 12px;
+            padding: 12px;
+            background: rgba(2, 6, 23, 0.5);
+            min-height: 190px;
+        }
+
+        .dl-compare-slot.filled {
+            border-style: solid;
+            border-color: rgba(59, 130, 246, 0.45);
+            background: rgba(15, 23, 42, 0.82);
+        }
+
+        .dl-compare-slot h3 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #bfdbfe;
+        }
+
+        .dl-compare-slot p {
+            margin: 7px 0 0;
+            font-size: 0.82rem;
+            color: #94a3b8;
+            line-height: 1.65;
+        }
+
+        .dl-pool {
+            border-top: 1px solid #1f2937;
+            padding-top: 12px;
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            margin-top: 14px;
         }
 
-        .dl-playbook .chip {
-            display: inline-flex;
-            align-items: center;
-            border: 1px solid #d1d5db;
+        .dl-pool button {
             border-radius: 999px;
-            padding: 3px 10px;
-            font-size: 12px;
-            color: #374151;
-            background: #ffffff;
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.82);
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            padding: 6px 10px;
+            cursor: pointer;
         }
 
-        .dl-playbook section {
-            margin-top: 22px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 18px;
-            background: #ffffff;
+        .dl-pool button.active {
+            border-color: rgba(59, 130, 246, 0.65);
+            color: #93c5fd;
+            background: rgba(59, 130, 246, 0.18);
+            cursor: not-allowed;
         }
 
-        .dl-playbook h2 {
-            font-size: 1.35rem;
-            line-height: 1.35;
-            margin: 0 0 10px;
-            color: #111827;
+        .dl-fine {
+            margin-top: 2px;
+            font-size: 0.75rem;
+            color: #64748b;
         }
 
-        .dl-playbook h3 {
-            font-size: 1rem;
-            margin: 14px 0 6px;
-            color: #111827;
+        @media (max-width: 1024px) {
+            .dl-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .dl-sidebar {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .dl-category-list {
+                max-height: none;
+                grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+            }
         }
 
-        .dl-playbook p {
-            margin: 0;
-        }
-
-        .dl-playbook p+p,
-        .dl-playbook p+ul,
-        .dl-playbook ul+p,
-        .dl-playbook ul+ul {
-            margin-top: 8px;
-        }
-
-        .dl-playbook ul {
-            padding-left: 20px;
-            margin: 0;
-        }
-
-        .dl-playbook li+li {
-            margin-top: 6px;
-        }
-
-        .dl-playbook .formula {
-            border-left: 4px solid #3b82f6;
-            background: #eff6ff;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            margin-top: 10px;
-        }
-
-        .dl-playbook .table-wrap {
-            overflow-x: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .dl-playbook table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 680px;
-        }
-
-        .dl-playbook th,
-        .dl-playbook td {
-            border-bottom: 1px solid #e5e7eb;
-            padding: 10px;
-            text-align: left;
-            vertical-align: top;
-            font-size: 0.92rem;
-        }
-
-        .dl-playbook th {
-            background: #f9fafb;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .dl-playbook .note {
-            margin-top: 10px;
-            border-left: 4px solid #f59e0b;
-            background: #fffbeb;
-            color: #78350f;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.93rem;
-        }
-
-        @media (max-width: 640px) {
-
-            .dl-playbook .hero,
-            .dl-playbook section {
+        @media (max-width: 760px) {
+            .dl-content {
                 padding: 14px;
             }
 
-            .dl-playbook h2 {
-                font-size: 1.2rem;
+            .dl-toolbar {
+                padding: 12px 14px;
+            }
+
+            .dl-toolbar h1 {
+                font-size: 0.96rem;
+            }
+
+            .dl-search-wrap {
+                max-width: 100%;
+            }
+
+            .dl-compare-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 
 <body>
-    <main class="dl-playbook">
-        <div class="hero">
-            <p><strong>TL;DR:</strong> Deep Learning không phải là một mô hình duy nhất mà là họ kiến trúc với thế mạnh
-                khác nhau. MLP phù hợp dữ liệu bảng, CNN xử lý không gian ảnh, RNN/LSTM/GRU cho chuỗi thời gian và
-                Transformer cho ngữ cảnh dài. Chọn sai kiến trúc thường làm mô hình chậm, tốn tài nguyên và khó tổng
-                quát hóa.</p>
-            <div class="chips">
-                <span class="chip">MLP</span>
-                <span class="chip">CNN</span>
-                <span class="chip">RNN</span>
-                <span class="chip">LSTM</span>
-                <span class="chip">GRU</span>
-                <span class="chip">Transformer</span>
-            </div>
+    <main class="dl-root">
+        <div class="dl-shell">
+            <section class="dl-sidebar" role="complementary">
+                <div class="dl-brand">
+                    <h2>Deep Learning Map</h2>
+                    <p>Hệ thống phân tích kiến trúc</p>
+                </div>
+
+                <div id="dl-category-list" class="dl-category-list"></div>
+
+                <div class="dl-sidebar-actions">
+                    <button id="dl-compare-toggle" type="button" class="dl-compare-toggle">Chế độ So sánh</button>
+                </div>
+            </section>
+
+            <section class="dl-main">
+                <div class="dl-toolbar">
+                    <h1 id="dl-page-title">Tổng quan (Dashboard)</h1>
+                    <div class="dl-search-wrap">
+                        <input id="dl-search" class="dl-search-input" type="text"
+                            placeholder="Tìm kiến trúc hoặc từ khóa..." autocomplete="off">
+                    </div>
+                </div>
+
+                <div id="dl-content" class="dl-content"></div>
+            </section>
         </div>
-
-        <section>
-            <h2>1. MLP (Multi-Layer Perceptron)</h2>
-            <p>MLP là mạng truyền thẳng cơ bản, dữ liệu đi từ đầu vào qua các tầng ẩn rồi ra đầu ra mà không có vòng lặp
-                theo thời gian.</p>
-            <h3>Khi nào nên dùng</h3>
-            <ul>
-                <li>Dữ liệu dạng bảng (tabular) với số chiều vừa phải.</li>
-                <li>Bài toán phân loại, hồi quy truyền thống.</li>
-            </ul>
-            <h3>Failure mode thường gặp</h3>
-            <ul>
-                <li>Overfitting khi số tham số lớn hơn dữ liệu hiệu dụng.</li>
-                <li>Dead ReLU ở các lớp sâu nếu khởi tạo và learning rate không phù hợp.</li>
-            </ul>
-            <div class="formula">Forward pass:
-                z^(l) = W^(l) a^(l-1) + b^(l)
-                a^(l) = f(z^(l))</div>
-        </section>
-
-        <section>
-            <h2>2. CNN (Convolutional Neural Network)</h2>
-            <p>CNN khai thác cấu trúc không gian bằng tích chập và chia sẻ tham số, giúp nhận diện đặc trưng ảnh hiệu
-                quả hơn MLP.</p>
-            <h3>Khi nào nên dùng</h3>
-            <ul>
-                <li>Computer Vision: phân loại ảnh, phát hiện đối tượng, segmentation.</li>
-                <li>Dữ liệu lưới có tính cục bộ mạnh (2D/3D).</li>
-            </ul>
-            <h3>Failure mode thường gặp</h3>
-            <ul>
-                <li>Khó nắm bắt quan hệ xa nếu receptive field hạn chế.</li>
-                <li>Nhạy cảm với nhiễu đối kháng (adversarial perturbation).</li>
-            </ul>
-            <div class="formula">Convolution 2D:
-                S(i,j) = Σm Σn I(i+m,j+n) K(m,n)</div>
-        </section>
-
-        <section>
-            <h2>3. RNN (Recurrent Neural Network)</h2>
-            <p>RNN giữ trạng thái ẩn qua từng bước thời gian, phù hợp chuỗi tuần tự nhưng khó huấn luyện với chuỗi dài.
-            </p>
-            <h3>Khi nào nên dùng</h3>
-            <ul>
-                <li>Dự báo chuỗi thời gian ngắn.</li>
-                <li>NLP tác vụ cơ bản khi tài nguyên hạn chế.</li>
-            </ul>
-            <h3>Failure mode thường gặp</h3>
-            <ul>
-                <li>Vanishing Gradient khiến mô hình quên ngữ cảnh xa.</li>
-                <li>Exploding Gradient gây mất ổn định khi train.</li>
-            </ul>
-            <div class="formula">h_t = tanh(W_hh h_(t-1) + W_xh x_t + b_h)</div>
-        </section>
-
-        <section>
-            <h2>4. LSTM (Long Short-Term Memory)</h2>
-            <p>LSTM mở rộng RNN bằng cơ chế cổng (forget/input/output), giúp lưu ngữ cảnh dài tốt hơn.</p>
-            <h3>Khi nào nên dùng</h3>
-            <ul>
-                <li>Chuỗi dài vừa phải cần giữ thông tin quá khứ.</li>
-                <li>Dự báo tài chính, cảm biến, hoặc NLP truyền thống.</li>
-            </ul>
-            <h3>Failure mode thường gặp</h3>
-            <ul>
-                <li>Huấn luyện chậm do xử lý tuần tự theo thời gian.</li>
-                <li>Khó mở rộng với sequence cực dài.</li>
-            </ul>
-            <div class="formula">C_t = f_t ⊙ C_(t-1) + i_t ⊙ C~_t
-                h_t = o_t ⊙ tanh(C_t)</div>
-        </section>
-
-        <section>
-            <h2>5. GRU (Gated Recurrent Unit)</h2>
-            <p>GRU là phiên bản gọn hơn LSTM, giảm số cổng và tham số, thường hội tụ nhanh hơn trên một số tập dữ liệu.
-            </p>
-            <h3>Khi nào nên dùng</h3>
-            <ul>
-                <li>Cần mô hình chuỗi nhẹ và train nhanh hơn LSTM.</li>
-                <li>Bài toán không yêu cầu phân tách bộ nhớ dài-ngắn quá chi tiết.</li>
-            </ul>
-            <h3>Failure mode thường gặp</h3>
-            <ul>
-                <li>Vẫn bị giới hạn bởi tính tuần tự như họ RNN.</li>
-                <li>Có thể kém LSTM trên tác vụ cần giữ phụ thuộc rất dài.</li>
-            </ul>
-            <div class="formula">h_t = (1-z_t) ⊙ h_(t-1) + z_t ⊙ h~_t</div>
-        </section>
-
-        <section>
-            <h2>6. Transformer</h2>
-            <p>Transformer dùng self-attention để mô hình hóa quan hệ toàn cục và cho phép huấn luyện song song, hiện là
-                kiến trúc chủ đạo của LLM.</p>
-            <h3>Khi nào nên dùng</h3>
-            <ul>
-                <li>NLP hiện đại: phân loại văn bản, QA, dịch máy, LLM.</li>
-                <li>Dữ liệu đa phương thức khi cần nắm ngữ cảnh xa.</li>
-            </ul>
-            <h3>Failure mode thường gặp</h3>
-            <ul>
-                <li>Chi phí attention tăng nhanh theo độ dài chuỗi.</li>
-                <li>Nhạy với dữ liệu nhiễu hoặc lệch miền nếu thiếu regularization.</li>
-            </ul>
-            <div class="formula">Attention(Q,K,V) = softmax(QK^T / sqrt(d_k))V</div>
-            <div class="note"><strong>Lưu ý:</strong> Với bài toán sequence rất dài, nên xem xét Longformer, Performer
-                hoặc các biến thể sparse attention để giảm chi phí.</div>
-        </section>
-
-        <section>
-            <h2>7. Bảng chọn kiến trúc nhanh</h2>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Bài toán</th>
-                            <th>Kiến trúc ưu tiên</th>
-                            <th>Lý do</th>
-                            <th>Rủi ro chính</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Phân loại dữ liệu bảng</td>
-                            <td>MLP</td>
-                            <td>Đơn giản, nhanh, dễ tuning.</td>
-                            <td>Overfitting với dữ liệu nhỏ.</td>
-                        </tr>
-                        <tr>
-                            <td>Nhận diện ảnh</td>
-                            <td>CNN</td>
-                            <td>Tận dụng cấu trúc không gian cục bộ.</td>
-                            <td>Mất ngữ cảnh xa nếu kiến trúc nông.</td>
-                        </tr>
-                        <tr>
-                            <td>Dự báo chuỗi ngắn</td>
-                            <td>GRU / LSTM</td>
-                            <td>Giữ trạng thái theo thời gian ổn định.</td>
-                            <td>Train tuần tự, khó mở rộng.</td>
-                        </tr>
-                        <tr>
-                            <td>NLP ngữ cảnh dài</td>
-                            <td>Transformer</td>
-                            <td>Self-attention học phụ thuộc xa tốt.</td>
-                            <td>Tốn bộ nhớ khi sequence dài.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <section>
-            <h2>8. Checklist triển khai thực chiến</h2>
-            <h3>Tiền xử lý dữ liệu</h3>
-            <ul>
-                <li>Chuẩn hóa đặc trưng, xử lý missing values, cân bằng lớp.</li>
-                <li>Tách train/validation/test đúng theo thời gian nếu là time-series.</li>
-            </ul>
-            <h3>Huấn luyện và đánh giá</h3>
-            <ul>
-                <li>Theo dõi loss và metric theo epoch, bật early stopping.</li>
-                <li>Đánh giá thêm robust metrics: calibration, out-of-domain checks.</li>
-            </ul>
-            <h3>Triển khai</h3>
-            <ul>
-                <li>Version hóa model + data + config để tái lập.</li>
-                <li>Giám sát drift sau triển khai và lịch retrain định kỳ.</li>
-            </ul>
-        </section>
-
-        <section>
-            <h2>9. FAQ nhanh</h2>
-            <h3>MLP có dùng cho NLP được không?</h3>
-            <p>Có, nhưng thường chỉ phù hợp bài toán đơn giản sau khi đã trích xuất đặc trưng. Với ngữ cảnh dài,
-                Transformer vẫn là lựa chọn mạnh hơn.</p>
-            <h3>Khi nào chọn GRU thay vì LSTM?</h3>
-            <p>Khi bạn cần mô hình nhẹ, train nhanh và chấp nhận giảm một phần khả năng mô hình hóa bộ nhớ dài.</p>
-            <h3>Transformer có luôn tốt nhất không?</h3>
-            <p>Không. Nếu dữ liệu nhỏ hoặc hạ tầng hạn chế, CNN/MLP đôi khi hiệu quả hơn về chi phí-vận hành.</p>
-        </section>
     </main>
+
+    <script>
+        const architecturesData = [
+            {
+                id: "mlp",
+                category: "1. Feedforward & Basic",
+                name: "Multilayer Perceptron (MLP)",
+                concept: "Giống như một dây chuyền nhà máy đơn giản: Nguyên liệu đi vào đầu này, đi qua các trạm kiểm duyệt (không được quay lui), và ra thành phẩm ở đầu kia.",
+                technical: "Mạng nơ-ron tiến (Feedforward Neural Network) với ít nhất 3 lớp (Input, Hidden, Output). Sử dụng backpropagation để cập nhật trọng số. Không có giả định về cấu trúc không gian hay thời gian của dữ liệu.",
+                differentiator: "Là nền tảng cơ bản nhất. Khác với CNN hay RNN, MLP coi mọi điểm dữ liệu đầu vào là độc lập, không nắm bắt được chuỗi hay cấu trúc hình ảnh 2D tốt."
+            },
+            {
+                id: "autoencoder",
+                category: "1. Feedforward & Basic",
+                name: "Autoencoder (AE)",
+                concept: "Giống như việc bạn cố tóm tắt một cuốn sách dày thành 1 trang giấy (mã hóa), sau đó yêu cầu một người khác dựa vào 1 trang giấy đó để viết lại cuốn sách y như cũ (giải mã).",
+                technical: "Mạng nơ-ron không giám sát gồm Encoder (nén dữ liệu vào latent space) và Decoder (tái tạo dữ liệu từ latent space). Mục tiêu là tối thiểu hóa loss tái tạo.",
+                differentiator: "Học cách nén dữ liệu hiệu quả thay vì phân loại. Là tiền đề cho các mô hình Generative sau này."
+            },
+            {
+                id: "cnn_basic",
+                category: "2. CNN – Convolutional",
+                name: "CNN cơ bản",
+                concept: "Thay vì nhìn toàn bộ bức tranh bằng một mắt, CNN dùng một chiếc kính lúp trượt dọc theo bức tranh để tìm các đặc điểm nhỏ (cạnh, góc), rồi ghép chúng lại thành hình khối phức tạp hơn.",
+                technical: "Sử dụng phép tích chập (Convolution) với các filter/kernel để trích xuất đặc trưng cục bộ, kết hợp Pooling để giảm chiều dữ liệu và đạt tính bất biến với phép dịch chuyển.",
+                differentiator: "Khai thác triệt để cấu trúc không gian 2D/3D của dữ liệu. Số lượng tham số ít hơn nhiều so với MLP nhờ cơ chế chia sẻ trọng số."
+            },
+            {
+                id: "resnet",
+                category: "2. CNN – Convolutional",
+                name: "ResNet (Residual Network)",
+                concept: "Trong một tổ chức quá nhiều cấp bậc, thông tin truyền từ sếp xuống nhân viên thường bị tam sao thất bản. ResNet tạo ra đường dây nóng cho phép thông tin truyền thẳng qua các cấp mà không bị biến dạng.",
+                technical: "Giới thiệu Residual Block với Skip Connection F(x) + x. Giúp gradient dễ dàng chảy ngược qua hàng trăm lớp, giải quyết triệt để bài toán vanishing gradient.",
+                differentiator: "Cho phép huấn luyện các mạng cực kỳ sâu mà vẫn duy trì hoặc tăng độ chính xác."
+            },
+            {
+                id: "yolo",
+                category: "2. CNN – Convolutional",
+                name: "YOLO (You Only Look Once)",
+                concept: "Thay vì cử nhiều nhóm đi rà soát từng khu vực, YOLO chia ảnh thành lưới và dự đoán mọi vật thể cùng vị trí của chúng ngay trong một cái liếc mắt.",
+                technical: "Single-stage Object Detection. Đưa bài toán phát hiện vật thể về hồi quy trực tiếp bounding box và class probability từ full image trong một lần forward.",
+                differentiator: "Tốc độ cực kỳ nhanh, phù hợp real-time processing."
+            },
+            {
+                id: "rnn_basic",
+                category: "3. RNN – Recurrent",
+                name: "Vanilla RNN",
+                concept: "Giống như việc bạn đọc một câu văn: Bạn hiểu từ hiện tại dựa trên trí nhớ về những từ đã đọc trước đó.",
+                technical: "Mạng nơ-ron có vòng lặp, duy trì hidden state theo thời gian. Đầu vào tại timestep t và hidden state t-1 dùng để tính toán đầu ra tại t.",
+                differentiator: "Xử lý dữ liệu dạng chuỗi có độ dài tùy ý."
+            },
+            {
+                id: "lstm",
+                category: "3. RNN – Recurrent",
+                name: "LSTM (Long Short-Term Memory)",
+                concept: "RNN bình thường bị não cá vàng khi câu quá dài. LSTM giống như một cuốn sổ tay có cơ chế chọn lọc giữ lại thông tin quan trọng, xóa rác và cập nhật kiến thức mới.",
+                technical: "Cải tiến của RNN với Cell State và 3 cổng (Forget/Input/Output gate), giúp giải quyết vanishing gradient trên chuỗi dài.",
+                differentiator: "Học phụ thuộc xa (long-term dependencies) tốt hơn hẳn RNN truyền thống."
+            },
+            {
+                id: "transformer",
+                category: "4. Transformer Family",
+                name: "Transformer (Gốc)",
+                concept: "Thay vì đọc từng chữ từ trái sang phải, mô hình nhìn bao quát toàn bộ câu cùng một lúc và tính mức chú ý giữa các token.",
+                technical: "Kiến trúc Encoder-Decoder loại bỏ recurrence. Cốt lõi là Self-Attention đa đầu kết hợp Positional Encoding.",
+                differentiator: "Tính toán song song vượt trội so với RNN, là xương sống của kỷ nguyên GenAI hiện tại."
+            },
+            {
+                id: "bert",
+                category: "4. Transformer Family",
+                name: "BERT",
+                concept: "Học hiểu ngôn ngữ bằng cách điền vào chỗ trống, nhìn cả hai chiều trái-phải của từ bị che.",
+                technical: "Bidirectional Encoder Representations from Transformers. Dùng phần Encoder, pre-train bằng MLM và NSP.",
+                differentiator: "Hiểu ngữ cảnh hai chiều sâu sắc, phù hợp các bài toán NLU."
+            },
+            {
+                id: "gpt",
+                category: "4. Transformer Family",
+                name: "GPT Family",
+                concept: "Giống tính năng autocomplete rất thông minh: đọc những gì đã viết và sinh token tiếp theo hợp lý nhất.",
+                technical: "Kiến trúc autoregressive, dùng Decoder, dự đoán token x_t dựa trên các token trước đó.",
+                differentiator: "Vô đối trong nhiều tác vụ sinh văn bản (NLG)."
+            },
+            {
+                id: "gan",
+                category: "5. Generative Models",
+                name: "GAN",
+                concept: "Cuộc chiến giữa Kẻ làm giả (Generator) và Cảnh sát (Discriminator). Qua thời gian, Generator sinh dữ liệu ngày càng giống thật.",
+                technical: "Hai mạng nơ-ron huấn luyện đối kháng bằng minimax game.",
+                differentiator: "Tạo ảnh sắc nét nhưng khó huấn luyện ổn định."
+            },
+            {
+                id: "diffusion",
+                category: "5. Generative Models",
+                name: "Diffusion Models",
+                concept: "Thêm nhiễu dần vào dữ liệu rồi học đảo ngược quá trình đó để khôi phục mẫu từ nhiễu.",
+                technical: "Forward process thêm Gaussian noise theo từng bước, reverse process học khử nhiễu dần (thường bằng U-Net).",
+                differentiator: "Ổn định hơn GAN, đa dạng mẫu tốt, rất mạnh trong text-to-image."
+            },
+            {
+                id: "gnn",
+                category: "6. Hybrid & Specialized",
+                name: "GNN (Graph Neural Network)",
+                concept: "Để hiểu một nút trong mạng, phải nhìn cả quan hệ với các nút lân cận.",
+                technical: "Xử lý dữ liệu đồ thị bằng message passing để cập nhật embedding nút.",
+                differentiator: "Phù hợp nhất cho dữ liệu mạng lưới: social graph, phân tử, giao thông."
+            },
+            {
+                id: "rl_dqn",
+                category: "7. Reinforcement Learning",
+                name: "DQN (Deep Q-Network)",
+                concept: "Dạy AI bằng thưởng-phạt để học hành động tối ưu trong từng trạng thái.",
+                technical: "Kết hợp Q-learning với deep neural network, dùng experience replay và target network để ổn định train.",
+                differentiator: "Giải quyết state space lớn, mở đường cho Deep RL như AlphaGo."
+            }
+        ];
+
+        const summaryStats = [
+            {
+                name: "CNN (Convolutional)",
+                count: "~25",
+                usage: "Thị giác máy tính, xử lý ảnh/video, không gian 2D/3D.",
+                trend: "Vẫn sống khỏe nhờ hiệu năng cao trên edge và chi phí thấp."
+            },
+            {
+                name: "RNN (Recurrent)",
+                count: "~15",
+                usage: "Xử lý chuỗi, chuỗi thời gian, tín hiệu.",
+                trend: "Đang bị Transformer thay thế trong NLP, rút về bài toán chuỗi hẹp."
+            },
+            {
+                name: "Transformer",
+                count: "~25+",
+                usage: "NLP, đa phương thức, vision, âm thanh.",
+                trend: "Kiến trúc bá chủ hiện tại, tối ưu context length và attention."
+            },
+            {
+                name: "Generative",
+                count: "~20",
+                usage: "Sinh ảnh, văn bản, âm thanh, video, thiết kế thuốc.",
+                trend: "Diffusion dẫn đầu ảnh/video, GPT dẫn đầu văn bản."
+            },
+            {
+                name: "Khác (Hybrid, RL, GNN)",
+                count: "~15+",
+                usage: "Tối ưu hóa, robot, phân tử, đồ thị.",
+                trend: "Xu hướng kết hợp đa kiến trúc để giải bài toán chuyên ngành."
+            }
+        ];
+
+        const categories = [
+            { id: "all", name: "Tổng quan (Dashboard)" },
+            { id: "1. Feedforward & Basic", name: "1. Feedforward & Basic" },
+            { id: "2. CNN – Convolutional", name: "2. CNN" },
+            { id: "3. RNN – Recurrent", name: "3. RNN" },
+            { id: "4. Transformer Family", name: "4. Transformer" },
+            { id: "5. Generative Models", name: "5. Generative" },
+            { id: "6. Hybrid & Specialized", name: "6. Hybrid & Specialized" },
+            { id: "7. Reinforcement Learning", name: "7. Reinforcement Learning" }
+        ];
+
+        const state = {
+            activeCategory: "all",
+            selectedModel: null,
+            searchTerm: "",
+            isCompareMode: false,
+            compareModels: [null, null]
+        };
+
+        const el = {
+            categoryList: document.getElementById("dl-category-list"),
+            compareToggle: document.getElementById("dl-compare-toggle"),
+            search: document.getElementById("dl-search"),
+            pageTitle: document.getElementById("dl-page-title"),
+            content: document.getElementById("dl-content")
+        };
+
+        function setState(partial) {
+            Object.assign(state, partial);
+            render();
+        }
+
+        function safeHtml(input) {
+            return String(input)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/\"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
+
+        function filteredData() {
+            const term = state.searchTerm.trim().toLowerCase();
+            return architecturesData.filter((item) => {
+                const byCategory = state.activeCategory === "all" || item.category === state.activeCategory;
+                const byTerm =
+                    !term ||
+                    item.name.toLowerCase().includes(term) ||
+                    item.concept.toLowerCase().includes(term) ||
+                    item.technical.toLowerCase().includes(term);
+                return byCategory && byTerm;
+            });
+        }
+
+        function renderCategories() {
+            el.categoryList.innerHTML = categories
+                .map((cat) => {
+                    const active = !state.isCompareMode && state.activeCategory === cat.id;
+                    return `<button type="button" class="dl-category-btn ${active ? "active" : ""}" data-category="${safeHtml(cat.id)}">${safeHtml(cat.name)}</button>`;
+                })
+                .join("");
+
+            el.categoryList.querySelectorAll(".dl-category-btn").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    setState({
+                        activeCategory: btn.getAttribute("data-category") || "all",
+                        isCompareMode: false,
+                        selectedModel: null
+                    });
+                });
+            });
+        }
+
+        function pickForCompare(modelId) {
+            const model = architecturesData.find((item) => item.id === modelId);
+            if (!model) return;
+
+            if (!state.compareModels[0]) {
+                state.compareModels[0] = model;
+            } else if (!state.compareModels[1] && state.compareModels[0].id !== model.id) {
+                state.compareModels[1] = model;
+            }
+
+            render();
+        }
+
+        function removeCompareAt(index) {
+            state.compareModels[index] = null;
+            render();
+        }
+
+        function renderDashboard() {
+            const summaryCards = summaryStats
+                .map(
+                    (stat) => `
+            <article class="dl-summary-card">
+              <h3>${safeHtml(stat.name)}</h3>
+              <span class="count">${safeHtml(stat.count)}</span>
+              <p><strong>Mảng ứng dụng:</strong> ${safeHtml(stat.usage)}</p>
+              <p><strong>Xu hướng:</strong> ${safeHtml(stat.trend)}</p>
+            </article>
+          `,
+                )
+                .join("");
+
+            return `
+        <section class="dl-hero" id="tong-quan-kien-truc">
+          <h2>Không có kiến trúc nào là tuyệt đối</h2>
+          <p>Theo thực tế, mỗi họ kiến trúc sinh ra để xử lý một kiểu dữ liệu khác nhau: không gian với CNN, thời gian với RNN, ngữ cảnh toàn cục với Transformer. Bạn nên chọn mô hình theo cấu trúc dữ liệu và ràng buộc vận hành.</p>
+          <p class="dl-fine">Dữ liệu nguồn gốc từ bản Deep Learning Map gốc của bạn đã được giữ nguyên theo trục: Trực quan -> Chuyên ngành -> Điểm khác biệt.</p>
+        </section>
+        <section class="dl-summary-grid">${summaryCards}</section>
+      `;
+        }
+
+        function renderCards() {
+            const data = filteredData();
+            if (data.length === 0) {
+                return `<section class="dl-hero"><h2>Không tìm thấy kiến trúc phù hợp</h2><p>Hãy đổi từ khóa tìm kiếm hoặc chọn lại nhóm kiến trúc ở thanh bên trái.</p></section>`;
+            }
+
+            const cards = data
+                .map(
+                    (item) => `
+            <article class="dl-card">
+              <h3>${safeHtml(item.name)}</h3>
+              <div class="meta">${safeHtml(item.category)}</div>
+              <p>${safeHtml(item.concept)}</p>
+              <button type="button" data-open="${safeHtml(item.id)}">Xem chi tiết</button>
+            </article>
+          `,
+                )
+                .join("");
+
+            return `<section class="dl-grid">${cards}</section>`;
+        }
+
+        function renderDetail() {
+            if (!state.selectedModel) return "";
+            const m = state.selectedModel;
+            return `
+        <section class="dl-detail" id="chi-tiet-kien-truc">
+          <div class="category">${safeHtml(m.category)}</div>
+          <h2>${safeHtml(m.name)}</h2>
+          <article class="block">
+            <h3>Bản chất (Trực giác)</h3>
+            <p>${safeHtml(m.concept)}</p>
+          </article>
+          <article class="block">
+            <h3>Thuật ngữ chuyên ngành</h3>
+            <p>${safeHtml(m.technical)}</p>
+          </article>
+          <article class="block">
+            <h3>Điểm khác biệt cốt lõi</h3>
+            <p>${safeHtml(m.differentiator)}</p>
+          </article>
+        </section>
+      `;
+        }
+
+        function renderCompareMode() {
+            const renderSlot = (model, idx) => {
+                if (!model) {
+                    return `<article class="dl-compare-slot"><p>Trống - chọn mô hình từ kho bên dưới để so sánh.</p></article>`;
+                }
+
+                return `
+          <article class="dl-compare-slot filled">
+            <h3>${safeHtml(model.name)}</h3>
+            <p><strong>Nhóm:</strong> ${safeHtml(model.category)}</p>
+            <p><strong>Trực giác:</strong> ${safeHtml(model.concept)}</p>
+            <p><strong>Khác biệt:</strong> ${safeHtml(model.differentiator)}</p>
+            <button type="button" data-remove-compare="${idx}" class="dl-compare-toggle" style="margin-top:10px">Bỏ khỏi so sánh</button>
+          </article>
+        `;
+            };
+
+            const pool = architecturesData
+                .map((m) => {
+                    const selected = state.compareModels.some((item) => item && item.id === m.id);
+                    return `<button type="button" data-pick-compare="${safeHtml(m.id)}" class="${selected ? "active" : ""}">${safeHtml(m.name)}</button>`;
+                })
+                .join("");
+
+            return `
+        <section class="dl-compare-wrap" id="so-sanh-kien-truc">
+          <div class="dl-compare-help">Chọn 2 mô hình để so sánh trực tiếp theo trục trực giác, kỹ thuật và điểm khác biệt.</div>
+          <div class="dl-compare-grid">
+            ${renderSlot(state.compareModels[0], 0)}
+            ${renderSlot(state.compareModels[1], 1)}
+          </div>
+          <div class="dl-pool">${pool}</div>
+        </section>
+      `;
+        }
+
+        function bindDynamicEvents() {
+            el.content.querySelectorAll("[data-open]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const model = architecturesData.find((m) => m.id === btn.getAttribute("data-open"));
+                    if (!model) return;
+                    setState({ selectedModel: model });
+                });
+            });
+
+            el.content.querySelectorAll("[data-pick-compare]").forEach((btn) => {
+                btn.addEventListener("click", () => pickForCompare(btn.getAttribute("data-pick-compare") || ""));
+            });
+
+            el.content.querySelectorAll("[data-remove-compare]").forEach((btn) => {
+                btn.addEventListener("click", () => removeCompareAt(Number(btn.getAttribute("data-remove-compare"))));
+            });
+        }
+
+        function render() {
+            renderCategories();
+
+            const title = state.isCompareMode
+                ? "Công cụ đối chiếu kiến trúc"
+                : categories.find((cat) => cat.id === state.activeCategory)?.name || "Khám phá";
+
+            el.pageTitle.textContent = title;
+            el.compareToggle.classList.toggle("active", state.isCompareMode);
+
+            if (state.isCompareMode || state.activeCategory === "all") {
+                el.search.value = state.searchTerm;
+            }
+
+            el.search.parentElement.style.display = state.isCompareMode ? "none" : "block";
+
+            let html = "";
+            if (state.isCompareMode) {
+                html = renderCompareMode();
+            } else if (state.activeCategory === "all") {
+                html = renderDashboard();
+            } else {
+                html = `${renderCards()}${renderDetail()}`;
+            }
+
+            el.content.innerHTML = html;
+            bindDynamicEvents();
+        }
+
+        el.compareToggle.addEventListener("click", () => {
+            setState({
+                isCompareMode: !state.isCompareMode,
+                selectedModel: null,
+                activeCategory: !state.isCompareMode ? state.activeCategory : "all"
+            });
+        });
+
+        el.search.addEventListener("input", (event) => {
+            setState({ searchTerm: event.target.value });
+        });
+
+        render();
+    </script>
 </body>
 
 </html>
