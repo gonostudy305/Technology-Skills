@@ -40,127 +40,161 @@ export default async function CurriculumPage({
 
   const filteredSubjects = query
     ? subjectDirectory.filter((subject) => {
-        const inSubject = `${subject.name} ${subject.description}`.toLowerCase();
-        const inResources = subject.resources
-          .map((resource) => resource.title)
-          .join(" ")
-          .toLowerCase();
-        return inSubject.includes(query) || inResources.includes(query);
-      })
+      const inSubject = `${subject.name} ${subject.description}`.toLowerCase();
+      const inResources = subject.resources
+        .map((resource) => resource.title)
+        .join(" ")
+        .toLowerCase();
+      return inSubject.includes(query) || inResources.includes(query);
+    })
     : subjectDirectory;
 
   const groupedSubjects = groupByYear(filteredSubjects);
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] px-4 py-12 sm:px-6 lg:px-8">
-      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
-        <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-primary)]">
-          Học phần HTTT UEL
-        </h1>
-        <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)]">
-          Tìm theo đúng môn học trong thời khóa biểu và mở nội dung ngay tại chỗ.
-          Mỗi học phần hiển thị trạng thái rõ ràng: Có blog, Có simulation,
-          Đang viết hoặc Chưa có.
-        </p>
+    <div className="mx-auto w-full max-w-[1180px] px-4 py-8 sm:px-6 lg:px-8">
+      {/* Header Bento Section */}
+      <section className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#0369a1] to-[#075985] p-8 text-white shadow-2xl lg:p-12">
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-orange-400 animate-pulse" />
+            Bản đồ tri thức
+          </div>
+          <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+            Học phần HTTT UEL
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-sky-100/90 sm:text-xl">
+            Lộ trình học tập tinh gọn, từ nền tảng đến chuyên sâu. Khám phá các bài viết, mô phỏng trực quan và tài nguyên số chuẩn Academic.
+          </p>
 
-        <form action="/hoc-phan" className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <input
-            name="q"
-            defaultValue={searchParams.q ?? ""}
-            placeholder="Tìm học phần, ví dụ: Cơ sở dữ liệu, Kỹ thuật lập trình..."
-            className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-4 text-sm text-zinc-800 outline-none transition focus:border-[var(--color-accent)] focus:ring-2 focus:ring-teal-100"
-          />
-          <button
-            type="submit"
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--color-accent)] px-5 text-sm font-semibold text-white transition hover:brightness-110"
-          >
-            Tìm học phần
-          </button>
-        </form>
+          <form action="/hoc-phan" className="mt-10 flex max-w-xl items-center gap-3 overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg shadow-sky-950/20">
+            <i className="fa-solid fa-magnifying-glass ml-4 text-zinc-400" />
+            <input
+              name="q"
+              defaultValue={searchParams.q ?? ""}
+              placeholder="Tìm theo môn học hoặc tài nguyên..."
+              className="h-10 w-full bg-transparent px-2 text-sm text-zinc-800 outline-none"
+            />
+            <button
+              type="submit"
+              className="inline-flex h-10 items-center justify-center rounded-xl bg-sky-700 px-6 text-sm font-bold text-white transition hover:bg-sky-800 active:scale-95"
+            >
+              Tìm kiếm
+            </button>
+          </form>
+        </div>
+
+        {/* Decorative elements */}
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -bottom-20 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-sky-400/10 blur-3xl transition-all" />
       </section>
 
       {groupedSubjects.length === 0 ? (
-        <section className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
-          <p className="text-zinc-600">Không tìm thấy học phần phù hợp với từ khóa.</p>
+        <section className="mt-12 rounded-[2rem] border-2 border-dashed border-zinc-200 bg-zinc-50/50 py-20 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-zinc-100 text-zinc-400">
+            <i className="fa-solid fa-ghost text-2xl" />
+          </div>
+          <h3 className="mt-4 text-lg font-bold text-zinc-800">Không tìm thấy kết quả</h3>
+          <p className="mt-1 text-sm text-zinc-500">Hãy thử tìm kiếm với từ khóa khác như "Cơ sở dữ liệu" hoặc "Python".</p>
         </section>
       ) : (
-        <section className="mt-8 space-y-8">
+        <section className="mt-12 space-y-16">
           {groupedSubjects.map((group) => (
             <div key={group.year}>
-              <h2 className="mb-3 text-xl font-semibold text-[var(--color-text-primary)]">
-                Năm {group.year}
-              </h2>
+              <div className="mb-8 flex items-end justify-between border-b border-zinc-200 pb-4">
+                <div>
+                  <h2 className="text-3xl font-extrabold tracking-tight text-zinc-900">
+                    Năm học {group.year}
+                  </h2>
+                  <p className="mt-1 text-sm font-medium text-zinc-500">Gồm {group.subjects.length} học phần then chốt</p>
+                </div>
+                <div className="h-0.5 flex-1 mx-8 bg-zinc-100 hidden md:block" />
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">HTTT UEL</span>
+              </div>
 
-              <div className="space-y-3">
+              <div className="grid gap-6 md:grid-cols-2">
                 {group.subjects.map((subject) => {
                   const statusMeta = getSubjectStatusMeta(subject.status);
-                  const shouldOpen = Boolean(query) || subject.resourceCount > 0;
 
                   return (
-                    <details
+                    <div
                       key={subject.slug}
-                      open={shouldOpen}
-                      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+                      className="group flex flex-col overflow-hidden rounded-[1.5rem] border border-zinc-200 bg-white shadow-sm transition-all hover:border-sky-200 hover:shadow-xl hover:shadow-sky-500/5"
                     >
-                      <summary className="cursor-pointer list-none p-5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
-                            {subject.name}
-                          </h3>
-                          <span
-                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${TONE_CLASS_MAP[statusMeta.tone]}`}
-                          >
-                            {statusMeta.label}
-                          </span>
-                          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
-                            {subject.resourceCount} tài nguyên
-                          </span>
-                        </div>
-                        <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-                          {subject.description}
-                        </p>
-                      </summary>
-
-                      <div className="border-t border-zinc-200 px-5 py-4">
-                        {subject.resources.length === 0 ? (
-                          <p className="text-sm text-[var(--color-text-secondary)]">
-                            Học phần này đang trong hàng đợi biên soạn.
-                          </p>
-                        ) : (
-                          <ul className="space-y-3">
-                            {subject.resources.map((resource) => (
-                              <li key={resource.slug}>
-                                <Link
-                                  href={resource.routePath}
-                                  className="group block rounded-xl border border-zinc-200 bg-zinc-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm"
-                                >
-                                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                                    <span>{resource.kind === "sim" ? "Simulation" : "Bài viết"}</span>
-                                    <span>•</span>
-                                    <span>{resource.category ?? "Kiến thức"}</span>
-                                  </div>
-                                  <h4 className="mt-2 text-base font-semibold leading-tight text-[var(--color-text-primary)] transition group-hover:text-[var(--color-accent)]">
-                                    {resource.title}
-                                  </h4>
-                                  <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
-                                    Cập nhật: {formatDateVi(resource.updatedAt)}
-                                  </p>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
-                        <div className="mt-4">
+                      <div className="flex-1 p-6 lg:p-8">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex flex-wrap gap-2">
+                            <span className={`rounded-lg border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${TONE_CLASS_MAP[statusMeta.tone]}`}>
+                              {statusMeta.label}
+                            </span>
+                            {subject.resourceCount > 0 && (
+                              <span className="rounded-lg border border-orange-100 bg-orange-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange-600">
+                                {subject.resourceCount} TÀI NGUYÊN
+                              </span>
+                            )}
+                          </div>
                           <Link
                             href={`/hoc-phan/${subject.slug}`}
-                            className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+                            className="text-zinc-400 hover:text-sky-600"
+                            title="Xem trang riêng"
                           >
-                            Xem trang học phần riêng
+                            <i className="fa-solid fa-arrow-up-right-from-square text-sm" />
                           </Link>
                         </div>
+
+                        <h3 className="mt-4 text-xl font-bold text-zinc-900 transition-colors group-hover:text-sky-700">
+                          {subject.name}
+                        </h3>
+                        <p className="mt-3 text-sm leading-relaxed text-zinc-500 line-clamp-2">
+                          {subject.description}
+                        </p>
+
+                        <div className="mt-8 space-y-3">
+                          {subject.resources.slice(0, 3).map((resource) => (
+                            <Link
+                              key={resource.slug}
+                              href={resource.routePath}
+                              className="flex items-center justify-between rounded-xl bg-zinc-50 p-3 transition hover:bg-sky-50 hover:text-sky-700"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${resource.kind === "sim" ? "bg-orange-100 text-orange-600" : "bg-sky-100 text-sky-600"}`}>
+                                  <i className={`fa-solid ${resource.kind === "sim" ? "fa-cube" : "fa-file-lines"} text-xs`} />
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-bold leading-none">{resource.title}</h4>
+                                  <p className="mt-1 text-[10px] text-zinc-400 font-medium">Cập nhật: {formatDateVi(resource.updatedAt)}</p>
+                                </div>
+                              </div>
+                              <i className="fa-solid fa-chevron-right text-[10px] opacity-0 transition group-hover/link:opacity-100" />
+                            </Link>
+                          ))}
+                          {subject.resourceCount > 3 && (
+                            <Link
+                              href={`/hoc-phan/${subject.slug}`}
+                              className="block py-1 text-center text-[11px] font-bold uppercase tracking-wider text-zinc-400 hover:text-sky-600"
+                            >
+                              Xem tất cả {subject.resourceCount} tài nguyên
+                            </Link>
+                          )}
+                          {subject.resourceCount === 0 && (
+                            <div className="flex items-center gap-2 py-3 text-xs italic text-zinc-400">
+                              <i className="fa-solid fa-clock-rotate-left opacity-50" />
+                              Học phần đang được biên soạn...
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </details>
+
+                      <div className="border-t border-zinc-50 bg-zinc-50/50 px-6 py-3">
+                        <Link
+                          href={`/hoc-phan/${subject.slug}`}
+                          className="flex items-center justify-center gap-2 text-xs font-bold text-zinc-600 transition hover:text-sky-700"
+                        >
+                          Mở chi tiết học phần
+                          <i className="fa-solid fa-chevron-down text-[8px]" />
+                        </Link>
+                      </div>
+                    </div>
                   );
                 })}
               </div>
