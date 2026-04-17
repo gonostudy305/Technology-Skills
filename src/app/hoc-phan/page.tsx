@@ -95,7 +95,7 @@ export default async function CurriculumPage({
             <i className="fa-solid fa-ghost text-2xl" />
           </div>
           <h3 className="mt-4 text-lg font-bold text-zinc-800">Không tìm thấy kết quả</h3>
-          <p className="mt-1 text-sm text-zinc-500">Hãy thử tìm kiếm với từ khóa khác như "Cơ sở dữ liệu" hoặc "Python".</p>
+          <p className="mt-1 text-sm text-zinc-500">Hãy thử tìm kiếm với từ khóa khác như &quot;Cơ sở dữ liệu&quot; hoặc &quot;Python&quot;.</p>
         </section>
       ) : (
         <section className="mt-12 space-y-16">

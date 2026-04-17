@@ -16,13 +16,6 @@ export const revalidate = 60;
 // Gradients & helpers
 // ---------------------------------------------------------------------------
 
-const TONE_CLASS_MAP = {
-  teal: "border-teal-200 bg-teal-50 text-teal-700",
-  cyan: "border-cyan-200 bg-cyan-50 text-cyan-700",
-  amber: "border-amber-200 bg-amber-50 text-amber-700",
-  zinc: "border-zinc-200 bg-zinc-100 text-zinc-700",
-} as const;
-
 function getTypeLabel(type: string): string {
   return type === "md" ? "Markdown" : "HTML";
 }
