@@ -87,7 +87,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const readingMinutes = readingTimeInMinutes(article.content);
   const authorInitial = articleAuthor.trim().charAt(0).toUpperCase() || "T";
   const articleToc = article.toc ?? [];
-  const hasEmbeddedSidebarLayout = article.type === "html";
+  const embeddedLayoutMarker = /(docker-sim-shell|dl-shell|id=["']tab-list["']|class=["'][^"']*tab-btn|id=["']local-graph-container["']|id=["']roleRadarChart["'])/i;
+  const hasEmbeddedSidebarLayout = article.type === "html" && embeddedLayoutMarker.test(article.content);
 
   const pageContainerClassName = hasEmbeddedSidebarLayout
     ? "mx-auto w-full max-w-[1540px] px-2 sm:px-4 lg:px-6"

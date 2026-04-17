@@ -50,6 +50,54 @@
             display: inline-block;
         }
 
+        .phase-pill {
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            background: rgba(15, 23, 42, 0.55);
+            color: #e2e8f0;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.75rem 1.05rem;
+            line-height: 1.2;
+            transition: all 0.2s ease;
+        }
+
+        .phase-pill:hover {
+            border-color: rgba(96, 165, 250, 0.55);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .phase-pill.active {
+            border-color: rgba(56, 189, 248, 0.6);
+            background: rgba(30, 64, 175, 0.24);
+            color: #dbeafe;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.16);
+        }
+
+        .header-kpi-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 0.9rem 1rem;
+        }
+
+        .header-kpi-card span {
+            display: block;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .header-kpi-card strong {
+            display: block;
+            margin-top: 0.3rem;
+            font-size: 1.25rem;
+            color: #f8fafc;
+        }
+
         @keyframes spin {
             0% {
                 transform: rotate(0deg);
@@ -65,14 +113,41 @@
 <body class="min-h-screen p-4 md:p-10">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <div class="mb-12 text-center">
-            <h1
-                class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
-                Hệ Sinh Thái Nhân Sự & Trợ Lý Gemini ✨
-            </h1>
-            <p class="text-slate-400 max-w-2xl mx-auto text-lg">
-                Sử dụng AI để mô phỏng sự phối hợp và mở rộng đội ngũ release của bạn.
-            </p>
+        <div class="mb-10">
+            <div class="flex flex-wrap items-center gap-3">
+                <button class="phase-pill active" type="button">Giai đoạn 1 · MVP</button>
+                <button class="phase-pill" type="button">Giai đoạn 2 · Nội dung</button>
+                <button class="phase-pill" type="button">Giai đoạn 3 · Cộng đồng</button>
+                <button class="phase-pill" type="button">Giai đoạn 4 · Tăng trưởng</button>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 md:p-6 mt-4">
+                <p class="text-slate-200 text-xl font-semibold leading-tight">
+                    Tháng 3-4 · Mục tiêu: map toàn bộ học phần HTTT → nội dung, build content engine
+                </p>
+                <p class="text-slate-400 mt-2 max-w-3xl">
+                    Ưu tiên simulation chất lượng cao, bám sát nhu cầu ôn thi thực tế của sinh viên UEL và biến kinh nghiệm dự án thật thành nội dung dễ học.
+                </p>
+
+                <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+                    <div class="header-kpi-card">
+                        <span>Ưu tiên</span>
+                        <strong>Simulation chất</strong>
+                    </div>
+                    <div class="header-kpi-card">
+                        <span>Cadence</span>
+                        <strong>1 bài / 2 tuần</strong>
+                    </div>
+                    <div class="header-kpi-card">
+                        <span>Mục tiêu bài</span>
+                        <strong>10-15 bài</strong>
+                    </div>
+                    <div class="header-kpi-card">
+                        <span>Điểm mạnh</span>
+                        <strong>Thực chiến &gt; lý thuyết</strong>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
