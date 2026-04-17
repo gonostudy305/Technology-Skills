@@ -18,6 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${lora.variable} ${firaCode.variable}`}>
+      <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+      </head>
       <body className={`font-sans antialiased bg-zinc-50 text-zinc-800`}>{children}</body>
     </html>
   );
