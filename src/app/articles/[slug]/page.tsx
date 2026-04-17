@@ -86,6 +86,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const articleViews = formatViews(articleMeta?.viewCount);
   const readingMinutes = readingTimeInMinutes(article.content);
   const authorInitial = articleAuthor.trim().charAt(0).toUpperCase() || "T";
+  const articleToc = article.toc ?? [];
 
   return (
     <div className="min-h-screen bg-[#f5f1ea] pb-14 pt-5 sm:pt-7">
@@ -131,8 +132,28 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </div>
         </section>
 
-        <main className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <article className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+        {articleToc.length > 0 ? (
+          <section className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">Mục lục nội dung</h2>
+            <nav className="mt-3" aria-label="Mục lục bài viết">
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {articleToc.map((item) => (
+                  <li key={item.id} className={item.level === 3 ? "pl-3" : ""}>
+                    <a
+                      href={`#${item.id}`}
+                      className="block rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700 transition hover:border-sky-200 hover:text-sky-700"
+                    >
+                      {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </section>
+        ) : null}
+
+        <section className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
+          <article className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             {article.type === "md" ? (
               <div className="article-rich-content prose prose-academic max-w-none px-4 py-9 sm:px-8 lg:px-10">
                 <div dangerouslySetInnerHTML={{ __html: article.content }} />
@@ -144,8 +165,28 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             )}
           </article>
 
-          <aside className="space-y-4">
-            <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:sticky lg:top-20">
+          <aside className="space-y-4 self-start lg:sticky lg:top-20">
+            {articleToc.length > 0 ? (
+              <section className="hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:block">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">Mục lục nội dung</h2>
+                <nav className="mt-3" aria-label="Mục lục bài viết">
+                  <ul className="space-y-1.5">
+                    {articleToc.map((item) => (
+                      <li key={item.id} className={item.level === 3 ? "pl-3" : ""}>
+                        <a
+                          href={`#${item.id}`}
+                          className="block rounded-md px-2 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                        >
+                          {item.text}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              </section>
+            ) : null}
+
+            <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
               <span className="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
                 AI Mới Nhất
               </span>
@@ -175,7 +216,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               </div>
             </section>
           </aside>
-        </main>
+        </section>
 
         <section className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">

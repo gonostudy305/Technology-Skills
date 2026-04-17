@@ -5,6 +5,17 @@ import matter from "gray-matter";
 
 // Define the content directory path
 export const CONTENT_DIR = path.join(process.cwd(), "content");
+export const SKILL_DIR = path.join(process.cwd(), "skill");
+
+type ArticleSource = "content" | "skill";
+
+const ARTICLE_SOURCES: ReadonlyArray<{ name: ArticleSource; dir: string }> = [
+  { name: "content", dir: CONTENT_DIR },
+  { name: "skill", dir: SKILL_DIR },
+];
+
+// Keep article discovery in skill/ explicit to avoid pulling unrelated internal docs.
+const ENABLED_SKILL_SLUGS = new Set(["seo-aeo-blog-writer"]);
 
 export interface ArticleInfo {
   slug: string;
@@ -16,9 +27,30 @@ export interface ArticleInfo {
   updatedAt?: string;
   author?: string;
   viewCount?: number;
+  source?: ArticleSource;
+}
+
+export interface TocItem {
+  id: string;
+  text: string;
+  level: 2 | 3;
+}
+
+export interface ArticleContent {
+  content: string;
+  type: "md" | "html";
+  scripts?: string;
+  toc: TocItem[];
 }
 
 const FALLBACK_SUMMARY = "Kho tri thức công nghệ được biên soạn chuyên sâu.";
+
+interface ArticleFile {
+  slug: string;
+  type: "md" | "html";
+  filePath: string;
+  source: ArticleSource;
+}
 
 function normalizeText(raw: string): string {
   return raw
@@ -38,6 +70,108 @@ function shortenText(raw: string, maxLength = 170): string {
   if (!text) return FALLBACK_SUMMARY;
   if (text.length <= maxLength) return text;
   return `${text.slice(0, maxLength).trimEnd()}...`;
+}
+
+function slugifyHeading(text: string): string {
+  const slug = text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || "section";
+}
+
+function withUniqueId(baseId: string, usedIds: Map<string, number>): string {
+  const key = baseId || "section";
+  const count = usedIds.get(key) ?? 0;
+  usedIds.set(key, count + 1);
+  return count === 0 ? key : `${key}-${count + 1}`;
+}
+
+function injectHeadingIdsAndBuildToc(html: string): { html: string; toc: TocItem[] } {
+  const usedIds = new Map<string, number>();
+  const toc: TocItem[] = [];
+
+  const htmlWithIds = html.replace(/<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/gi, (_, levelRaw: string, attrsRaw: string, innerHtml: string) => {
+    const level = Number(levelRaw);
+    const text = normalizeText(innerHtml);
+    const existingId = attrsRaw.match(/\sid=(["'])(.*?)\1/i)?.[2];
+    const uniqueId = withUniqueId(existingId ?? slugifyHeading(text), usedIds);
+
+    if ((level === 2 || level === 3) && text) {
+      toc.push({ id: uniqueId, text, level: level as 2 | 3 });
+    }
+
+    const attrsWithoutId = attrsRaw.replace(/\sid=(["'])(.*?)\1/i, "").trim();
+    const attrsPrefix = attrsWithoutId ? ` ${attrsWithoutId}` : "";
+
+    return `<h${level} id="${uniqueId}"${attrsPrefix}>${innerHtml}</h${level}>`;
+  });
+
+  return { html: htmlWithIds, toc };
+}
+
+function shouldIncludeFile(source: ArticleSource, slug: string): boolean {
+  if (source !== "skill") return true;
+  return ENABLED_SKILL_SLUGS.has(slug);
+}
+
+function listArticleFiles(): ArticleFile[] {
+  const bySlug = new Map<string, ArticleFile>();
+
+  for (const source of ARTICLE_SOURCES) {
+    if (!fs.existsSync(source.dir)) continue;
+
+    const files = fs.readdirSync(source.dir).filter((fileName) => fileName.endsWith(".md") || fileName.endsWith(".html"));
+
+    for (const fileName of files) {
+      const slug = fileName.replace(/\.(html|md)$/i, "");
+      if (!shouldIncludeFile(source.name, slug)) continue;
+      if (bySlug.has(slug)) continue;
+
+      bySlug.set(slug, {
+        slug,
+        type: fileName.endsWith(".md") ? "md" : "html",
+        filePath: path.join(source.dir, fileName),
+        source: source.name,
+      });
+    }
+  }
+
+  return Array.from(bySlug.values());
+}
+
+function resolveArticleFileBySlug(slug: string): ArticleFile | null {
+  for (const source of ARTICLE_SOURCES) {
+    if (!shouldIncludeFile(source.name, slug)) continue;
+
+    const mdPath = path.join(source.dir, `${slug}.md`);
+    if (fs.existsSync(mdPath)) {
+      return { slug, type: "md", filePath: mdPath, source: source.name };
+    }
+
+    const htmlPath = path.join(source.dir, `${slug}.html`);
+    if (fs.existsSync(htmlPath)) {
+      return { slug, type: "html", filePath: htmlPath, source: source.name };
+    }
+  }
+
+  return null;
+}
+
+function extractPrimaryHtmlContent(rawHtml: string): string {
+  const bodyMatch = rawHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const bodyContent = bodyMatch ? bodyMatch[1] : rawHtml;
+
+  const mainMatch = bodyContent.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+  let content = mainMatch ? mainMatch[1] : bodyContent;
+
+  content = content.replace(/<header[\s\S]*?<\/header>/gi, "");
+  content = content.replace(/<aside[\s\S]*?<\/aside>/gi, "");
+
+  return content;
 }
 
 function extractSummaryFromHtml(rawHtml: string): string {
@@ -70,7 +204,9 @@ function extractSummaryFromMarkdown(mdContent: string): string {
   return shortenText(paragraphs[0] ?? "");
 }
 
-function inferCategory(slug: string, title: string, type: string): string {
+function inferCategory(slug: string, title: string, type: string, source: ArticleSource): string {
+  if (source === "skill") return "Kỹ năng";
+
   const probe = `${slug} ${title}`.toLowerCase();
 
   if (/(data|warehouse|etl|bi|analytics|database)/.test(probe)) return "Nền tảng";
@@ -91,15 +227,11 @@ function pseudoViewCount(slug: string): number {
 
 export async function getArticlesList(): Promise<ArticleInfo[]> {
   try {
-    if (!fs.existsSync(CONTENT_DIR)) return [];
-    
-    const files = fs.readdirSync(CONTENT_DIR);
-    const validFiles = files.filter(file => file.endsWith(".html") || file.endsWith(".md"));
-    
-    return validFiles.map(filename => {
-      const type = filename.endsWith(".md") ? "md" : "html";
-      const slug = filename.replace(/\.(html|md)$/, "");
-      const filePath = path.join(CONTENT_DIR, filename);
+    const files = listArticleFiles();
+    if (files.length === 0) return [];
+
+    return files.map((file) => {
+      const { type, slug, filePath, source } = file;
       const content = fs.readFileSync(filePath, "utf-8");
       const fileStat = fs.statSync(filePath);
       const updatedAt = fileStat.mtime.toISOString();
@@ -119,16 +251,17 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
         else if (h1Match) title = h1Match[1].replace(/<[^>]*>?/gm, "").trim(); 
         else title = slug.replace(/_/g, " ").replace(/-/g, " ");
 
-        summary = extractSummaryFromHtml(content);
+        summary = extractSummaryFromHtml(extractPrimaryHtmlContent(content));
         if (categoryMatch) category = normalizeText(categoryMatch[1]);
         if (authorMatch) author = normalizeText(authorMatch[1]);
       } else {
         const { data, content: mdContent } = matter(content);
-        if (data.name) title = data.name;
-        else if (data.title) title = data.title;
-        else {
+        if (typeof data.title === "string" && data.title.trim().length > 0) {
+          title = data.title.trim();
+        } else {
           const match = mdContent.match(/^#\s+(.+)$/m);
           if (match) title = match[1].trim();
+          else if (typeof data.name === "string" && data.name.trim().length > 0) title = data.name.trim();
         }
 
         summary = typeof data.description === "string" && data.description.trim().length > 0
@@ -144,7 +277,7 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
         }
       }
 
-      category = category ?? inferCategory(slug, title, type);
+      category = category ?? inferCategory(slug, title, type, source);
       
       return {
         slug,
@@ -156,6 +289,7 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
         dateStr: updatedAt,
         author,
         viewCount: pseudoViewCount(slug),
+        source,
       };
     });
   } catch (error) {
@@ -164,19 +298,22 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<{content: string, type: string, scripts?: string} | null> {
+export async function getArticleBySlug(slug: string): Promise<ArticleContent | null> {
   try {
-    let filePath = path.join(CONTENT_DIR, `${slug}.md`);
-    if (fs.existsSync(filePath)) {
-      const rawContent = fs.readFileSync(filePath, "utf-8");
+    const articleFile = resolveArticleFileBySlug(slug);
+    if (!articleFile) return null;
+
+    if (articleFile.type === "md") {
+      const rawContent = fs.readFileSync(articleFile.filePath, "utf-8");
       const { content } = matter(rawContent);
       const parsedHTML = await marked.parse(content);
-      return { content: parsedHTML, type: "md" };
+      const mdResult = injectHeadingIdsAndBuildToc(parsedHTML);
+
+      return { content: mdResult.html, type: "md", toc: mdResult.toc };
     }
-    
-    filePath = path.join(CONTENT_DIR, `${slug}.html`);
-    if (fs.existsSync(filePath)) {
-      const rawHTML = fs.readFileSync(filePath, "utf-8");
+
+    if (articleFile.type === "html") {
+      const rawHTML = fs.readFileSync(articleFile.filePath, "utf-8");
       
       // Extract links 
       const linksSet = new Set<string>();
@@ -207,23 +344,24 @@ export async function getArticleBySlug(slug: string): Promise<{content: string, 
       }
       const scripts = scriptsList.join("\n");
 
-      // Extract body
-      const bodyMatch = rawHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      let bodyContent = bodyMatch ? bodyMatch[1] : rawHTML;
+      // Keep only the primary article area to avoid nested layout conflicts.
+      let bodyContent = extractPrimaryHtmlContent(rawHTML);
       
       // Clear out scripts from html since NextJS dangerouslySetInnerHTML wont run them anyway
       bodyContent = bodyContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+      const htmlResult = injectHeadingIdsAndBuildToc(bodyContent);
 
       // Return combined safe HTML
       const finalHTML = `
         ${links}
         ${styles}
-        <div class="canvas-html-wrapper">
-          ${bodyContent}
+        <div class="canvas-html-wrapper canvas-html-article">
+          ${htmlResult.html}
         </div>
       `;
 
-      return { content: finalHTML, type: "html", scripts };
+      return { content: finalHTML, type: "html", scripts, toc: htmlResult.toc };
     }
     
     return null;

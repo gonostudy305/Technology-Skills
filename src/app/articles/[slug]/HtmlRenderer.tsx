@@ -1,19 +1,23 @@
 ﻿"use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function HtmlRenderer({ html, scripts }: { html: string; scripts?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (scripts && scripts.trim().length > 0) {
       const scriptEl = document.createElement("script");
-      scriptEl.innerHTML = scripts;
-      document.body.appendChild(scriptEl);
+      scriptEl.type = "text/javascript";
+      scriptEl.innerHTML = `try {\n${scripts}\n} catch (error) {\n  console.warn("Article inline script error:", error);\n}`;
+
+      containerRef.current?.appendChild(scriptEl);
 
       return () => {
-        document.body.removeChild(scriptEl);
+        scriptEl.remove();
       };
     }
   }, [scripts]);
 
-  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
 }
