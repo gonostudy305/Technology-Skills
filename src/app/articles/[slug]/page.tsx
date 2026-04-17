@@ -87,10 +87,27 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const readingMinutes = readingTimeInMinutes(article.content);
   const authorInitial = articleAuthor.trim().charAt(0).toUpperCase() || "T";
   const articleToc = article.toc ?? [];
+  const hasEmbeddedSidebarLayout = article.type === "html" && /(docker-sim-shell|dl-shell)/.test(article.content);
+
+  const pageContainerClassName = hasEmbeddedSidebarLayout
+    ? "mx-auto w-full max-w-[1540px] px-2 sm:px-4 lg:px-6"
+    : "mx-auto w-full max-w-[1180px] px-3 sm:px-5 lg:px-8";
+
+  const tocTopClassName = hasEmbeddedSidebarLayout
+    ? "mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm"
+    : "mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden";
+
+  const articleGridClassName = hasEmbeddedSidebarLayout
+    ? "mt-4 grid gap-4"
+    : "mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]";
+
+  const htmlContentPaddingClassName = hasEmbeddedSidebarLayout
+    ? "article-rich-content px-1 py-1 sm:px-2 sm:py-2"
+    : "article-rich-content px-2 py-2 sm:px-4 sm:py-4";
 
   return (
     <div className="min-h-screen bg-[#f5f1ea] pb-14 pt-5 sm:pt-7">
-      <div className="mx-auto w-full max-w-[1180px] px-3 sm:px-5 lg:px-8">
+      <div className={pageContainerClassName}>
         <section className="rounded-2xl border border-zinc-200 bg-white/95 p-4 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
             <Link href="/" className="font-medium text-zinc-600 transition hover:text-zinc-900">
@@ -133,7 +150,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
         </section>
 
         {articleToc.length > 0 ? (
-          <section className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden">
+          <section className={tocTopClassName}>
             <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">Mục lục nội dung</h2>
             <nav className="mt-3" aria-label="Mục lục bài viết">
               <ul className="grid gap-2 sm:grid-cols-2">
@@ -152,20 +169,21 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </section>
         ) : null}
 
-        <section className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className={articleGridClassName}>
           <article className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             {article.type === "md" ? (
               <div className="article-rich-content prose prose-academic max-w-none px-4 py-9 sm:px-8 lg:px-10">
                 <div dangerouslySetInnerHTML={{ __html: article.content }} />
               </div>
             ) : (
-              <div className="article-rich-content px-2 py-2 sm:px-4 sm:py-4">
+              <div className={htmlContentPaddingClassName}>
                 <HtmlRenderer html={article.content} scripts={article.scripts} />
               </div>
             )}
           </article>
 
-          <aside className="space-y-4 self-start lg:sticky lg:top-20">
+          {!hasEmbeddedSidebarLayout ? (
+            <aside className="space-y-4 self-start lg:sticky lg:top-20">
             {articleToc.length > 0 ? (
               <section className="hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:block">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">Mục lục nội dung</h2>
@@ -215,7 +233,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
                 <p className="font-semibold text-orange-600">2.092 người đã đăng ký</p>
               </div>
             </section>
-          </aside>
+            </aside>
+          ) : null}
         </section>
 
         <section className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">

@@ -373,6 +373,170 @@
             line-height: 1.7;
         }
 
+        /* Light system-like theme with stronger contrast */
+        .docker-sim-root {
+            --bg-main: #f5f1ea;
+            --bg-panel: #ffffff;
+            --bg-soft: #f8fafc;
+            --line: #d4dbe7;
+            --text-main: #1f2937;
+            --text-soft: #475569;
+            --title: #111827;
+            --brand: #2563eb;
+            --brand-soft: rgba(37, 99, 235, 0.14);
+            color: var(--text-main);
+        }
+
+        .docker-sim-shell {
+            border: 1px solid var(--line);
+            background: radial-gradient(circle at top right, #f2f7ff 0%, #f8fafc 48%, #f9fafb 100%);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+        }
+
+        .docker-sim-mobile-topbar {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .docker-sim-mobile-brand {
+            color: #0f172a;
+        }
+
+        .docker-sim-mobile-logo {
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            border-color: rgba(37, 99, 235, 0.45);
+        }
+
+        .docker-sim-mobile-toggle {
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #334155;
+        }
+
+        .docker-sim-mobile-toggle:hover {
+            border-color: rgba(37, 99, 235, 0.65);
+        }
+
+        .docker-sim-sidebar {
+            border-right: 1px solid var(--line);
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+        }
+
+        .docker-sim-brand {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .docker-sim-brand-logo {
+            border-color: rgba(37, 99, 235, 0.45);
+            background: rgba(37, 99, 235, 0.1);
+            color: #1d4ed8;
+        }
+
+        .docker-sim-brand span {
+            color: #0f172a;
+        }
+
+        .docker-sim-nav-btn {
+            color: #475569;
+        }
+
+        .docker-sim-nav-btn:hover {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e293b;
+        }
+
+        .docker-sim-nav-btn.active {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            color: #1d4ed8;
+        }
+
+        .docker-sim-icon-chip {
+            border-color: #bfdbfe;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .docker-sim-nav-btn.active .docker-sim-icon-chip {
+            border-color: #93c5fd;
+            background: #e0e7ff;
+            color: #1d4ed8;
+        }
+
+        .docker-sim-badge {
+            border-color: #93c5fd;
+            color: #1d4ed8;
+            background: #e0ecff;
+        }
+
+        .docker-sim-main {
+            background: linear-gradient(180deg, #ffffff, #f8fafc);
+        }
+
+        .docker-sim-main-inner {
+            max-width: none;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .docker-sim-main-head {
+            border-bottom: 1px solid #dbe2ee;
+        }
+
+        .docker-sim-main-icon {
+            border-color: #93c5fd;
+            color: #1d4ed8;
+            background: #dbeafe;
+        }
+
+        .docker-sim-main-head h1 {
+            color: #0f172a;
+        }
+
+        .docker-sim-panel {
+            border: 1px solid #d4dbe7;
+            background: #ffffff;
+        }
+
+        .docker-sim-panel.intuitive {
+            border-color: #93c5fd;
+            background: linear-gradient(165deg, #eff6ff, #ffffff);
+        }
+
+        .docker-sim-panel.intuitive::before {
+            background: #2563eb;
+        }
+
+        .docker-sim-panel h2 {
+            color: #0f172a;
+        }
+
+        .docker-sim-panel-note {
+            border-color: #93c5fd;
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .docker-sim-paragraph {
+            color: #334155;
+        }
+
+        .docker-sim-panel.technical .docker-sim-paragraph {
+            color: #334155;
+        }
+
+        .docker-sim-bullet {
+            border-left: 2px solid #cbd5e1;
+            color: #334155;
+        }
+
+        .docker-sim-footer {
+            border-top: 1px solid #dbe2ee;
+            color: #475569;
+        }
+
         @media (max-width: 980px) {
             .docker-sim-shell {
                 grid-template-columns: 1fr;
@@ -394,7 +558,7 @@
                 border-right: 1px solid var(--line);
                 border-top-right-radius: 14px;
                 border-bottom-right-radius: 14px;
-                box-shadow: 0 24px 42px rgba(2, 6, 23, 0.62);
+                box-shadow: 0 16px 30px rgba(15, 23, 42, 0.18);
             }
 
             .docker-sim-sidebar.open {
