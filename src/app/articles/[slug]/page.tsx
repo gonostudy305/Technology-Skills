@@ -1,6 +1,7 @@
 ﻿import { notFound } from "next/navigation";
 import { getArticleBySlug, getArticlesList } from "@/lib/contents";
 import Link from "next/link";
+import HtmlRenderer from "./HtmlRenderer";
 
 export async function generateStaticParams() {
   const articles = await getArticlesList();
@@ -30,25 +31,23 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </div>
         </div>
       </nav>
-      
+
       {/* Reading Content Area */}
       <main className="flex-1 w-full bg-white pb-24 shadow-sm border-x border-zinc-100 max-w-4xl mx-auto">
         <article>
           {article.type === "md" ? (
             <div className="px-6 py-12 sm:px-12 sm:py-20 max-w-[700px] mx-auto prose prose-academic w-full">
-              {/* Note: In Markdown context, title is inside the raw HTML string generated, but we apply `prose-academic` which makes h1 serif */}
-              <div dangerouslySetInnerHTML={{ __html: article.content }} />
+              <div dangerouslySetInnerHTML={{ __html: article.content }} />     
             </div>
           ) : (
             <div className="w-full">
-               {/* HTML from Canvas often has its own layout, so we just wrap it loosely */}
-               <div dangerouslySetInnerHTML={{ __html: article.content }} />
+               <HtmlRenderer html={article.content} scripts={article.scripts} />
             </div>
           )}
         </article>
       </main>
 
-      <footer className="w-full max-w-4xl mx-auto py-10 px-4 text-center">
+      <footer className="w-full max-w-4xl mx-auto py-10 px-4 text-center">      
         <p className="text-xs text-zinc-400 font-mono">End of document. Knowledge is power.</p>
       </footer>
     </div>
