@@ -1,18 +1,18 @@
-import fs from 'fs';
-import path from 'path';
+﻿import fs from "fs";
+import path from "path";
+import { marked } from "marked";
+import matter from "gray-matter";
 
 // Define the content directory path
-export const CONTENT_DIR = path.join(process.cwd(), 'content');
+export const CONTENT_DIR = path.join(process.cwd(), "content");
 
 export interface ArticleInfo {
   slug: string;
   title: string;
   dateStr?: string;
+  type: string;
 }
 
-/**
- * Retrieves a list of all available HTML files in the content directory.
- */
 export async function getArticlesList(): Promise<ArticleInfo[]> {
   try {
     if (!fs.existsSync(CONTENT_DIR)) {
@@ -20,40 +20,56 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
     }
     
     const files = fs.readdirSync(CONTENT_DIR);
-    const htmlFiles = files.filter(file => file.endsWith('.html'));
+    const validFiles = files.filter(file => file.endsWith(".html") || file.endsWith(".md"));
     
-    return htmlFiles.map(filename => {
-      const slug = filename.replace(/\.html$/, '');
+    return validFiles.map(filename => {
+      const type = filename.endsWith(".md") ? "md" : "html";
+      const slug = filename.replace(/\.(html|md)$/, "");
       const filePath = path.join(CONTENT_DIR, filename);
-      const content = fs.readFileSync(filePath, 'utf-8');
+      const content = fs.readFileSync(filePath, "utf-8");
       
-      // Simple regex to extract <title>...</title> tag from the HTML file
-      // If none found, fallback to slug
-      const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
-      const title = titleMatch ? titleMatch[1].trim() : slug;
+      let title = slug;
+      if (type === "html") {
+        const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
+        if (titleMatch) title = titleMatch[1].trim();
+      } else {
+        const { data, content: mdContent } = matter(content);
+        if (data.name) title = data.name;
+        else if (data.title) title = data.title;
+        else {
+          const match = mdContent.match(/^#\s+(.+)$/m);
+          if (match) title = match[1].trim();
+        }
+      }
       
       return {
         slug,
         title,
+        type
       };
     });
   } catch (error) {
-    console.error('Error fetching articles list:', error);
+    console.error("Error fetching articles list:", error);
     return [];
   }
 }
 
-/**
- * Reads a specific HTML article by its slug.
- */
-export async function getArticleBySlug(slug: string): Promise<string | null> {
+export async function getArticleBySlug(slug: string): Promise<{content: string, type: string} | null> {
   try {
-    const filePath = path.join(CONTENT_DIR, `${slug}.html`);
-    if (!fs.existsSync(filePath)) {
-      return null;
+    let filePath = path.join(CONTENT_DIR, `${slug}.md`);
+    if (fs.existsSync(filePath)) {
+      const rawContent = fs.readFileSync(filePath, "utf-8");
+      const { content } = matter(rawContent);
+      const parsedHTML = await marked.parse(content);
+      return { content: parsedHTML, type: "md" };
     }
     
-    return fs.readFileSync(filePath, 'utf-8');
+    filePath = path.join(CONTENT_DIR, `${slug}.html`);
+    if (fs.existsSync(filePath)) {
+      return { content: fs.readFileSync(filePath, "utf-8"), type: "html" };
+    }
+    
+    return null;
   } catch (error) {
     console.error(`Error reading article ${slug}:`, error);
     return null;
