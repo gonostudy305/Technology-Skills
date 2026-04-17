@@ -39,8 +39,8 @@ export default function Header() {
       </a>
 
       <div className="mx-auto h-16 w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
-        <div className="flex h-full items-center justify-between gap-3">
-          <div className="flex items-center gap-7">
+        <div className="flex h-full items-center justify-between gap-1.5">
+          <div className="flex items-center gap-2 xl:gap-5">
             <Link
               href="/"
               className="flex items-center gap-1.5 rounded px-1 py-1 text-zinc-900 transition hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
@@ -50,7 +50,7 @@ export default function Header() {
               <span className="rounded border border-orange-300 px-1.5 py-[1px] font-serif text-sm leading-none text-orange-500">UEL</span>
             </Link>
 
-            <nav className="hidden items-center gap-5 text-sm font-medium text-zinc-600 lg:flex" aria-label="Main navigation">
+            <nav className="hidden items-center gap-2 text-sm font-medium text-zinc-600 lg:flex xl:gap-4" aria-label="Main navigation">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item}
@@ -63,7 +63,7 @@ export default function Header() {
             </nav>
           </div>
 
-          <div className="hidden items-center gap-2 xl:flex">
+          <div className="hidden items-center gap-1.5 2xl:flex">
             <ThemeToggle />
 
             <button
@@ -99,7 +99,7 @@ export default function Header() {
 
           <button
             type="button"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 xl:hidden"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 2xl:hidden"
             aria-label="Open navigation menu"
             onClick={handleToggleMobileMenu}
           >
@@ -109,7 +109,7 @@ export default function Header() {
       </div>
 
       {isMobileMenuOpen ? (
-        <div className="border-t border-zinc-200 bg-[#f6f2ea] px-4 py-4 xl:hidden">
+        <div className="border-t border-zinc-200 bg-[#f6f2ea] px-4 py-4 2xl:hidden">
           <nav className="grid grid-cols-2 gap-2" aria-label="Mobile navigation">
             {NAV_ITEMS.map((item) => (
               <Link

@@ -10,53 +10,55 @@
     <meta name="category" content="Ứng dụng">
     <meta name="author" content="Minh Tuấn">
     <style>
+        :root {
+            --bg-main: #fdfbf7;
+            --bg-sidebar: #f5f1ea;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --accent-blue: #0369a1;
+            --accent-orange: #f97316;
+            --border-color: #e5e7eb;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
         .dl-root {
-            --bg-main: #ffffff;
-            --bg-panel: #fcfcfc;
-            --bg-soft: #f8fafc;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --line: #e2e8f0;
-            --primary: #0369a1;
-            --primary-soft: rgba(3, 105, 161, 0.1);
-            --accent: #059669;
-            --warning: #d97706;
-            --danger: #dc2626;
-            font-family: inherit;
-            color: var(--text-main);
-            width: 100%;
+            font-family: var(--font-be-vietnam, inherit);
+            color: var(--text-primary);
+            line-height: 1.6;
+            background: var(--bg-main);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
         .dl-shell {
             display: grid;
-            grid-template-columns: 280px minmax(0, 1fr);
-            border: 1px solid var(--line);
-            border-radius: 18px;
-            overflow: hidden;
-            background: #ffffff;
-            min-height: 70vh;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            grid-template-columns: 260px 1fr;
+            min-height: 80vh;
         }
 
         .dl-sidebar {
-            border-right: 1px solid var(--line);
-            background: #f8fafc;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            min-width: 0;
+            padding: 24px 0;
         }
 
         .dl-brand {
-            padding: 20px 18px 14px;
-            border-bottom: 1px solid var(--line);
+            padding: 0 24px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .dl-brand h2 {
             margin: 0;
-            font-size: 1.15rem;
-            letter-spacing: 0.01em;
-            color: var(--primary);
-            font-weight: 700;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            letter-spacing: -0.02em;
         }
 
         .dl-brand p {
@@ -66,36 +68,36 @@
         }
 
         .dl-category-list {
-            padding: 10px;
-            display: grid;
-            gap: 6px;
-            overflow-y: auto;
-            max-height: 58vh;
+            padding: 16px 12px;
+            flex: 1;
         }
 
         .dl-category-btn {
+            width: 100%;
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid transparent;
             background: transparent;
-            color: var(--text-muted);
-            text-align: left;
-            border-radius: 10px;
-            padding: 9px 10px;
-            font-size: 0.82rem;
-            font-weight: 600;
+            margin-bottom: 4px;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
 
         .dl-category-btn:hover {
-            color: var(--primary);
-            background: #f1f5f9;
-            border-color: var(--line);
+            background: rgba(0, 0, 0, 0.03);
+            color: var(--text-primary);
         }
 
         .dl-category-btn.active {
-            color: white;
-            background: var(--primary);
-            border-color: var(--primary);
+            background: var(--bg-card);
+            color: var(--accent-blue);
+            box-shadow: var(--shadow-sm);
+            border-color: var(--border-color);
+            font-weight: 600;
         }
 
         .dl-sidebar-actions {
@@ -130,166 +132,196 @@
         }
 
         .dl-main {
+            background: var(--bg-card);
             display: flex;
             flex-direction: column;
-            min-width: 0;
-            max-height: 100%;
         }
 
         .dl-toolbar {
-            border-bottom: 1px solid var(--line);
-            padding: 16px 20px;
+            padding: 16px 32px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
-            gap: 10px;
             justify-content: space-between;
-            flex-wrap: wrap;
-            background: #ffffff;
-            backdrop-filter: blur(8px);
+            background: var(--bg-card);
+            z-index: 10;
         }
 
         .dl-toolbar h1 {
-            margin: 0;
-            font-size: 1.06rem;
+            font-size: 1.125rem;
             font-weight: 700;
-            color: var(--text-main);
+            color: var(--text-primary);
+            margin: 0;
         }
 
         .dl-search-wrap {
             position: relative;
-            min-width: min(100%, 340px);
-            flex: 1;
-            max-width: 340px;
+            width: 300px;
         }
 
         .dl-search-input {
             width: 100%;
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            background: #f8fafc;
-            color: var(--text-main);
+            padding: 8px 16px;
+            padding-left: 36px;
+            border-radius: 99px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-sidebar);
+            font-size: 0.875rem;
+            transition: all 0.2s;
             outline: none;
-            padding: 10px 14px;
-            font-size: 0.86rem;
-            transition: all 0.2s ease;
         }
 
         .dl-search-input:focus {
-            border-color: var(--primary);
-            background: #ffffff;
-            box-shadow: 0 0 0 4px var(--primary-soft);
+            background: var(--bg-card);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(3, 105, 161, 0.1);
+        }
+
+        .dl-search-wrap::before {
+            content: "\f002";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
         }
 
         .dl-content {
-            padding: 20px;
+            padding: 32px;
             overflow-y: auto;
-            min-height: 0;
-            display: grid;
-            gap: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
         }
 
         .dl-hero {
-            border: 1px solid var(--primary-soft);
-            border-radius: 14px;
-            padding: 16px;
-            background: linear-gradient(160deg, #f0f9ff, #ffffff);
+            background: linear-gradient(to right, #0369a1, #075985);
+            border-radius: 16px;
+            padding: 32px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dl-hero::after {
+            content: "";
+            position: absolute;
+            right: -50px;
+            bottom: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
         }
 
         .dl-hero h2 {
-            margin: 0;
-            font-size: 1.22rem;
-            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 0 12px;
+            color: white;
         }
 
         .dl-hero p {
-            margin: 10px 0 0;
-            font-size: 0.92rem;
-            color: var(--text-main);
-            line-height: 1.75;
+            font-size: 1rem;
+            opacity: 0.9;
+            margin: 0;
+            max-width: 600px;
+            line-height: 1.7;
         }
 
         .dl-grid {
             display: grid;
-            gap: 12px;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
         .dl-card {
-            border: 1px solid var(--line);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px;
-            background: #ffffff;
-            transition: all 0.2s ease;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
 
         .dl-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-blue);
         }
 
         .dl-card h3 {
-            margin: 0;
-            font-size: 0.98rem;
-            color: var(--text-main);
-            line-height: 1.45;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: var(--text-primary);
         }
 
         .dl-card .meta {
-            margin-top: 6px;
-            font-size: 0.73rem;
-            color: var(--primary);
+            font-size: 0.7rem;
             font-weight: 700;
+            color: var(--accent-orange);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.08em;
+            margin-bottom: 14px;
+            display: inline-block;
+            background: #fff7ed;
+            padding: 2px 8px;
+            border-radius: 4px;
         }
 
         .dl-card p {
-            margin: 8px 0 0;
-            color: #94a3b8;
-            font-size: 0.82rem;
-            line-height: 1.65;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0 0 20px;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            line-height: 1.6;
         }
 
         .dl-card button {
-            margin-top: 10px;
-            border: 1px solid var(--accent);
+            border: 1.5px solid var(--accent-blue);
             background: transparent;
-            color: var(--accent);
-            border-radius: 999px;
-            padding: 5px 12px;
-            font-size: 0.74rem;
-            font-weight: 700;
+            color: var(--accent-blue);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.8125rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .dl-card button:hover {
-            background: var(--accent);
+            background: var(--accent-blue);
             color: white;
+            box-shadow: 0 4px 12px rgba(3, 105, 161, 0.25);
         }
 
         .dl-summary-grid {
             display: grid;
-            gap: 12px;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         }
 
         .dl-summary-card {
-            border: 1px solid var(--line);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            background: #ffffff;
-            padding: 13px;
-            transition: all 0.2s ease;
+            background: var(--bg-card);
+            padding: 24px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .dl-summary-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-color: var(--accent-blue);
+            box-shadow: var(--shadow-md);
         }
 
         .dl-summary-card h3 {
@@ -299,68 +331,82 @@
         }
 
         .dl-summary-card .count {
-            margin-top: 5px;
             display: inline-flex;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            background: var(--bg-soft);
-            color: var(--primary);
-            padding: 2px 10px;
-            font-size: 0.74rem;
+            width: fit-content;
+            border-radius: 6px;
+            background: #f0f9ff;
+            color: var(--accent-blue);
+            padding: 4px 10px;
+            font-size: 0.75rem;
             font-weight: 700;
         }
 
         .dl-summary-card p {
-            margin: 8px 0 0;
-            color: #94a3b8;
-            font-size: 0.82rem;
-            line-height: 1.65;
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
         }
 
         .dl-detail {
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 20px;
-            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            background: var(--bg-card);
             display: grid;
-            gap: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            gap: 24px;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.4s cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .dl-detail h2 {
             margin: 0;
-            font-size: 1.12rem;
-            color: var(--primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
         }
 
         .dl-detail .category {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 700;
-            letter-spacing: 0.04em;
+            color: var(--accent-orange);
             text-transform: uppercase;
-            color: var(--primary);
+            letter-spacing: 0.1em;
         }
 
         .dl-detail .block {
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: var(--bg-soft);
-            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-sidebar);
+            padding: 20px;
         }
 
         .dl-detail .block h3 {
-            margin: 0;
-            font-size: 0.86rem;
-            color: var(--text-main);
+            margin: 0 0 10px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-weight: 700;
         }
 
         .dl-detail .block p {
-            margin: 7px 0 0;
-            font-size: 0.84rem;
-            color: var(--text-main);
+            margin: 0;
+            font-size: 0.9375rem;
+            color: var(--text-primary);
             line-height: 1.7;
         }
 
@@ -407,16 +453,17 @@
         }
 
         .dl-compare-slot h3 {
-            margin: 0;
-            font-size: 0.95rem;
-            color: var(--primary);
+            margin: 0 0 8px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-blue);
         }
 
         .dl-compare-slot p {
-            margin: 7px 0 0;
-            font-size: 0.82rem;
-            color: var(--text-main);
-            line-height: 1.65;
+            margin: 0 0 12px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
 
         .dl-pool {
