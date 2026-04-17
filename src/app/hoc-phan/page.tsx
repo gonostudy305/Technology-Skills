@@ -1,110 +1,173 @@
-import React from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { getArticlesList } from "@/lib/contents";
+import {
+  buildSubjectDirectory,
+  getSubjectStatusMeta,
+  type SubjectDirectoryItem,
+} from "@/lib/subjects";
+import { formatDateVi } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Học phần | Tech Knowledge Base",
-  description: "Danh sách các học phần trong chương trình Hệ thống thông tin UEL",
+  title: "Học phần | HTTT UEL Hub",
+  description: "Tra cứu học phần HTTT UEL và mở rộng nội dung theo từng môn học.",
 };
 
-const curriculumGroups = [
-  {
-    name: "Nhóm 1 — Nền tảng kỹ thuật",
-    description: "Các học phần nền tảng kỹ thuật, tập trung vào algorithms, database, và DevOps.",
-    modules: [
-      { name: "Tư duy lập trình", type: "Simulation", description: "Visualize thuật toán sorting, recursion call stack, flowchart tương tác." },
-      { name: "Nền tảng công nghệ cho HTTT", type: "Blog + Simulation", description: "Giải thích TCP/IP, request-response, so sánh client-server vs peer-to-peer." },
-      { name: "Kỹ thuật lập trình (Tập trung Git/Docker)", type: "Blog + Simulation", description: "Git workflow, commit tree, Docker lifecycle." },
-      { name: "Cơ sở dữ liệu", type: "Simulation", description: "SQL JOIN visualizer, Entity-Relationship diagram builder." },
-      { name: "An toàn và bảo mật HTTT", type: "Blog", description: "SSL/TLS handshake, OWASP Top 10, phân biệt authentication vs authorization." },
-      { name: "Kỹ thuật kiểm thử phần mềm", type: "Blog + Simulation", description: "Unit test vs integration test vs E2E, interactive test case builder." },
-    ],
-  },
-  {
-    name: "Nhóm 2 — Phân tích dữ liệu",
-    description: "Thế mạnh cốt lõi: từ pipeline raw data đến visualized insights và Machine Learning.",
-    modules: [
-      { name: "Phân tích dữ liệu", type: "Blog + Simulation", description: "Pandas workflow từ dataset web analytics, interactive chart builder." },
-      { name: "Phân tích dữ liệu nâng cao", type: "Blog", description: "Data pipeline, cleaning, EDA, visualization với PhoBERT/SVM/XGBoost." },
-      { name: "Phân tích dữ liệu web", type: "Blog + Simulation", description: "Google Analytics 4 funnel visualization, cohort analysis." },
-      { name: "Học máy trong phân tích kinh doanh", type: "Blog", description: "Decision tree, random forest, gradient boosting, so sánh SVM/XGBoost." },
-      { name: "Giải pháp AI trong kinh doanh & quản lý", type: "Blog", description: "LLM prompt engineering, AI agent workflow (n8n + Gemini)." },
-    ],
-  },
-  {
-    name: "Nhóm 3 — Phát triển hệ thống / Web",
-    description: "Xây dựng các hệ thống web thực tế phục vụ vận hành kinh doanh và doanh nghiệp.",
-    modules: [
-      { name: "Phân tích và thiết kế HTTT", type: "Blog + Simulation", description: "UML use case diagram builder tương tác, BPMN process flow." },
-      { name: "Phát triển web kinh doanh", type: "Blog + Simulation", description: "Next.js project structure, REST API lifecycle animation." },
-      { name: "Phát triển web kinh doanh nâng cao", type: "Blog", description: "Performance optimization (Core Web Vitals), SSR vs SSG vs CSR." },
-      { name: "Tích hợp quy trình KD với ERP", type: "Blog", description: "ERP architecture, module-based vs monolith, workflow automation." },
-      { name: "Chuyên đề: Tự động hóa quy trình quản trị", type: "Blog", description: "RPA workflow từ n8n, Zapier vs Make." },
-    ],
-  },
-  {
-    name: "Nhóm 4 — Marketing số và kinh doanh ĐT",
-    description: "Công nghệ Martech, D2C, eCRM và Quản trị chuỗi cung ứng.",
-    modules: [
-      { name: "Phân tích marketing số", type: "Blog + Simulation", description: "Marketing attribution model visualizer, A/B test significance calculator." },
-      { name: "Công nghệ marketing", type: "Blog", description: "Martech stack, CDP vs CRM vs DMP, Pixel tracking lifecycle." },
-      { name: "Thương mại điện tử", type: "Blog", description: "Marketplace vs D2C vs social commerce, unit economics calculator." },
-      { name: "Thương mại trên mạng xã hội", type: "Blog", description: "TikTok Shop vs Facebook Shop architecture, live commerce funnel." },
-      { name: "Quán trị khách hàng điện tử (eCRM)", type: "Blog + Simulation", description: "Customer journey map builder, RFM segmentation visualizer." },
-      { name: "Quán trị chuỗi cung ứng TMĐT", type: "Blog", description: "Supply chain visualization tương tác." },
-    ],
-  },
-  {
-    name: "Nhóm 5 — Chuyên sâu và liên ngành",
-    description: "Kiến thức nâng cao đi từ Blockchain đến phương pháp nghiên cứu liên ngành.",
-    modules: [
-      { name: "Ứng dụng công nghệ Blockchain", type: "Blog + Simulation", description: "Blockchain block structure visualizer, public vs private blockchain." },
-      { name: "Hệ thống thông tin kinh doanh", type: "Blog", description: "BI stack architecture, dashboard design principles." },
-      { name: "Phương pháp nghiên cứu liên ngành", type: "Blog", description: "Hướng dẫn viết research paper, IMRaD structure với PhoBERT." },
-      { name: "Thiết kế đồ họa và đa phương tiện", type: "Blog", description: "Figma component system, design token, Figma MCP." },
-    ],
-  },
-];
+const TONE_CLASS_MAP = {
+  teal: "border-teal-200 bg-teal-50 text-teal-700",
+  cyan: "border-cyan-200 bg-cyan-50 text-cyan-700",
+  amber: "border-amber-200 bg-amber-50 text-amber-700",
+  zinc: "border-zinc-200 bg-zinc-100 text-zinc-700",
+} as const;
 
-export default function CurriculumPage() {
+function groupByYear(subjects: SubjectDirectoryItem[]) {
+  return [1, 2, 3, 4]
+    .map((year) => ({
+      year,
+      subjects: subjects.filter((subject) => subject.year === year),
+    }))
+    .filter((group) => group.subjects.length > 0);
+}
+
+export default async function CurriculumPage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
+  const query = (searchParams.q ?? "").trim().toLowerCase();
+  const articles = await getArticlesList();
+  const subjectDirectory = buildSubjectDirectory(articles);
+
+  const filteredSubjects = query
+    ? subjectDirectory.filter((subject) => {
+        const inSubject = `${subject.name} ${subject.description}`.toLowerCase();
+        const inResources = subject.resources
+          .map((resource) => resource.title)
+          .join(" ")
+          .toLowerCase();
+        return inSubject.includes(query) || inResources.includes(query);
+      })
+    : subjectDirectory;
+
+  const groupedSubjects = groupByYear(filteredSubjects);
+
   return (
     <div className="mx-auto w-full max-w-[1180px] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mb-12">
-        <h1 className="text-4xl font-serif font-bold text-zinc-900 mb-4 tracking-tight">Học phần HTTT UEL</h1>
-        <p className="text-lg text-zinc-600 max-w-2xl leading-relaxed">
-          Bản đồ lộ trình học tập gồm hơn 30 học phần ngành Thương mại điện tử và Hệ thống thông tin (UEL). 
-          Kết hợp lý thuyết với <strong className="font-medium text-orange-600">tương tác thực hành (Simulation)</strong> và case study từ dự án thực tế.
+      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-sm">
+        <h1 className="text-4xl font-bold tracking-tight text-[var(--color-text-primary)]">
+          Học phần HTTT UEL
+        </h1>
+        <p className="mt-3 max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)]">
+          Tìm theo đúng môn học trong thời khóa biểu và mở nội dung ngay tại chỗ.
+          Mỗi học phần hiển thị trạng thái rõ ràng: Có blog, Có simulation,
+          Đang viết hoặc Chưa có.
         </p>
-      </div>
 
-      <div className="space-y-12">
-        {curriculumGroups.map((group, idx) => (
-          <div key={idx} className="border border-zinc-200 bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="bg-zinc-50 border-b border-zinc-200 px-6 py-4">
-              <h2 className="text-xl font-semibold text-zinc-800">{group.name}</h2>
-              <p className="text-sm text-zinc-500 mt-1">{group.description}</p>
+        <form action="/hoc-phan" className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <input
+            name="q"
+            defaultValue={searchParams.q ?? ""}
+            placeholder="Tìm học phần, ví dụ: Cơ sở dữ liệu, Kỹ thuật lập trình..."
+            className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-4 text-sm text-zinc-800 outline-none transition focus:border-[var(--color-accent)] focus:ring-2 focus:ring-teal-100"
+          />
+          <button
+            type="submit"
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--color-accent)] px-5 text-sm font-semibold text-white transition hover:brightness-110"
+          >
+            Tìm học phần
+          </button>
+        </form>
+      </section>
+
+      {groupedSubjects.length === 0 ? (
+        <section className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center shadow-sm">
+          <p className="text-zinc-600">Không tìm thấy học phần phù hợp với từ khóa.</p>
+        </section>
+      ) : (
+        <section className="mt-8 space-y-8">
+          {groupedSubjects.map((group) => (
+            <div key={group.year}>
+              <h2 className="mb-3 text-xl font-semibold text-[var(--color-text-primary)]">
+                Năm {group.year}
+              </h2>
+
+              <div className="space-y-3">
+                {group.subjects.map((subject) => {
+                  const statusMeta = getSubjectStatusMeta(subject.status);
+                  const shouldOpen = Boolean(query) || subject.resourceCount > 0;
+
+                  return (
+                    <details
+                      key={subject.slug}
+                      open={shouldOpen}
+                      className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm"
+                    >
+                      <summary className="cursor-pointer list-none p-5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-semibold text-[var(--color-text-primary)]">
+                            {subject.name}
+                          </h3>
+                          <span
+                            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${TONE_CLASS_MAP[statusMeta.tone]}`}
+                          >
+                            {statusMeta.label}
+                          </span>
+                          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700">
+                            {subject.resourceCount} tài nguyên
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                          {subject.description}
+                        </p>
+                      </summary>
+
+                      <div className="border-t border-zinc-200 px-5 py-4">
+                        {subject.resources.length === 0 ? (
+                          <p className="text-sm text-[var(--color-text-secondary)]">
+                            Học phần này đang trong hàng đợi biên soạn.
+                          </p>
+                        ) : (
+                          <ul className="space-y-3">
+                            {subject.resources.map((resource) => (
+                              <li key={resource.slug}>
+                                <Link
+                                  href={resource.routePath}
+                                  className="group block rounded-xl border border-zinc-200 bg-zinc-50 p-4 transition hover:-translate-y-0.5 hover:bg-white hover:shadow-sm"
+                                >
+                                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                                    <span>{resource.kind === "sim" ? "Simulation" : "Bài viết"}</span>
+                                    <span>•</span>
+                                    <span>{resource.category ?? "Kiến thức"}</span>
+                                  </div>
+                                  <h4 className="mt-2 text-base font-semibold leading-tight text-[var(--color-text-primary)] transition group-hover:text-[var(--color-accent)]">
+                                    {resource.title}
+                                  </h4>
+                                  <p className="mt-2 text-xs text-[var(--color-text-secondary)]">
+                                    Cập nhật: {formatDateVi(resource.updatedAt)}
+                                  </p>
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        <div className="mt-4">
+                          <Link
+                            href={`/hoc-phan/${subject.slug}`}
+                            className="text-sm font-medium text-[var(--color-accent)] hover:underline"
+                          >
+                            Xem trang học phần riêng
+                          </Link>
+                        </div>
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
             </div>
-            <div className="divide-y divide-zinc-100">
-              {group.modules.map((mod, midx) => (
-                <div key={midx} className="p-6 transition hover:bg-zinc-50 flex flex-col sm:flex-row sm:items-start gap-4 justify-between">
-                  <div className="space-y-1.5 flex-1">
-                    <h3 className="text-lg font-medium text-zinc-900 group-hover:text-sky-600 transition-colors">
-                      {mod.name}
-                    </h3>
-                    <p className="text-sm text-zinc-600 leading-relaxed max-w-3xl">
-                      {mod.description}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="inline-flex items-center rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/20 whitespace-nowrap">
-                      {mod.type}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </section>
+      )}
     </div>
   );
 }

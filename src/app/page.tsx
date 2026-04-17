@@ -6,6 +6,11 @@ import {
   TAB_CATEGORY_MAP,
 } from "@/lib/contents";
 import { formatDateVi, formatNumberVi } from "@/lib/utils";
+import {
+  buildSubjectDirectory,
+  getCanonicalArticlePath,
+  getSubjectStatusMeta,
+} from "@/lib/subjects";
 
 // ---------------------------------------------------------------------------
 // ISR – rebuild Home at most once every 60 seconds
@@ -44,6 +49,17 @@ function getTypeLabel(type: string): string {
   return type === "md" ? "Markdown" : "HTML";
 }
 
+function getArticleHref(slug: string): string {
+  return getCanonicalArticlePath(slug) ?? `/articles/${slug}`;
+}
+
+const TONE_CLASS_MAP = {
+  teal: "border-teal-200 bg-teal-50 text-teal-700",
+  cyan: "border-cyan-200 bg-cyan-50 text-cyan-700",
+  amber: "border-amber-200 bg-amber-50 text-amber-700",
+  zinc: "border-zinc-200 bg-zinc-100 text-zinc-700",
+} as const;
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
@@ -54,11 +70,13 @@ function renderSecondaryHeroCard(
 ) {
   if (!article) return null;
 
+  const articleHref = getArticleHref(article.slug);
+
   return (
     <Link
       key={article.slug}
       prefetch
-      href={`/articles/${article.slug}`}
+      href={articleHref}
       className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900 p-5 text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
     >
       <div
@@ -108,6 +126,9 @@ export default async function Home({
     ? sortedArticles.filter((a) => a.category === activeCategory)
     : sortedArticles;
 
+  const subjectDirectory = buildSubjectDirectory(sortedArticles);
+  const featuredSubjects = subjectDirectory.slice(0, 8);
+
   const heroArticle = sortedArticles[0];
   const secondaryHeroArticles = sortedArticles.slice(1, 3);
   const spotlightArticle = sortedArticles[3] ?? sortedArticles[0];
@@ -128,33 +149,73 @@ export default async function Home({
           </section>
         ) : (
           <>
-            <section className="mb-12 mt-4 text-center max-w-4xl mx-auto space-y-4 px-4 bg-white/50 py-10 rounded-3xl border border-zinc-200/50 backdrop-blur-sm">
-              <span className="inline-block rounded-full bg-sky-100 px-3 py-1 font-medium tracking-wide text-sky-800 text-sm mb-2 shadow-sm border border-sky-200/60 uppercase">
-                Dành riêng cho sinh viên UEL
+            <section className="mb-8 mt-4 rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
+              <span className="inline-flex rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-teal-700">
+                Module-first Homepage
               </span>
-              <h1 className="text-[2.5rem] sm:text-5xl font-serif font-bold text-zinc-900 tracking-tight !leading-tight">
-                Tài nguyên Học tập &amp; Simulation Trực quan
+              <h1 className="mt-3 text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
+                Bạn đang học môn nào ở HTTT UEL?
               </h1>
-              <p className="text-lg text-zinc-600 max-w-2xl mx-auto mt-4">
-                Hơn 35 module kiến thức cho ngành{" "}
-                <strong className="text-zinc-800 font-medium">
-                  HTTT, TMĐT, KDS &amp; AI
-                </strong>
-                . Tiếp cận kiến thức chuyên ngành trực quan qua interactive
-                simulations và case study thực tế từ doanh nghiệp.
+              <p className="mt-3 max-w-3xl text-base leading-relaxed text-zinc-600">
+                Tìm học phần trước, đọc nội dung sau. Chọn đúng môn để vào ngay
+                bài viết hoặc simulation phù hợp cho việc học và ôn thi.
               </p>
-              <div className="pt-6 flex flex-wrap items-center justify-center gap-4">
+
+              <form action="/hoc-phan" className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <input
+                  name="q"
+                  placeholder="Ví dụ: Cơ sở dữ liệu, Kỹ thuật lập trình, Phân tích dữ liệu..."
+                  className="h-11 w-full rounded-xl border border-zinc-300 bg-white px-4 text-sm text-zinc-800 outline-none transition focus:border-[var(--color-accent)] focus:ring-2 focus:ring-teal-100"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex h-11 items-center justify-center rounded-xl bg-[var(--color-accent)] px-5 text-sm font-semibold text-white transition hover:brightness-110"
+                >
+                  Tìm học phần
+                </button>
+              </form>
+
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {featuredSubjects.map((subject) => {
+                  const statusMeta = getSubjectStatusMeta(subject.status);
+
+                  return (
+                    <Link
+                      key={subject.slug}
+                      href={`/hoc-phan/${subject.slug}`}
+                      className="group rounded-2xl border border-zinc-200 bg-zinc-50 p-4 transition hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-white hover:shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                          Năm {subject.year}
+                        </span>
+                        <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${TONE_CLASS_MAP[statusMeta.tone]}`}>
+                          {statusMeta.label}
+                        </span>
+                      </div>
+                      <h2 className="mt-2 text-base font-semibold leading-tight text-zinc-900 transition group-hover:text-[var(--color-accent)]">
+                        {subject.name}
+                      </h2>
+                      <p className="mt-2 text-sm text-zinc-600">
+                        {subject.resourceCount} tài nguyên khả dụng
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-4">
                 <Link
                   href="/hoc-phan"
-                  className="rounded-full bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 shadow-sm"
+                  className="text-sm font-semibold text-[var(--color-accent)] hover:underline"
                 >
-                  Khám phá Lộ trình Học phần
+                  Xem toàn bộ map học phần
                 </Link>
                 <Link
                   href="#latest-articles"
-                  className="rounded-full bg-white border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 shadow-sm"
+                  className="text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
                 >
-                  Bài viết mới nhất
+                  Xem feed bài viết phía dưới
                 </Link>
               </div>
             </section>
@@ -163,7 +224,7 @@ export default async function Home({
               {heroArticle ? (
                 <Link
                   prefetch
-                  href={`/articles/${heroArticle.slug}`}
+                  href={getArticleHref(heroArticle.slug)}
                   className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900 p-6 text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:p-8"
                 >
                   <div
@@ -212,7 +273,7 @@ export default async function Home({
                 {spotlightArticle ? (
                   <Link
                     prefetch
-                    href={`/articles/${spotlightArticle.slug}`}
+                    href={getArticleHref(spotlightArticle.slug)}
                     className="group mt-4 block overflow-hidden rounded-xl border border-zinc-200"
                   >
                     <div
@@ -286,7 +347,7 @@ export default async function Home({
                     <li key={article.slug}>
                       <Link
                         prefetch
-                        href={`/articles/${article.slug}`}
+                        href={getArticleHref(article.slug)}
                         className="group flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-start sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
                       >
                         <div
