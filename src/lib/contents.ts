@@ -30,8 +30,19 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
       
       let title = slug;
       if (type === "html") {
+        // Try getting <title> first (if present), else fallback to the first <h1>
         const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
-        if (titleMatch) title = titleMatch[1].trim();
+        const h1Match = content.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+        
+        if (titleMatch) {
+          title = titleMatch[1].trim();
+        } else if (h1Match) {
+          // Remove potential child tags like <span> inside <h1>
+          title = h1Match[1].replace(/<[^>]*>?/gm, "").trim(); 
+        } else {
+          // Fallback to formatted slug
+          title = slug.replace(/_/g, " ").replace(/-/g, " ");
+        }
       } else {
         const { data, content: mdContent } = matter(content);
         if (data.name) title = data.name;
