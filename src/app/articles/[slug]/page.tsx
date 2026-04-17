@@ -13,6 +13,7 @@ import {
 } from "@/lib/utils";
 import Link from "next/link";
 import HtmlRenderer from "./HtmlRenderer";
+import ReadingProgressBar from "./ReadingProgressBar";
 
 // ---------------------------------------------------------------------------
 // ISR — Incremental Static Regeneration
@@ -116,10 +117,6 @@ export default async function ArticlePage({
   }
 
   const articleMeta = articles.find((item) => item.slug === params.slug);
-  const relatedArticles = articles
-    .filter((item) => item.slug !== params.slug)
-    .sort((a, b) => articleTimeValue(b) - articleTimeValue(a))
-    .slice(0, 3);
 
   const articleTitle = articleMeta?.title ?? titleFromSlug(params.slug);
   const articleSummary =
@@ -138,24 +135,47 @@ export default async function ArticlePage({
     /(docker-sim-shell|dl-shell|id=["']tab-list["']|class=["'][^"']*tab-btn|id=["']local-graph-container["']|id=["']roleRadarChart["'])/i;
   const hasEmbeddedSidebarLayout =
     article.type === "html" && embeddedLayoutMarker.test(article.content);
+  const isReadingLayout = !hasEmbeddedSidebarLayout;
+
+  const sameCategoryArticles = articles
+    .filter(
+      (item) =>
+        item.slug !== params.slug &&
+        normalizeCategoryLabel(item.category) === articleCategory,
+    )
+    .sort((a, b) => articleTimeValue(b) - articleTimeValue(a));
+
+  const fallbackArticles = articles
+    .filter(
+      (item) =>
+        item.slug !== params.slug &&
+        !sameCategoryArticles.some((related) => related.slug === item.slug),
+    )
+    .sort((a, b) => articleTimeValue(b) - articleTimeValue(a));
+
+  const relatedArticles = [...sameCategoryArticles, ...fallbackArticles].slice(0, 3);
 
   const pageContainerClassName = hasEmbeddedSidebarLayout
     ? "mx-auto w-full max-w-[1540px] px-2 sm:px-4 lg:px-6"
-    : "mx-auto w-full max-w-[1180px] px-3 sm:px-5 lg:px-8";
+    : "mx-auto w-full max-w-[1200px] px-3 sm:px-5 lg:px-8";
 
   const tocTopClassName =
     "mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:hidden";
 
   const articleGridClassName = hasEmbeddedSidebarLayout
     ? "mt-6 grid gap-4"
-    : "mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]";
+    : articleToc.length > 0
+      ? "mt-6 grid gap-6 lg:grid-cols-[220px_minmax(0,720px)] lg:justify-center xl:grid-cols-[240px_minmax(0,720px)]"
+      : "mt-6 grid gap-6 lg:grid-cols-[minmax(0,720px)] lg:justify-center";
 
   const htmlContentPaddingClassName = hasEmbeddedSidebarLayout
     ? "article-rich-content px-1 py-1 sm:px-2 sm:py-2"
-    : "article-rich-content px-2 py-2 sm:px-4 sm:py-4";
+    : "article-rich-content article-reading px-3 py-4 sm:px-6 sm:py-7";
 
   return (
     <div className="min-h-screen bg-[#f5f1ea] pb-14 pt-5 sm:pt-7">
+      {isReadingLayout ? <ReadingProgressBar /> : null}
+
       <div className={pageContainerClassName}>
         <section className="rounded-2xl border border-zinc-200 bg-white/95 p-4 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
@@ -195,8 +215,8 @@ export default async function ArticlePage({
             </div>
 
             <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-              <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600">
-                {articleCategory}
+              <span className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                Học phần liên quan: {articleCategory}
               </span>
               <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600">
                 {article.type.toUpperCase()}
@@ -208,7 +228,7 @@ export default async function ArticlePage({
           </div>
         </section>
 
-        {articleToc.length > 0 && !hasEmbeddedSidebarLayout ? (
+        {articleToc.length > 0 && isReadingLayout ? (
           <section className={tocTopClassName}>
             <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">
               Mục lục nội dung
@@ -234,9 +254,31 @@ export default async function ArticlePage({
         ) : null}
 
         <section className={articleGridClassName}>
+          {isReadingLayout && articleToc.length > 0 ? (
+            <aside className="hidden self-start rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:block">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                Mục lục nội dung
+              </h2>
+              <nav className="mt-3" aria-label="Mục lục bài viết">
+                <ul className="space-y-1.5">
+                  {articleToc.map((item) => (
+                    <li key={item.id} className={item.level === 3 ? "pl-3" : ""}>
+                      <a
+                        href={`#${item.id}`}
+                        className="block rounded-md px-2 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
+                      >
+                        {item.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </aside>
+          ) : null}
+
           <article className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
             {article.type === "md" ? (
-              <div className="article-rich-content prose prose-academic max-w-none px-4 py-9 sm:px-8 lg:px-10">
+              <div className="article-rich-content article-reading prose prose-academic max-w-none px-5 py-9 sm:px-8 lg:px-10">
                 <div dangerouslySetInnerHTML={{ __html: article.content }} />
               </div>
             ) : (
@@ -248,81 +290,15 @@ export default async function ArticlePage({
               </div>
             )}
           </article>
-
-          {!hasEmbeddedSidebarLayout ? (
-            <aside className="space-y-4 self-start lg:sticky lg:top-20">
-              {articleToc.length > 0 ? (
-                <section className="hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm lg:block">
-                  <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-zinc-500">
-                    Mục lục nội dung
-                  </h2>
-                  <nav className="mt-3" aria-label="Mục lục bài viết">
-                    <ul className="space-y-1.5">
-                      {articleToc.map((item) => (
-                        <li
-                          key={item.id}
-                          className={item.level === 3 ? "pl-3" : ""}
-                        >
-                          <a
-                            href={`#${item.id}`}
-                            className="block rounded-md px-2 py-1.5 text-sm text-zinc-600 transition hover:bg-zinc-100 hover:text-zinc-900"
-                          >
-                            {item.text}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
-                </section>
-              ) : null}
-
-              <section className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <span className="inline-flex rounded-full bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
-                  AI Mới Nhất
-                </span>
-                <h2 className="mt-3 text-xl font-semibold leading-tight text-zinc-900">
-                  Claude Skills giúp bạn tăng tốc quy trình viết và nghiên cứu
-                </h2>
-                <p className="mt-3 text-sm leading-relaxed text-zinc-600">
-                  Tận dụng bộ kỹ năng theo ngữ cảnh để tạo bài viết, chuẩn hóa
-                  cấu trúc và tự động hóa thao tác lặp lại.
-                </p>
-                <button
-                  type="button"
-                  className="mt-4 inline-flex items-center rounded-lg bg-[#c7662d] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#b35a26]"
-                >
-                  Dùng thử ngay
-                </button>
-              </section>
-
-              <section className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
-                <div className="bg-[radial-gradient(circle_at_top_left,#fed7aa,#ea580c)] p-4 text-white">
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/85">
-                    Sự kiện
-                  </span>
-                  <h2 className="mt-2 text-lg font-semibold leading-tight">
-                    Workshop Claude AI dành cho đội ngũ nội dung
-                  </h2>
-                </div>
-                <div className="space-y-2 p-4 text-sm text-zinc-600">
-                  <p className="font-medium text-zinc-800">18/04/2026</p>
-                  <p>Online (Lark/Zoom) + Offline: TP.HCM</p>
-                  <p className="font-semibold text-orange-600">
-                    2.092 người đã đăng ký
-                  </p>
-                </div>
-              </section>
-            </aside>
-          ) : null}
         </section>
 
         <section className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-xl font-semibold text-zinc-900">
-              Bài viết liên quan
+              Bài liên quan trong cùng học phần
             </h2>
             <Link
-              href="/"
+              href="/hoc-phan"
               className="text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
             >
               Xem tất cả
@@ -362,26 +338,6 @@ export default async function ArticlePage({
               ))}
             </ul>
           )}
-        </section>
-
-        <section className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-6">
-          <h2 className="text-xl font-semibold text-zinc-900">Thảo luận</h2>
-          <p className="mt-2 text-sm text-zinc-600">
-            Khu vực này dùng để ghi chú nhanh, đặt câu hỏi và trao đổi thêm về
-            nội dung bài viết.
-          </p>
-          <textarea
-            className="mt-4 min-h-28 w-full rounded-xl border border-zinc-300 px-4 py-3 text-sm text-zinc-800 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
-            placeholder="Viết bình luận của bạn tại đây..."
-          />
-          <div className="mt-3 flex justify-end">
-            <button
-              type="button"
-              className="inline-flex items-center rounded-lg bg-[#c7662d] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#b35a26]"
-            >
-              Gửi bình luận
-            </button>
-          </div>
         </section>
       </div>
     </div>
