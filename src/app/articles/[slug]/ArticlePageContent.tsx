@@ -15,6 +15,8 @@ import { getCanonicalArticlePath } from "@/lib/subjects";
 import Link from "next/link";
 import HtmlRenderer from "./HtmlRenderer";
 import ReadingProgressBar from "./ReadingProgressBar";
+import CodeHighlighter from "./CodeHighlighter";
+import SimulationControls from "./SimulationControls";
 
 export const revalidate = 60;
 
@@ -251,18 +253,22 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
             </aside>
           ) : null}
 
-          <article className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+          <article id="article-content-container" className="min-w-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition-all duration-300">
+            <CodeHighlighter />
             {article.type === "md" ? (
               <div className="article-rich-content article-reading prose prose-academic max-w-none px-5 py-9 sm:px-8 lg:px-10">
                 <div dangerouslySetInnerHTML={{ __html: article.content }} />
               </div>
             ) : (
-              <div className={htmlContentPaddingClassName}>
-                <HtmlRenderer
-                  html={article.content}
-                  scripts={article.scripts}
-                />
-              </div>
+              <>
+                {hasEmbeddedSidebarLayout && <SimulationControls />}
+                <div className={htmlContentPaddingClassName}>
+                  <HtmlRenderer
+                    html={article.content}
+                    scripts={article.scripts}
+                  />
+                </div>
+              </>
             )}
           </article>
         </section>
