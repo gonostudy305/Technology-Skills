@@ -127,7 +127,7 @@ export default async function CurriculumPage({
                     <div className="px-5 pt-4 pb-2 flex-1 flex flex-col relative">
                       {/* University logo block (pushed up a bit) */}
                       <div className="absolute -top-6 left-5 h-12 w-12 bg-white rounded shadow-md border border-zinc-100 flex items-center justify-center p-1">
-                        <img src="https://it.uel.edu.vn/wp-content/uploads/2021/04/Logo-Khoa-HTTT.png" alt="Logo" className="w-full h-full object-contain" onError={(e) => e.currentTarget.style.display = 'none'} />
+                        <img src="https://it.uel.edu.vn/wp-content/uploads/2021/04/Logo-Khoa-HTTT.png" alt="Logo" className="w-full h-full object-contain" />
                       </div>
 
                       <div className="mt-6 flex flex-col h-full">
