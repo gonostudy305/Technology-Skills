@@ -980,6 +980,102 @@
 
         render();
     </script>
+    </main>
+
+    <!-- Static Learning Summary — safe zone, outside JS-managed DOM -->
+    <section class="dl-root" style="margin-top: 24px;">
+        <div
+            style="border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; background: var(--bg-card);">
+            <h2 style="margin: 0 0 20px; font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">
+                🎯 Bạn nên thử gì tiếp theo?
+            </h2>
+
+            <div
+                style="display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-bottom: 24px;">
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">Bài
+                        tập 1: Train MLP trên MNIST</h3>
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Dùng đoạn
+                        code bên dưới, thay đổi số hidden units (128 → 256 → 512) và quan sát accuracy thay đổi. Giải
+                        thích tại sao thêm neurons không phải lúc nào cũng tốt hơn.</p>
+                </div>
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">Bài
+                        tập 2: So sánh MLP vs CNN</h3>
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Thay lớp
+                        Linear bằng Conv2d + MaxPool2d trên cùng tập MNIST. So sánh accuracy và thời gian train — bạn sẽ
+                        hiểu ngay lý do CNN sinh ra.</p>
+                </div>
+                <div
+                    style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--accent-blue);">Bài
+                        tập 3: Khám phá Hugging Face</h3>
+                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">Vào
+                        <strong>huggingface.co/models</strong>, tìm model BERT tiếng Việt
+                        (<code>vinai/phobert-base</code>), chạy thử pipeline phân loại cảm xúc với 5 câu review Shopee.
+                    </p>
+                </div>
+            </div>
+
+            <div
+                style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-sidebar);">
+                <h3 style="margin: 0 0 12px; font-size: 0.875rem; font-weight: 700; color: var(--accent-orange);">
+                    Starter Code: MLP phân loại chữ số viết tay (PyTorch)</h3>
+                <pre
+                    style="margin: 0; padding: 16px; border-radius: 8px; background: #1e293b; color: #e2e8f0; font-family: monospace; font-size: 0.82rem; overflow-x: auto; white-space: pre; line-height: 1.6;">import torch
+import torch.nn as nn
+from torchvision import datasets, transforms
+from torch.utils.data import DataLoader
+
+# 1. Chuẩn bị dữ liệu MNIST (60k ảnh 28x28 chữ số viết tay)
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+train_data = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
+train_loader = DataLoader(train_data, batch_size=64, shuffle=True)
+
+# 2. Định nghĩa MLP: 784 input → 128 hidden → 10 output
+class MLP(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Flatten(),              # 28x28 → 784
+            nn.Linear(784, 128),       # Hidden layer
+            nn.ReLU(),                 # Activation function
+            nn.Linear(128, 10)         # 10 chữ số (0-9)
+        )
+    def forward(self, x):
+        return self.net(x)
+
+# 3. Train loop cơ bản
+model = MLP()
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+loss_fn = nn.CrossEntropyLoss()
+
+for epoch in range(3):
+    total_loss = 0
+    for images, labels in train_loader:
+        pred = model(images)
+        loss = loss_fn(pred, labels)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        total_loss += loss.item()
+    print(f"Epoch {epoch+1}, Loss: {total_loss/len(train_loader):.4f}")
+# Kỳ vọng: loss giảm dần qua 3 epoch → model đang học!</pre>
+            </div>
+
+            <div
+                style="margin-top: 16px; padding: 14px; border-left: 3px solid var(--accent-blue); border-radius: 0 10px 10px 0; background: rgba(3, 105, 161, 0.06);">
+                <p style="margin: 0; font-size: 0.875rem; color: var(--text-primary);">
+                    <strong>Lộ trình tiếp theo:</strong> Sau khi hiểu MLP → CNN → RNN, hãy đọc paper gốc "Attention Is
+                    All You Need" (2017) — đây là bài báo tạo ra Transformer và thay đổi toàn bộ ngành AI. Tìm từ khóa
+                    <code>"Vaswani et al 2017 PDF"</code>.
+                </p>
+            </div>
+        </div>
+    </section>
+
 </body>
 
 </html>

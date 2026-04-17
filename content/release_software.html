@@ -566,6 +566,47 @@
 
         startApp();
     </script>
+    <!-- Static Educational Summary — safe zone, outside JS module scope -->
+    <section class="max-w-7xl mx-auto px-4 md:px-10 mt-10 mb-8">
+        <div class="glass-card rounded-2xl p-6 md:p-8">
+            <h2 class="text-xl font-bold text-white mb-4">🎯 Từ bài học này ra thực tế — 3 bước tiếp theo</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <h3 class="text-sm font-bold text-blue-400 mb-2">1. Xây Release Checklist cho team</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Lấy checklist của 4 vai trò (PM, Dev, QA, DevOps)
+                        trong bài, customize theo project môn học của bạn. Chia checklist thành 3 giai đoạn:
+                        Pre-release, Release day, Post-release.</p>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <h3 class="text-sm font-bold text-emerald-400 mb-2">2. Tập mô phỏng sự cố</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Hẹn nhóm 30 phút, đặt ra 1 tình huống (VD:
+                        "database migration lỗi 10 phút trước release"). Mỗi người đóng 1 vai trò và đề xuất hành động
+                        trong 5 phút.</p>
+                </div>
+                <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700">
+                    <h3 class="text-sm font-bold text-amber-400 mb-2">3. Tìm hiểu CI/CD pipeline</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Tạo một GitHub Actions workflow đơn giản: push
+                        code → chạy test → build → deploy lên Vercel/Firebase Hosting. Đây là kỹ năng DevOps nền tảng.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-4 rounded-xl border border-indigo-500/30 bg-indigo-900/10">
+                <h3 class="text-sm font-bold text-indigo-300 mb-2">📝 Ghi chú về triển khai trang này</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    Trang này sử dụng <strong>Firebase Auth</strong> (anonymous sign-in) + <strong>Firestore</strong>
+                    (lưu custom roles) + <strong>Gemini API</strong> (mô phỏng sự cố).
+                    Khi chạy standalone (ngoài Google Canvas), bạn cần: (1) tạo Firebase project và thay <code
+                        class="bg-slate-800 px-1 rounded">__firebase_config</code> bằng config thật,
+                    (2) bật Anonymous Auth trong Firebase Console, (3) thêm Gemini API key vào biến <code
+                        class="bg-slate-800 px-1 rounded">apiKey</code> trong hàm <code
+                        class="bg-slate-800 px-1 rounded">callGemini</code>.
+                </p>
+            </div>
+        </div>
+    </section>
+
 </body>
 
 </html>

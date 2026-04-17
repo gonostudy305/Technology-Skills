@@ -674,6 +674,66 @@
         </div>
     </main>
 
+    <!-- Static Learning Summary — safe zone, outside JS-managed DOM -->
+    <section class="docker-sim-root" style="margin-top: 24px;">
+        <div style="border: 1px solid var(--line); border-radius: 14px; padding: 24px; background: var(--bg-panel);">
+            <h2 style="margin: 0 0 16px; font-size: 1.25rem; font-weight: 700; color: var(--title);">
+                🎯 Thử Docker ngay trên máy — 3 bước đầu tiên
+            </h2>
+
+            <div style="display: grid; gap: 16px;">
+                <div
+                    style="border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--bg-soft);">
+                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--brand);">Bước 1:
+                        Chạy container đầu tiên</h3>
+                    <pre
+                        style="margin: 8px 0 0; padding: 12px; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-family: monospace; font-size: 0.85rem; overflow-x: auto; white-space: pre;">docker run hello-world
+# Docker tự tải image hello-world từ Docker Hub
+# rồi chạy container in ra thông báo chào mừng.</pre>
+                </div>
+
+                <div
+                    style="border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--bg-soft);">
+                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--brand);">Bước 2:
+                        Viết Dockerfile cho app Python Flask</h3>
+                    <pre
+                        style="margin: 8px 0 0; padding: 12px; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-family: monospace; font-size: 0.85rem; overflow-x: auto; white-space: pre;"># Dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD ["python", "app.py"]</pre>
+                    <p style="margin: 8px 0 0; font-size: 0.85rem; color: var(--text-soft);">
+                        <strong>Tại sao COPY requirements.txt trước?</strong> Docker cache từng layer — nếu code thay
+                        đổi nhưng dependencies không đổi, bước <code>pip install</code> sẽ dùng lại cache, giúp build
+                        nhanh hơn 10-20x.
+                    </p>
+                </div>
+
+                <div
+                    style="border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: var(--bg-soft);">
+                    <h3 style="margin: 0 0 8px; font-size: 0.875rem; font-weight: 700; color: var(--brand);">Bước 3:
+                        Build và chạy</h3>
+                    <pre
+                        style="margin: 8px 0 0; padding: 12px; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-family: monospace; font-size: 0.85rem; overflow-x: auto; white-space: pre;">docker build -t my-flask-app .
+docker run -p 5000:5000 my-flask-app
+# Mở trình duyệt: http://localhost:5000</pre>
+                </div>
+            </div>
+
+            <div
+                style="margin-top: 16px; padding: 14px; border-left: 3px solid var(--brand); border-radius: 0 10px 10px 0; background: rgba(37, 99, 235, 0.08);">
+                <p style="margin: 0; font-size: 0.875rem; color: var(--text-main);">
+                    <strong>Bước tiếp theo:</strong> Tìm hiểu <code>docker-compose.yml</code> để chạy nhiều container
+                    cùng lúc (ví dụ: Flask + PostgreSQL + Redis). Đây là kỹ năng bắt buộc cho bất kỳ dự án backend nào
+                    trong môn Phát triển web kinh doanh.
+                </p>
+            </div>
+        </div>
+    </section>
+
     <script>
         const DOCKER_KNOWLEDGE = {
             overview: {

@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="category" content="Kiến thức">
+    <meta name="description"
+        content="Giải thích chuyên sâu 9 thiết bị mạng cốt lõi (Modem, Router, Switch, AP, Firewall…) từ trực quan đến kỹ thuật OSI, kèm sơ đồ minh họa và bảng so sánh thực tế.">
+    <meta name="author" content="Minh Tuấn">
     <title>Từ Điển Chuyên Sâu: Thiết Bị Mạng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -605,18 +608,35 @@
             </section>
 
             <!-- Conclusion -->
-            <section id="conclusion" class="bg-slate-900 text-white rounded-2xl p-8 text-center">
-                <i class="fa-solid fa-flag-checkered text-3xl text-primary mb-4 block"></i>
-                <h2 class="text-2xl font-bold mb-3">Tổng kết</h2>
-                <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto mb-6">
-                    Mạng máy tính không phải là một phép màu, nó là sự kết hợp chặt chẽ của phần cứng với các giao thức
-                    tiêu chuẩn (OSI, TCP/IP). Hiểu rõ chức năng phân tách của <strong>Modem</strong> (dịch tín hiệu),
-                    <strong>Router</strong> (tìm đường), <strong>Switch</strong> (chia nhánh) và <strong>AP</strong>
-                    (phát vô tuyến) sẽ giúp bạn có tư duy thiết kế, gỡ lỗi (troubleshoot) và tối ưu hóa bất kỳ hệ thống
-                    mạng nào một cách khoa học nhất.
-                </p>
+            <section id="conclusion" class="bg-slate-900 text-white rounded-2xl p-8">
+                <h2 class="text-2xl font-bold mb-4">🎯 Thử ngay: Vẽ bản đồ mạng nhà bạn</h2>
+                <div class="text-slate-300 text-sm md:text-base max-w-3xl space-y-4">
+                    <p>Lấy một tờ giấy A4 và thực hiện 3 bước sau:</p>
+                    <ol class="list-decimal pl-6 space-y-2">
+                        <li><strong>Xác định thiết bị "All-in-One"</strong> của nhà mạng (Viettel/FPT/VNPT). Lật mặt sau
+                            đọc model — tra Google xem nó tích hợp những module nào (Modem? Router? AP? Switch?).</li>
+                        <li><strong>Vẽ sơ đồ kết nối</strong> từ ONT Gateway đến từng thiết bị trong nhà (PC, điện
+                            thoại, smart TV, camera IP). Ghi rõ: kết nối có dây (LAN) hay không dây (Wi-Fi).</li>
+                        <li><strong>Xác định điểm yếu</strong>: phòng nào sóng yếu nhất? Bạn sẽ dùng Repeater hay kéo
+                            dây lắp AP? Giải thích trade-off giữa hai phương án dựa trên kiến thức trong bài.</li>
+                    </ol>
+
+                    <div class="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
+                        <p class="text-sm text-blue-200 font-semibold mb-2">Bước tiếp theo trong lộ trình</p>
+                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                            <li><strong>VLAN (Virtual LAN):</strong> Cách Switch Layer 3 chia mạng vật lý thành nhiều
+                                mạng logic — kỹ năng bắt buộc cho quản trị mạng doanh nghiệp.</li>
+                            <li><strong>Subnetting:</strong> Cách chia nhỏ dải IP để tối ưu hiệu suất mạng và bảo mật —
+                                đề thi thường gặp trong môn An toàn bảo mật.</li>
+                        </ul>
+                    </div>
+
+                    <p class="text-slate-400 text-xs mt-4"><strong>Câu hỏi mở:</strong> Nếu quán cafe có 50 khách kết
+                        nối Wi-Fi cùng lúc, tại sao dùng 1 Router Wi-Fi không đủ mà cần hệ thống AP + Switch? Gợi ý:
+                        nghĩ về Collision Domain và NAT table size.</p>
+                </div>
                 <button onclick="window.scrollTo(0,0)"
-                    class="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-full transition-colors text-sm">
+                    class="mt-6 bg-primary hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-full transition-colors text-sm">
                     Lên đầu trang <i class="fa-solid fa-arrow-up ml-2"></i>
                 </button>
             </section>
