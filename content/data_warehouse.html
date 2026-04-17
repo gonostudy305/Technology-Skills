@@ -1,4 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chiến Lược Data Warehouse - Akia Smart Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .phase-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .phase-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .arch-node {
+            transition: all 0.3s ease;
+        }
+
+        .arch-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-btn.active {
+            background-color: #eff6ff;
+            border-right: 4px solid #2563eb;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 antialiased">
 
     <!-- Navbar -->
     <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
@@ -390,4 +457,23 @@
     </footer>
 
     <!-- Interactive Script -->
-    
+    <script>
+        function showPhase(phaseIndex) {
+            // Hide all phases
+            const contents = document.querySelectorAll('.phase-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show target phase
+            document.getElementById(`phase-${phaseIndex}`).classList.add('active');
+
+            // Highlight active tab
+            tabs[phaseIndex].classList.add('active');
+        }
+    </script>
+</body>
+
+</html>
