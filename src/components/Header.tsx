@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
-const NAV_ITEMS = ["Nen tang", "Tinh nang", "Nang cao", "Ung dung", "Viet Nam", "Cong dong"];
+const NAV_ITEMS = ["Học phần", "Simulation", "Case Studies", "Tài nguyên", "Cộng đồng UEL", "Về dự án"];
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -43,21 +43,21 @@ export default function Header() {
             <Link
               href="/"
               className="flex items-center gap-1.5 rounded px-1 py-1 text-zinc-900 transition hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-              aria-label="Tech Knowledge Base"
+              aria-label="HTTT UEL Knowledge Base"
             >
-              <span className="font-serif text-[2rem] font-semibold leading-none tracking-tight">Tech</span>
-              <span className="rounded border border-orange-300 px-1.5 py-[1px] font-serif text-sm leading-none text-orange-500">vn</span>
+              <span className="font-serif text-[2rem] font-semibold leading-none tracking-tight">HTTT</span>
+              <span className="rounded border border-orange-300 px-1.5 py-[1px] font-serif text-sm leading-none text-orange-500">UEL</span>
             </Link>
 
             <nav className="hidden items-center gap-5 text-sm font-medium text-zinc-600 lg:flex" aria-label="Main navigation">
               {NAV_ITEMS.map((item) => (
-                <button
+                <Link
                   key={item}
-                  type="button"
+                  href={item === "Học phần" ? "/hoc-phan" : "#"}
                   className="rounded px-1 py-1 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
                   {item}
-                </button>
+                </Link>
               ))}
             </nav>
           </div>
@@ -65,32 +65,32 @@ export default function Header() {
           <div className="hidden items-center gap-2 sm:flex">
             <button
               type="button"
-              className="inline-flex h-8 items-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="inline-flex h-8 items-center rounded-full border border-orange-200 bg-orange-50 px-4 text-sm font-medium text-orange-700 transition hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
             >
-              Ask AI
+              Cộng đồng
             </button>
 
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition hover:bg-white hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
               aria-label="Search"
               onClick={handleSearchClick}
             >
               <i className="fa-solid fa-magnifying-glass" aria-hidden="true" />
             </button>
 
-            <button
-              type="button"
-              className="inline-flex h-9 items-center rounded-lg bg-[#c7662d] px-4 text-sm font-semibold text-white transition hover:bg-[#b35a26] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+            <Link
+              href="/hoc-phan"
+              className="inline-flex h-9 items-center rounded-lg bg-sky-700 px-4 text-sm font-semibold text-white transition hover:bg-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
-              Dang bai
-            </button>
+              Xem Học Phần
+            </Link>
 
             <button
               type="button"
               className="rounded px-2 py-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
-              Dang nhap
+              Đóng góp
             </button>
           </div>
 
@@ -123,16 +123,16 @@ export default function Header() {
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+              className="inline-flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700"
             >
-              Ask AI
+              Cộng đồng
             </button>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center rounded-lg bg-[#c7662d] px-3 py-2 text-sm font-semibold text-white"
+            <Link
+              href="/hoc-phan"
+              className="inline-flex items-center justify-center rounded-lg bg-sky-700 px-3 py-2 text-sm font-semibold text-white"
             >
-              Dang bai
-            </button>
+              Lộ trình học
+            </Link>
           </div>
         </div>
       ) : null}

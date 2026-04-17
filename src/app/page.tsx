@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import { type ArticleInfo, getArticlesList } from "@/lib/contents";
 
-const HOME_TABS = ["Moi nhat", "Noi bat", "Nen tang", "San pham", "Ung dung", "Su kien"];
+const HOME_TABS = ["Mới nhất", "Môn Kỹ thuật", "Môn Dữ liệu", "Môn Kinh doanh", "Case Study Akia/GoClaw"];
 
 const HERO_GRADIENTS = [
   "from-sky-300 via-blue-600 to-slate-950",
@@ -98,13 +98,37 @@ export default async function Home() {
       <div className="mx-auto w-full max-w-[1180px]">
         {sortedArticles.length === 0 ? (
           <section className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center shadow-sm">
-            <h1 className="text-3xl font-semibold text-zinc-900">Tech Knowledge Base</h1>
+            <h1 className="text-3xl font-semibold text-zinc-900">HTTT UEL Resources</h1>
             <p className="mx-auto mt-3 max-w-xl text-zinc-500">
-              Chua co bai viet nao trong thu muc content/. Them file .md hoac .html de hien thi tren trang chu.
+              Đang chuẩn bị nội dung và simulation tương tác cho sinh viên HTTT. Hãy quay lại sau!
             </p>
           </section>
         ) : (
           <>
+            <section className="mb-12 mt-4 text-center max-w-4xl mx-auto space-y-4 px-4 bg-white/50 py-10 rounded-3xl border border-zinc-200/50 backdrop-blur-sm">
+              <span className="inline-block rounded-full bg-sky-100 px-3 py-1 font-medium tracking-wide text-sky-800 text-sm mb-2 shadow-sm border border-sky-200/60 uppercase">Dành riêng cho sinh viên UEL</span>
+              <h1 className="text-[2.5rem] sm:text-5xl font-serif font-bold text-zinc-900 tracking-tight !leading-tight">
+                Tài nguyên Học tập & Simulation Trực quan
+              </h1>
+              <p className="text-lg text-zinc-600 max-w-2xl mx-auto mt-4">
+                Hơn 35 module kiến thức cho ngành <strong className="text-zinc-800 font-medium">HTTT, TMĐT, KDS & AI</strong>. Tiếp cận kiến thức chuyên ngành trực quan qua interactive simulations và case study thực tế từ doanh nghiệp.
+              </p>
+              <div className="pt-6 flex flex-wrap items-center justify-center gap-4">
+                <Link
+                  href="/hoc-phan"
+                  className="rounded-full bg-sky-700 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-800 shadow-sm"
+                >
+                  Khám phá Lộ trình Học phần
+                </Link>
+                <Link
+                  href="#latest-articles"
+                  className="rounded-full bg-white border border-zinc-300 px-6 py-3 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 shadow-sm"
+                >
+                  Bài viết mới nhất
+                </Link>
+              </div>
+            </section>
+
             <section className="grid gap-4 lg:grid-cols-[2.1fr_1fr_1fr]">
               {heroArticle ? (
                 <Link
@@ -173,7 +197,7 @@ export default async function Home() {
               </aside>
             </section>
 
-            <section className="mt-4 rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <section id="latest-articles" className="mt-12 rounded-xl border border-zinc-200 bg-white shadow-sm">
               <div className="no-scrollbar overflow-x-auto px-4">
                 <ul className="flex min-w-max items-center gap-7 py-3.5 text-sm">
                   {HOME_TABS.map((tab, index) => (
