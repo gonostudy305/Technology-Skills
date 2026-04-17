@@ -1,134 +1,141 @@
 ﻿"use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+
+const NAV_ITEMS = ["Nen tang", "Tinh nang", "Nang cao", "Ung dung", "Viet Nam", "Cong dong"];
 
 export default function Header() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
+  function isActive(linkPath: string): boolean {
+    if (linkPath === "/") return pathname === "/";
+    return pathname.startsWith(linkPath);
+  }
+
+  function handleToggleMobileMenu() {
+    setIsMobileMenuOpen((prev) => !prev);
+  }
+
+  function handleSearchClick() {
+    if (!isActive("/")) {
+      router.push("/");
+      return;
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close dropdown on route change
-  useEffect(() => {
-    setIsDropdownOpen(false);
-  }, [pathname]);
-
-  function handleKeyDown(event: React.KeyboardEvent) {
-    if (event.key === "Escape") {
-      setIsDropdownOpen(false);
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
-    <header className="bg-white border-b border-zinc-200 sticky top-0 z-50">
-      {/* Skip link for accessibility */}
-      <a 
-        href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-indigo-600 text-white px-4 py-2 font-medium rounded shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 z-50"
+    <header className="sticky top-0 z-50 border-b border-zinc-200 bg-[#f6f2ea]/95 backdrop-blur">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 rounded bg-sky-700 px-4 py-2 font-medium text-white shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
       >
-        Skip to main content
+        Skip to content
       </a>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
-            <Link 
-              href="/" 
-              className="flex items-center gap-2 text-zinc-900 hover:text-indigo-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded p-1"
-              aria-label="Home"
+
+      <div className="mx-auto h-16 w-full max-w-[1180px] px-4 sm:px-6 lg:px-8">
+        <div className="flex h-full items-center justify-between gap-3">
+          <div className="flex items-center gap-7">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 rounded px-1 py-1 text-zinc-900 transition hover:text-orange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              aria-label="Tech Knowledge Base"
             >
-              <i className="fa-solid fa-book-open-reader text-xl" aria-hidden="true"></i>
-              <span className="font-bold text-xl tracking-tight">TechBase</span>
+              <span className="font-serif text-[2rem] font-semibold leading-none tracking-tight">Tech</span>
+              <span className="rounded border border-orange-300 px-1.5 py-[1px] font-serif text-sm leading-none text-orange-500">vn</span>
             </Link>
+
+            <nav className="hidden items-center gap-5 text-sm font-medium text-zinc-600 lg:flex" aria-label="Main navigation">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className="rounded px-1 py-1 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                >
+                  {item}
+                </button>
+              ))}
+            </nav>
           </div>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium" aria-label="Main Navigation">
-            <Link 
-              href="/" 
-              className="text-zinc-600 hover:text-zinc-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-2 py-1"
+          <div className="hidden items-center gap-2 sm:flex">
+            <button
+              type="button"
+              className="inline-flex h-8 items-center rounded-full border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
-              Categories
-            </Link>
+              Ask AI
+            </button>
 
-            {/* Dropdown Menu */}
-            <div className="relative" ref={dropdownRef} onKeyDown={handleKeyDown}>
-              <button
-                type="button"
-                className="flex items-center gap-1 text-zinc-600 hover:text-zinc-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded px-2 py-1"
-                aria-haspopup="menu"
-                aria-expanded={isDropdownOpen}
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              >
-                Resources
-                <svg 
-                  className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} 
-                  viewBox="0 0 20 20" 
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-
-              {isDropdownOpen && (
-                <div 
-                  className="absolute right-0 mt-2 w-48 bg-white border border-zinc-200 rounded-md shadow-lg py-1 z-50 origin-top-right transition-opacity"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="options-menu"
-                >
-                  <Link 
-                    href="/guides" 
-                    className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-indigo-600 focus-visible:bg-zinc-50 focus-visible:text-indigo-600 focus-visible:outline-none"
-                    role="menuitem"
-                  >
-                    Guides
-                  </Link>
-                  <Link 
-                    href="/api-reference" 
-                    className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-indigo-600 focus-visible:bg-zinc-50 focus-visible:text-indigo-600 focus-visible:outline-none"
-                    role="menuitem"
-                  >
-                    API Reference
-                  </Link>
-                  <Link 
-                    href="/community" 
-                    className="block px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50 hover:text-indigo-600 focus-visible:bg-zinc-50 focus-visible:text-indigo-600 focus-visible:outline-none"
-                    role="menuitem"
-                  >
-                    Community
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Icon Button */}
-            <a 
-              href="https://github.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-zinc-500 hover:text-zinc-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded-full p-2"
-              aria-label="GitHub Repository"
+            <button
+              type="button"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full text-zinc-500 transition hover:bg-white hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+              aria-label="Search"
+              onClick={handleSearchClick}
             >
-              <i className="fa-brands fa-github text-xl" aria-hidden="true"></i>
-            </a>
-          </nav>
+              <i className="fa-solid fa-magnifying-glass" aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex h-9 items-center rounded-lg bg-[#c7662d] px-4 text-sm font-semibold text-white transition hover:bg-[#b35a26] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+            >
+              Dang bai
+            </button>
+
+            <button
+              type="button"
+              className="rounded px-2 py-1 text-sm font-medium text-zinc-500 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+            >
+              Dang nhap
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-600 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:hidden"
+            aria-label="Open navigation menu"
+            onClick={handleToggleMobileMenu}
+          >
+            <i className={`fa-solid ${isMobileMenuOpen ? "fa-xmark" : "fa-bars"}`} aria-hidden="true" />
+          </button>
         </div>
       </div>
+
+      {isMobileMenuOpen ? (
+        <div className="border-t border-zinc-200 bg-[#f6f2ea] px-4 py-4 sm:hidden">
+          <nav className="grid gap-2" aria-label="Mobile navigation">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm font-medium text-zinc-700"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm font-medium text-zinc-700"
+            >
+              Ask AI
+            </button>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-lg bg-[#c7662d] px-3 py-2 text-sm font-semibold text-white"
+            >
+              Dang bai
+            </button>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }
