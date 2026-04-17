@@ -215,14 +215,40 @@ async function _getArticlesList(): Promise<ArticleInfo[]> {
     const manifestPath = path.join(process.cwd(), ".next", "content-manifest.json");
     if (fs.existsSync(manifestPath)) {
       const manifestData = fs.readFileSync(manifestPath, "utf-8");
-      const manifest = JSON.parse(manifestData) as any[];
-      return manifest.map((item) => ({
-        ...item,
-        dateStr: item.updatedAt,
-        viewCount: pseudoViewCount(item.slug),
-        summary: item.summary || FALLBACK_SUMMARY,
-        category: item.category || inferCategory(item.slug, item.title, item.type, item.source)
-      }));
+      const parsedManifest = JSON.parse(manifestData) as unknown;
+      const manifest = Array.isArray(parsedManifest)
+        ? (parsedManifest as Array<Record<string, unknown>>)
+        : [];
+
+      return manifest
+        .filter(
+          (item): item is Record<string, string> =>
+            typeof item.slug === "string" &&
+            typeof item.title === "string" &&
+            typeof item.type === "string",
+        )
+        .map((item) => {
+          const updatedAt = typeof item.updatedAt === "string" ? item.updatedAt : undefined;
+          const summary = typeof item.summary === "string" ? item.summary : FALLBACK_SUMMARY;
+          const category =
+            typeof item.category === "string"
+              ? item.category
+              : inferCategory(item.slug, item.title, item.type, "content");
+          const author = typeof item.author === "string" ? item.author : "Minh Tuấn";
+
+          return {
+            slug: item.slug,
+            title: item.title,
+            type: item.type,
+            updatedAt,
+            dateStr: updatedAt,
+            summary,
+            category,
+            author,
+            source: "content" as const,
+            viewCount: pseudoViewCount(item.slug),
+          };
+        });
     }
 
     const files = listArticleFiles();

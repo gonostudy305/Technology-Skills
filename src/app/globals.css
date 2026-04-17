@@ -1,6 +1,47 @@
-﻿@tailwind base;
+﻿@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #f5f3ee;
+    --color-surface: #ffffff;
+    --color-text-primary: #111827;
+    --color-text-secondary: #475569;
+    --color-accent: #0f766e;
+    --color-border: #d4d4d8;
+    color-scheme: light;
+  }
+
+  html.dark {
+    --color-bg: #0b1220;
+    --color-surface: #121a2a;
+    --color-text-primary: #e2e8f0;
+    --color-text-secondary: #94a3b8;
+    --color-accent: #14b8a6;
+    --color-border: #243247;
+    color-scheme: dark;
+  }
+
+  html,
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+  }
+
+  body {
+    font-family: var(--font-be-vietnam), "Segoe UI", sans-serif;
+  }
+
+  code,
+  pre,
+  kbd,
+  samp {
+    font-family: "Geist Mono", Consolas, "Courier New", monospace;
+  }
+}
 
 @layer components {
   .article-rich-content {

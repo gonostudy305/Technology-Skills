@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import DOMPurify from "dompurify";
 
 /**
@@ -23,7 +23,6 @@ export default function HtmlRenderer({
   scripts?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Sanitise once per content change
   const sanitisedHtml = useMemo(() => {
@@ -83,11 +82,9 @@ export default function HtmlRenderer({
     iframe.srcdoc = iframeSrcDoc;
 
     containerRef.current.appendChild(iframe);
-    iframeRef.current = iframe;
 
     return () => {
       iframe.remove();
-      iframeRef.current = null;
     };
   }, [scripts]);
 

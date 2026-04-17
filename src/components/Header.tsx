@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV_ITEMS = ["Học phần", "Simulation", "Case Studies", "Tài nguyên", "Cộng đồng UEL", "Về dự án"];
 
@@ -63,6 +64,8 @@ export default function Header() {
           </div>
 
           <div className="hidden items-center gap-2 sm:flex">
+            <ThemeToggle />
+
             <button
               type="button"
               className="inline-flex h-8 items-center rounded-full border border-orange-200 bg-orange-50 px-4 text-sm font-medium text-orange-700 transition hover:bg-orange-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
@@ -120,7 +123,8 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <ThemeToggle className="w-full justify-center rounded-lg" />
             <button
               type="button"
               className="inline-flex items-center justify-center rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700"
