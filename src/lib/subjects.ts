@@ -27,8 +27,8 @@ export interface SubjectResourceResolved {
   kind: SubjectResourceKind;
   routePath: string;
   title: string;
-  category?: string;
-  updatedAt?: string;
+  category: string | undefined;
+  updatedAt: string | undefined;
 }
 
 export interface SubjectDirectoryItem extends SubjectDefinition {
@@ -69,6 +69,40 @@ const SUBJECT_DEFINITIONS: SubjectDefinition[] = [
     description: "SQL, data warehouse, indexing và tư duy thiết kế truy vấn.",
   },
   {
+    slug: "an-toan-va-bao-mat-httt",
+    name: "An toàn và bảo mật HTTT",
+    year: 2,
+    description: "Bảo mật web/app, rủi ro hệ thống và tư duy phòng vệ thực tế.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "ky-thuat-kiem-thu-phan-mem",
+    name: "Kỹ thuật kiểm thử phần mềm",
+    year: 2,
+    description: "Unit test, integration test và chiến lược đảm bảo chất lượng.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "phan-tich-va-thiet-ke-httt",
+    name: "Phân tích và thiết kế HTTT",
+    year: 2,
+    description: "UML, BPMN và thiết kế quy trình hệ thống theo nghiệp vụ.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "phat-trien-web-kinh-doanh",
+    name: "Phát triển web kinh doanh",
+    year: 2,
+    description: "Xây dựng ứng dụng web cho bài toán doanh nghiệp thực tế.",
+  },
+  {
+    slug: "phat-trien-web-kinh-doanh-nang-cao",
+    name: "Phát triển web kinh doanh nâng cao",
+    year: 3,
+    description: "Tối ưu hiệu năng, kiến trúc hiện đại và chuẩn triển khai production.",
+    defaultStatus: "dang-viet",
+  },
+  {
     slug: "phan-tich-du-lieu",
     name: "Phân tích dữ liệu",
     year: 2,
@@ -76,22 +110,129 @@ const SUBJECT_DEFINITIONS: SubjectDefinition[] = [
     defaultStatus: "dang-viet",
   },
   {
+    slug: "phan-tich-du-lieu-nang-cao",
+    name: "Phân tích dữ liệu nâng cao",
+    year: 3,
+    description: "Chuẩn hóa data pipeline và mô hình hóa dữ liệu nâng cao.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "phan-tich-du-lieu-web",
+    name: "Phân tích dữ liệu web",
+    year: 3,
+    description: "Funnel, cohort, attribution và đo lường hành vi người dùng số.",
+    defaultStatus: "dang-viet",
+  },
+  {
     slug: "hoc-may-trong-phan-tich-kinh-doanh",
     name: "Học máy trong phân tích kinh doanh",
     year: 3,
     description: "Direct compare mô hình và trực quan hóa kiến trúc học sâu.",
+    defaultStatus: "dang-viet",
   },
   {
-    slug: "phat-trien-web-kinh-doanh",
-    name: "Phát triển web kinh doanh",
+    slug: "giai-phap-ai-trong-kinh-doanh-va-quan-ly",
+    name: "Giải pháp AI trong kinh doanh và quản lý",
     year: 3,
-    description: "Xây dựng sản phẩm web thực chiến cho ngữ cảnh doanh nghiệp.",
+    description: "Ứng dụng AI agent, prompt workflow và tự động hóa nghiệp vụ.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "tich-hop-quy-trinh-kinh-doanh-voi-erp",
+    name: "Tích hợp quy trình kinh doanh với ERP",
+    year: 3,
+    description: "Thiết kế luồng nghiệp vụ và tích hợp hệ thống module doanh nghiệp.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "tu-dong-hoa-quy-trinh-bang-robot-trong-thuong-mai-dien-tu",
+    name: "Tự động hóa quy trình bằng robot trong TMĐT",
+    year: 3,
+    description: "RPA và workflow automation cho vận hành kinh doanh số.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "phan-tich-marketing-so",
+    name: "Phân tích marketing số",
+    year: 3,
+    description: "Đo lường chiến dịch, mô hình attribution và thực nghiệm A/B.",
+    defaultStatus: "dang-viet",
   },
   {
     slug: "cong-nghe-marketing",
     name: "Công nghệ marketing",
     year: 3,
     description: "SEO, tracking và tự động hóa nội dung trong martech stack.",
+  },
+  {
+    slug: "thuong-mai-dien-tu",
+    name: "Thương mại điện tử",
+    year: 3,
+    description: "Mô hình kinh doanh số, unit economics và tối ưu chuyển đổi.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "thuong-mai-tren-mang-xa-hoi",
+    name: "Thương mại trên mạng xã hội",
+    year: 3,
+    description: "Social commerce, live funnel và tăng trưởng theo nền tảng xã hội.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "quan-tri-quan-he-khach-hang-dien-tu",
+    name: "Quản trị quan hệ khách hàng điện tử",
+    year: 3,
+    description: "Customer journey, phân khúc và chiến lược giữ chân khách hàng.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "quan-tri-ban-le-truc-tuyen",
+    name: "Quản trị bán lẻ trực tuyến",
+    year: 3,
+    description: "Vận hành đơn hàng, tồn kho và tối ưu hệ thống bán lẻ số.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "thanh-toan-dien-tu",
+    name: "Thanh toán điện tử",
+    year: 3,
+    description: "Kiến trúc cổng thanh toán và an toàn giao dịch số.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "phat-trien-thuong-mai-di-dong",
+    name: "Phát triển thương mại di động",
+    year: 3,
+    description: "PWA, mobile UX và kiến trúc sản phẩm thương mại trên di động.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "quan-tri-chuoi-cung-ung-trong-thuong-mai-dien-tu",
+    name: "Quản trị chuỗi cung ứng trong TMĐT",
+    year: 3,
+    description: "Chuỗi cung ứng đa kênh, fulfillment và tối ưu last-mile.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "ung-dung-cong-nghe-blockchain",
+    name: "Ứng dụng công nghệ Blockchain",
+    year: 4,
+    description: "Cấu trúc blockchain và ứng dụng trong bài toán kinh doanh số.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "chuyen-doi-so-trong-kinh-doanh",
+    name: "Chuyển đổi số trong kinh doanh",
+    year: 4,
+    description: "Khung chuyển đổi số và chiến lược triển khai doanh nghiệp.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "he-thong-thong-tin-kinh-doanh",
+    name: "Hệ thống thông tin kinh doanh",
+    year: 4,
+    description: "BI stack, dashboard điều hành và hạ tầng báo cáo quyết định.",
+    defaultStatus: "dang-viet",
   },
   {
     slug: "thiet-ke-do-hoa-va-da-phuong-tien",
@@ -106,6 +247,76 @@ const SUBJECT_DEFINITIONS: SubjectDefinition[] = [
     description: "Viết nghiên cứu ứng dụng và triển khai case học thuật vào dự án.",
     defaultStatus: "dang-viet",
   },
+  {
+    slug: "quan-ly-du-an-httt",
+    name: "Quản lý dự án HTTT",
+    year: 4,
+    description: "Agile delivery, vận hành sprint và điều phối dự án hệ thống.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "he-thong-thong-tin-quan-ly",
+    name: "Hệ thống thông tin quản lý",
+    year: 4,
+    description: "Thiết kế hệ thống quản trị hỗ trợ quyết định ở cấp tổ chức.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "khai-pha-du-lieu",
+    name: "Khai phá dữ liệu",
+    year: 4,
+    description: "Khám phá pattern dữ liệu và ứng dụng mô hình dự báo.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "tri-tue-nhan-tao-ung-dung",
+    name: "Trí tuệ nhân tạo ứng dụng",
+    year: 4,
+    description: "Ứng dụng AI đa miền trong bài toán doanh nghiệp thực tế.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "xu-ly-ngon-ngu-tu-nhien",
+    name: "Xử lý ngôn ngữ tự nhiên",
+    year: 4,
+    description: "NLP pipeline, embedding và mô hình ngôn ngữ cho tiếng Việt.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "thi-giac-may-tinh",
+    name: "Thị giác máy tính",
+    year: 4,
+    description: "Nhận diện hình ảnh, object detection và ứng dụng thị giác AI.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "phan-tich-du-lieu-lon",
+    name: "Phân tích dữ liệu lớn",
+    year: 4,
+    description: "Kiến trúc xử lý dữ liệu quy mô lớn và phân tích near real-time.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "he-thong-goi-y-va-ca-nhan-hoa",
+    name: "Hệ thống gợi ý và cá nhân hóa",
+    year: 4,
+    description: "Recommendation systems và chiến lược cá nhân hóa trải nghiệm số.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "kinh-doanh-so-va-doi-moi",
+    name: "Kinh doanh số và đổi mới",
+    year: 4,
+    description: "Chiến lược đổi mới mô hình kinh doanh trong môi trường số.",
+    defaultStatus: "dang-viet",
+  },
+  {
+    slug: "chuyen-de-thuc-tap-nganh-httt",
+    name: "Chuyên đề thực tập ngành HTTT",
+    year: 4,
+    description: "Tổng hợp năng lực qua dự án capstone và báo cáo thực tập.",
+    defaultStatus: "dang-viet",
+  },
 ];
 
 const SUBJECT_RESOURCE_MAP: Record<string, SubjectResourceLink[]> = {
@@ -113,13 +324,13 @@ const SUBJECT_RESOURCE_MAP: Record<string, SubjectResourceLink[]> = {
   "ky-thuat-lap-trinh": [
     { slug: "git_visualizer", kind: "sim" },
     { slug: "docker", kind: "sim" },
-    { slug: "release_software", kind: "sim" },
   ],
   "co-so-du-lieu": [{ slug: "data_warehouse", kind: "sim" }],
   "hoc-may-trong-phan-tich-kinh-doanh": [{ slug: "deeplearning", kind: "sim" }],
   "phat-trien-web-kinh-doanh": [{ slug: "obsidan", kind: "article" }],
   "cong-nghe-marketing": [{ slug: "seo-aeo-blog-writer", kind: "article" }],
   "thiet-ke-do-hoa-va-da-phuong-tien": [{ slug: "ui_ux_pro_max", kind: "article" }],
+  "quan-ly-du-an-httt": [{ slug: "release_software", kind: "sim" }],
 };
 
 const STATUS_META: Record<SubjectStatus, SubjectStatusMeta> = {
