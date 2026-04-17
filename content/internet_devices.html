@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Từ Điển Chuyên Sâu: Thiết Bị Mạng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3b82f6', // blue-500
+                        secondary: '#64748b', // slate-500
+                        bg_light: '#f8fafc', // slate-50
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styling for diagram lines */
+        .diagram-line {
+            height: 2px;
+            background-color: #cbd5e1;
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .diagram-line::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 5px solid #cbd5e1;
+        }
+
+        .toc-active {
+            color: #2563eb;
+            font-weight: 600;
+            border-left-color: #2563eb;
+            background-color: #eff6ff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hide scrollbar for clean TOC */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="bg-bg_light text-slate-800 leading-relaxed">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-network-wired text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">NetArch<span
+                        class="text-primary font-light">Docs</span></h1>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-btn" class="text-slate-500 hover:text-slate-700">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
+
+        <!-- Sidebar Navigation (Table of Contents) -->
+        <aside class="w-full md:w-64 flex-shrink-0 hidden md:block" id="sidebar">
+            <div
+                class="sticky top-24 bg-white p-5 rounded-xl shadow-sm border border-slate-100 max-h-[calc(100vh-8rem)] overflow-y-auto no-scrollbar">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Mục lục nội dung</h3>
+                <nav class="space-y-1 text-sm" id="toc">
+                    <a href="#intro"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">Tổng
+                        quan</a>
+
+                    <div class="pt-2 pb-1"><span class="text-xs font-semibold text-slate-400 uppercase">Thiết bị cơ
+                            bản</span></div>
+                    <a href="#modem"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">1.
+                        Modem</a>
+                    <a href="#router"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">2.
+                        Router</a>
+                    <a href="#switch"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">3.
+                        Switch</a>
+
+                    <div class="pt-2 pb-1"><span class="text-xs font-semibold text-slate-400 uppercase">Mở rộng & Không
+                            dây</span></div>
+                    <a href="#ap"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">4.
+                        Access Point (AP)</a>
+                    <a href="#repeater"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">5.
+                        Repeater / Extender</a>
+
+                    <div class="pt-2 pb-1"><span class="text-xs font-semibold text-slate-400 uppercase">Thiết bị chuyên
+                            dụng</span></div>
+                    <a href="#bridge"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">6.
+                        Bridge</a>
+                    <a href="#gateway"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">7.
+                        Gateway</a>
+                    <a href="#firewall"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">8.
+                        Firewall</a>
+                    <a href="#nic"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">9.
+                        NIC</a>
+
+                    <div class="pt-2 pb-1"><span class="text-xs font-semibold text-slate-400 uppercase">Tổng hợp</span>
+                    </div>
+                    <a href="#comparison"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">Bảng
+                        So Sánh</a>
+                    <a href="#faq"
+                        class="block py-2 px-3 border-l-2 border-transparent hover:bg-slate-50 transition-colors text-slate-600 rounded-r">FAQ
+                        Thực Tế</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 w-full max-w-4xl space-y-12">
+
+            <!-- Intro Section -->
+            <section id="intro" class="scroll-mt-24">
+                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white shadow-lg">
+                    <h2 class="text-3xl font-bold mb-4">Kiến Trúc & Thiết Bị Mạng Chuyên Sâu</h2>
+                    <p class="text-slate-300 text-lg">
+                        Tài liệu này cung cấp định nghĩa từ trực quan đến kỹ thuật chuyên sâu về các thiết bị cấu thành
+                        nên hạ tầng mạng (Network Infrastructure). Dành cho những ai muốn hiểu rõ bản chất "dưới mui xe"
+                        của luồng dữ liệu thay vì chỉ nhìn nhận thiết bị như một "chiếc hộp đen".
+                    </p>
+                    <div class="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
+                        <p class="text-sm text-blue-200 font-semibold mb-1"><i
+                                class="fa-solid fa-lightbulb mr-2"></i>Lưu ý quan trọng:</p>
+                        <p class="text-sm text-slate-300">Thiết bị "Cục Wi-Fi" ở nhà bạn thực chất không phải là một
+                            thiết bị đơn lẻ. Nó là sự kết hợp của nhiều thiết bị vật lý: <strong
+                                class="text-white">Modem + Router + Switch + Access Point</strong> trong cùng một lớp vỏ
+                            nhựa. Tài liệu này sẽ bóc tách riêng biệt từng thành phần.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. Modem -->
+            <section id="modem"
+                class="scroll-mt-24 content-section bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xl">
+                        <i class="fa-solid fa-plug"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">1. Modem (Modulator - Demodulator)</h2>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Bản chất trực quan</h3>
+                <p class="text-slate-600 mb-4">Modem giống như một <strong>"người phiên dịch"</strong> đứng ở cửa nhà
+                    bạn. Internet bên ngoài giao tiếp bằng ngôn ngữ tín hiệu quang/tương tự (cáp quang, cáp đồng trục),
+                    nhưng máy tính trong nhà bạn chỉ hiểu ngôn ngữ kỹ thuật số (0 và 1). Modem dịch hai ngôn ngữ này qua
+                    lại cho nhau.</p>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Cách thức hoạt động & Kỹ thuật</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-6">
+                    <li><strong>Điều chế (Modulation):</strong> Chuyển đổi tín hiệu số (Digital) từ thiết bị mạng nội bộ
+                        thành tín hiệu tương tự (Analog) hoặc tín hiệu quang học để truyền qua dây cáp của nhà mạng
+                        (ISP).</li>
+                    <li><strong>Giải điều chế (Demodulation):</strong> Làm ngược lại, nhận tín hiệu từ nhà mạng và
+                        chuyển thành dữ liệu số cho Router xử lý.</li>
+                    <li>Nó hoạt động chủ yếu ở <strong>Lớp 1 (Physical Layer)</strong> và <strong>Lớp 2 (Data Link
+                            Layer)</strong> của mô hình OSI.</li>
+                    <li>Mỗi giao thức cáp (DSL, Fiber/GPON, Coaxial) yêu cầu một loại Modem chuyên dụng tương ứng.</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-4">Sơ đồ minh họa</h3>
+                <div
+                    class="bg-slate-50 p-6 rounded-lg border border-slate-200 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm font-medium text-slate-600">
+                    <div class="text-center"><i class="fa-solid fa-globe text-3xl text-slate-400 mb-2 block"></i>ISP
+                        (Internet)</div>
+                    <div class="hidden sm:block diagram-line"><span
+                            class="absolute -top-6 text-xs text-slate-400 left-1/2 -translate-x-1/2">Cáp
+                            quang/Đồng</span></div>
+                    <div
+                        class="bg-blue-100 text-blue-700 px-4 py-3 rounded-lg border border-blue-300 text-center shadow-sm">
+                        <i class="fa-solid fa-server block text-xl mb-1"></i> Modem
+                    </div>
+                    <div class="hidden sm:block diagram-line"><span
+                            class="absolute -top-6 text-xs text-slate-400 left-1/2 -translate-x-1/2">Cáp mạng LAN</span>
+                    </div>
+                    <div class="text-center"><i
+                            class="fa-solid fa-network-wired text-3xl text-slate-400 mb-2 block"></i>Router / Mạng LAN
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4">
+                    <p class="text-sm text-blue-800"><strong>Khi nào dùng:</strong> Bắt buộc phải có để kết nối bất kỳ
+                        mạng nội bộ nào ra môi trường Internet rộng lớn của ISP (Viettel, VNPT, FPT...).</p>
+                </div>
+            </section>
+
+            <!-- 2. Router -->
+            <section id="router"
+                class="scroll-mt-24 content-section bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">2. Router (Bộ định tuyến)</h2>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Bản chất trực quan</h3>
+                <p class="text-slate-600 mb-4">Router là <strong>"cảnh sát giao thông"</strong> kiêm <strong>"bưu cục
+                        điều phối"</strong>. Trong khi Modem chỉ biết dịch ngôn ngữ, Router quyết định gói tin (bức thư)
+                    sẽ đi bằng con đường nào ngắn nhất và đúng đắn nhất giữa các mạng khác nhau (ví dụ: giữa mạng gia
+                    đình bạn và mạng Internet).</p>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Cách thức hoạt động & Kỹ thuật</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-6">
+                    <li>Hoạt động ở <strong>Lớp 3 (Network Layer)</strong> của mô hình OSI. Thiết bị này làm việc dựa
+                        trên <strong>Địa chỉ IP (IP Address)</strong> chứ không phải địa chỉ vật lý MAC.</li>
+                    <li><strong>Bảng định tuyến (Routing Table):</strong> Router đọc IP đích của gói tin, tra cứu bảng
+                        định tuyến để đẩy gói tin ra cổng (interface) phù hợp nhất.</li>
+                    <li><strong>NAT (Network Address Translation):</strong> Dịch hàng chục IP nội bộ (LAN) của nhà bạn
+                        thành một IP Public duy nhất để ra Internet. Điều này giúp ẩn mạng nội bộ và tiết kiệm IP v4.
+                    </li>
+                    <li><strong>DHCP Server:</strong> Tự động cấp phát địa chỉ IP động cho các thiết bị khi chúng kết
+                        nối vào mạng.</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-4">Sơ đồ minh họa</h3>
+                <div
+                    class="bg-slate-50 p-6 rounded-lg border border-slate-200 flex flex-col sm:flex-row items-center justify-center gap-4 text-sm font-medium text-slate-600">
+                    <div class="text-center"><i class="fa-solid fa-plug text-3xl text-slate-400 mb-2 block"></i>Modem
+                    </div>
+                    <div class="hidden sm:block diagram-line"><span
+                            class="absolute -top-6 text-xs text-slate-400 left-1/2 -translate-x-1/2">WAN (IP
+                            Public)</span></div>
+                    <div
+                        class="bg-emerald-100 text-emerald-700 px-4 py-3 rounded-lg border border-emerald-300 text-center shadow-sm">
+                        <i class="fa-solid fa-route block text-xl mb-1"></i> Router
+                    </div>
+                    <div class="hidden sm:block diagram-line"><span
+                            class="absolute -top-6 text-xs text-slate-400 left-1/2 -translate-x-1/2">LAN (IP
+                            Private)</span></div>
+                    <div class="text-center"><i
+                            class="fa-solid fa-sitemap text-3xl text-slate-400 mb-2 block"></i>Switch / Thiết bị nội bộ
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-emerald-50 border-l-4 border-emerald-500 p-4">
+                    <p class="text-sm text-emerald-800"><strong>Khi nào dùng:</strong> Cần kết nối hai hoặc nhiều dải
+                        mạng (Network Segments) khác nhau lại với nhau, đặc biệt là kết nối mạng LAN ra Internet.</p>
+                </div>
+            </section>
+
+            <!-- 3. Switch -->
+            <section id="switch"
+                class="scroll-mt-24 content-section bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 text-xl">
+                        <i class="fa-solid fa-sitemap"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">3. Switch (Bộ chuyển mạch)</h2>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Bản chất trực quan</h3>
+                <p class="text-slate-600 mb-4">Switch là <strong>"người chia thư nội bộ"</strong> thông minh trong một
+                    tòa nhà công ty. Thay vì hét lên cho tất cả mọi người cùng nghe (như Hub cũ kỹ), Switch biết chính
+                    xác máy tính nào (phòng nào) đang cần nhận gói tin và chỉ gửi trực tiếp đến đúng máy đó, giúp mạng
+                    không bị nghẽn.</p>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Cách thức hoạt động & Kỹ thuật</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-6">
+                    <li>Hoạt động ở <strong>Lớp 2 (Data Link Layer)</strong> của mô hình OSI. Không quan tâm IP, chỉ làm
+                        việc với <strong>Địa chỉ MAC (MAC Address)</strong>.</li>
+                    <li><strong>Bảng MAC (MAC Table):</strong> Switch tự động học hỏi bằng cách ghi nhận địa chỉ MAC của
+                        thiết bị cắm vào cổng (Port) của nó. Khi gói tin tới, nó tra MAC đích và chuyển mạch (Switching)
+                        khung dữ liệu (Frame) thẳng tới Port đó.</li>
+                    <li><strong>Phân chia miền đụng độ (Collision Domain):</strong> Mỗi cổng trên Switch là một miền
+                        đụng độ riêng biệt, cho phép truyền nhận dữ liệu đồng thời (Full-Duplex) tốc độ cao mà không bị
+                        nhiễu sóng.</li>
+                </ul>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-4">Sơ đồ minh họa</h3>
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                    <div class="flex justify-center mb-6">
+                        <div
+                            class="bg-amber-100 text-amber-700 px-6 py-2 rounded-lg border border-amber-300 shadow-sm font-semibold">
+                            Switch (24 Ports)</div>
+                    </div>
+                    <div class="flex justify-around items-start relative">
+                        <!-- Lines connecting downwards -->
+                        <div class="absolute w-[60%] h-4 border-t-2 border-l-2 border-r-2 border-slate-300 top-[-1rem]">
+                        </div>
+                        <div class="absolute w-[2px] h-4 bg-slate-300 top-[-1rem]"></div>
+
+                        <div class="text-center mt-2 flex flex-col items-center">
+                            <i class="fa-solid fa-desktop text-2xl text-slate-500 mb-1"></i>
+                            <span class="text-xs text-slate-600">PC 1<br>(Port 1)</span>
+                        </div>
+                        <div class="text-center mt-2 flex flex-col items-center">
+                            <i class="fa-solid fa-print text-2xl text-slate-500 mb-1"></i>
+                            <span class="text-xs text-slate-600">Máy in<br>(Port 5)</span>
+                        </div>
+                        <div class="text-center mt-2 flex flex-col items-center">
+                            <i class="fa-solid fa-server text-2xl text-slate-500 mb-1"></i>
+                            <span class="text-xs text-slate-600">Server nội bộ<br>(Port 12)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-amber-50 border-l-4 border-amber-500 p-4">
+                    <p class="text-sm text-amber-800"><strong>Khi nào dùng:</strong> Cần kết nối nhiều thiết bị có dây
+                        (PC, Máy in, Camera IP) lại với nhau để tạo thành một mạng nội bộ (LAN) tốc độ cao.</p>
+                </div>
+            </section>
+
+            <!-- 4. Access Point -->
+            <section id="ap"
+                class="scroll-mt-24 content-section bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-xl">
+                        <i class="fa-solid fa-wifi"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">4. Access Point (AP - Điểm truy cập)</h2>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Bản chất trực quan</h3>
+                <p class="text-slate-600 mb-4">AP là <strong>"bộ phát sóng Wi-Fi"</strong> nối tiếp từ đường dây mạng có
+                    sẵn. Nếu Switch cung cấp cổng cắm dây cáp, thì AP biến tín hiệu từ dây cáp đó thành sóng vô tuyến để
+                    điện thoại, laptop kết nối không dây. Nó không tự cấp phát IP, nó chỉ là một chiếc "Switch không
+                    dây".</p>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Cách thức hoạt động & Kỹ thuật</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-6">
+                    <li>Hoạt động ở Lớp 1 và Lớp 2. Chức năng chính là chuyển đổi giao thức mạng có dây (Ethernet -
+                        802.3) sang giao thức mạng không dây (Wi-Fi - 802.11) và ngược lại.</li>
+                    <li>Nó tạo ra một <strong>WLAN (Wireless Local Area Network)</strong>.</li>
+                    <li>AP không định tuyến (Routing). Mọi thiết bị bắt sóng AP thực chất sẽ nhận IP từ thiết bị Router
+                        chính đứng đằng sau nó.</li>
+                    <li>Hỗ trợ các chuẩn mã hóa bảo mật như WPA2, WPA3 để mã hóa sóng vô tuyến truyền trong không khí.
+                    </li>
+                </ul>
+
+                <div class="mt-6 bg-purple-50 border-l-4 border-purple-500 p-4">
+                    <p class="text-sm text-purple-800"><strong>Khi nào dùng:</strong> Trong văn phòng, quán cafe, khách
+                        sạn. Họ dùng 1 Router tổng trong phòng máy, sau đó kéo dây cáp mạng nối ra các AP ốp trên trần
+                        nhà ở các tầng để phủ sóng Wi-Fi.</p>
+                </div>
+            </section>
+
+            <!-- 5. Repeater -->
+            <section id="repeater"
+                class="scroll-mt-24 content-section bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-6">
+                    <div
+                        class="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 text-xl">
+                        <i class="fa-solid fa-satellite-dish"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800">5. Repeater / Extender (Bộ khuếch đại sóng)</h2>
+                </div>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Bản chất trực quan</h3>
+                <p class="text-slate-600 mb-4">Repeater là <strong>"người hét lại"</strong>. Hãy tưởng tượng bạn đứng ở
+                    tầng 1 gọi người ở tầng 3 nhưng họ không nghe thấy. Repeater đứng ở tầng 2, nghe giọng bạn và hét to
+                    lại lên tầng 3. Nó thu sóng Wi-Fi đang yếu dần, tái tạo và phát lại để mở rộng vùng phủ sóng.</p>
+
+                <h3 class="text-lg font-semibold text-slate-700 mt-4 mb-2">Cách thức hoạt động & Kỹ thuật</h3>
+                <ul class="list-disc list-inside text-slate-600 space-y-2 mb-6">
+                    <li>Hoạt động ở <strong>Lớp 1 (Physical)</strong>. Không xử lý thông minh, nhận bit nào là phát lại
+                        bit đó (Regeneration).</li>
+                    <li><strong>Nhược điểm cốt lõi (Half-Duplex penalty):</strong> Vì Repeater thường sử dụng cùng một
+                        dải tần số (Kênh/Channel) để vừa thu sóng từ Router chính vừa phát lại cho Client, băng thông
+                        (tốc độ) của mạng đi qua Repeater thường bị <strong>giảm đi một nửa (50%)</strong> do nguyên lý
+                        bán song công (không thể vừa nghe vừa nói cùng lúc).</li>
+                </ul>
+
+                <div class="mt-6 bg-pink-50 border-l-4 border-pink-500 p-4">
+                    <p class="text-sm text-pink-800"><strong>Khi nào dùng:</strong> Giải pháp rẻ tiền, tạm thời ở gia
+                        đình để kéo sóng Wi-Fi tới các "điểm mù" (phòng ngủ xa, nhà vệ sinh) mà KHÔNG THỂ kéo được dây
+                        cáp mạng để lắp Access Point.</p>
+                </div>
+            </section>
+
+            <!-- 6, 7, 8, 9 (Specialized) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- 6. Bridge -->
+                <section id="bridge"
+                    class="scroll-mt-24 content-section bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center text-cyan-600">
+                            <i class="fa-solid fa-bridge"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">6. Bridge</h2>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">Bridge là <strong>"chiếc cầu"</strong> kết nối 2
+                        phân đoạn mạng LAN riêng biệt lại thành một mạng LAN lớn duy nhất (cùng chung 1 dải IP). Hoạt
+                        động ở Lớp 2, chia nhỏ Collision Domain nhưng không chặn Broadcast. Ngày nay, tính năng này
+                        thường được tích hợp vào Switch (Switch bản chất là Multi-port Bridge) hoặc AP (Wireless Bridge
+                        điểm-điểm giữa 2 tòa nhà).</p>
+                </section>
+
+                <!-- 7. Gateway -->
+                <section id="gateway"
+                    class="scroll-mt-24 content-section bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
+                            <i class="fa-solid fa-door-open"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">7. Gateway</h2>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">Gateway là <strong>"cổng thông dịch"</strong> cao
+                        cấp. Khác với Router (định tuyến trên cùng một hệ giao thức IP), Gateway có khả năng kết nối 2
+                        mạng sử dụng các <strong>kiến trúc/giao thức hoàn toàn khác nhau</strong> (vd: mạng IoT Zigbee
+                        giao tiếp với mạng IP Internet). Nó hoạt động ở tất cả các lớp của OSI (từ lớp 4 đến 7). Khái
+                        niệm "Default Gateway" trên PC thực chất trỏ về IP của Router.</p>
+                </section>
+
+                <!-- 8. Firewall -->
+                <section id="firewall"
+                    class="scroll-mt-24 content-section bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">8. Firewall</h2>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">Hardware Firewall (Tường lửa phần cứng) là
+                        <strong>"trạm kiểm soát an ninh"</strong>. Nó đứng chắn giữa mạng LAN nội bộ và Internet.
+                        Firewall quét các gói tin dựa trên tập hợp các quy tắc (Rules) đã định sẵn (Block Port,
+                        Statefull Packet Inspection - SPI, lọc nội dung) để quyết định xem có cho phép luồng dữ liệu đó
+                        đi qua hay không nhằm ngăn chặn Hacker, Malware.</p>
+                </section>
+
+                <!-- 9. NIC -->
+                <section id="nic"
+                    class="scroll-mt-24 content-section bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-600">
+                            <i class="fa-solid fa-microchip"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-800">9. NIC (Network Card)</h2>
+                    </div>
+                    <p class="text-slate-600 text-sm mb-4 flex-grow">NIC (Network Interface Card) là <strong>"tấm vé
+                            thông hành"</strong> vật lý. Nó là bảng mạch, con chip gắn trong PC, Laptop (có thể là cổng
+                        cắm cáp LAN hoặc chip Wi-Fi). NIC chịu trách nhiệm biến dữ liệu của máy tính thành xung
+                        điện/sóng vô tuyến đẩy ra mạng. Mỗi NIC được nhà sản xuất khắc "chết" một địa chỉ định danh duy
+                        nhất toàn cầu gọi là <strong>Địa chỉ MAC</strong>.</p>
+                </section>
+            </div>
+
+            <!-- Bảng So Sánh -->
+            <section id="comparison" class="scroll-mt-24">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-2">Bảng Phân Biệt Thực Tế</h2>
+
+                <!-- Router vs Switch -->
+                <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200 mb-8">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-white uppercase bg-slate-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 w-1/4">Tiêu chí</th>
+                                <th scope="col" class="px-6 py-4 w-3/8 bg-emerald-600">Router</th>
+                                <th scope="col" class="px-6 py-4 w-3/8 bg-amber-600">Switch</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-600 divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Lớp OSI hoạt động</td>
+                                <td class="px-6 py-4">Lớp 3 (Network)</td>
+                                <td class="px-6 py-4">Lớp 2 (Data Link)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Địa chỉ xử lý</td>
+                                <td class="px-6 py-4 font-mono text-emerald-700 font-bold">Địa chỉ IP</td>
+                                <td class="px-6 py-4 font-mono text-amber-700 font-bold">Địa chỉ MAC</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Mục đích chính</td>
+                                <td class="px-6 py-4">Kết nối các mạng nội bộ LAN ra mạng Internet WAN.</td>
+                                <td class="px-6 py-4">Kết nối các thiết bị PC, Printer với nhau tạo thành một mạng LAN.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Cấp phát IP (DHCP)</td>
+                                <td class="px-6 py-4"><i class="fa-solid fa-check text-green-500 mr-1"></i> Có (thường
+                                    là Server DHCP)</td>
+                                <td class="px-6 py-4"><i class="fa-solid fa-xmark text-red-500 mr-1"></i> Không</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- AP vs Repeater -->
+                <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-slate-200">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-white uppercase bg-slate-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 w-1/4">Tiêu chí</th>
+                                <th scope="col" class="px-6 py-4 w-3/8 bg-purple-600">Access Point (AP)</th>
+                                <th scope="col" class="px-6 py-4 w-3/8 bg-pink-600">Repeater</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-slate-600 divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Nguồn cấp dữ liệu</td>
+                                <td class="px-6 py-4">Nhận tín hiệu từ <strong>Dây cáp mạng (LAN)</strong> cắm vào nó.
+                                </td>
+                                <td class="px-6 py-4">Nhận tín hiệu từ <strong>Sóng Wi-Fi</strong> của Router mẹ.</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Độ suy hao tốc độ</td>
+                                <td class="px-6 py-4">Gần như bằng 0. Tốc độ cao, ổn định tuyệt đối.</td>
+                                <td class="px-6 py-4">Giảm tối thiểu ~50% băng thông do thu/phát cùng lúc qua không khí.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-slate-800 bg-slate-50">Triển khai</td>
+                                <td class="px-6 py-4">Phức tạp hơn (phải đi dây âm tường/trần). Dùng cho dự án chuyên
+                                    nghiệp.</td>
+                                <td class="px-6 py-4">Rất dễ (cắm thẳng vào ổ điện). Dùng chữa cháy cho hộ gia đình.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section id="faq" class="scroll-mt-24 mb-10">
+                <h2 class="text-2xl font-bold text-slate-800 mb-6 border-b pb-2">FAQ - Tình huống thực tế</h2>
+
+                <div class="space-y-4">
+                    <!-- FAQ 1 -->
+                    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                        <button
+                            class="w-full px-6 py-4 text-left font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 focus:outline-none flex justify-between items-center faq-btn">
+                            Thiết bị Wi-Fi nhà mạng cấp (Viettel, FPT...) gọi là gì mới đúng?
+                            <i class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="p-6 text-slate-600 text-sm hidden">
+                            Nó là một thiết bị <strong>"All-in-One" (Tất cả trong một)</strong>. Chính xác nó bao gồm: 1
+                            Module Modem quang (ONT) để nhận sợi cáp quang đen + 1 Module Router để cấp IP và NAT + 1
+                            Module Switch (các cổng LAN màu vàng/xanh phía sau) + 1 Module Access Point (ăng-ten phát
+                            sóng Wi-Fi). Tuy nhiên trong kỹ thuật, người ta thường gọi tắt nó là <strong>ONT
+                                Gateway</strong> hoặc <strong>Wireless Router</strong>.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                        <button
+                            class="w-full px-6 py-4 text-left font-semibold text-slate-800 bg-slate-50 hover:bg-slate-100 focus:outline-none flex justify-between items-center faq-btn">
+                            Nhà tôi 3 tầng, sóng Wi-Fi tầng 3 rất yếu. Tôi nên mua Repeater hay mua thêm Router/AP?
+                            <i class="fa-solid fa-chevron-down text-slate-400 transition-transform"></i>
+                        </button>
+                        <div class="p-6 text-slate-600 text-sm hidden">
+                            <ul class="list-disc pl-4 space-y-2">
+                                <li><strong>Cách tốt nhất (Chuyên nghiệp):</strong> Kéo 1 sợi cáp LAN từ tầng 1 lên tầng
+                                    3 và cắm vào một <strong>Access Point</strong> (hoặc Router cũ chuyển sang chế độ AP
+                                    mode). Tốc độ sẽ giữ nguyên 100%.</li>
+                                <li><strong>Cách tạm thời:</strong> Nếu không thể khoan tường đi dây, bạn mua
+                                    <strong>Repeater</strong> cắm ở tầng 2 (nơi sóng vẫn còn khoảng 3 vạch). Tuyệt đối
+                                    không cắm Repeater ở tầng 3 vì lúc đó Repeater thu sóng đã quá yếu, phát lại cũng
+                                    không giải quyết được vấn đề tốc độ.</li>
+                                <li><strong>Cách hiện đại nhất:</strong> Nâng cấp lên hệ thống <strong>Wi-Fi
+                                        Mesh</strong> (hoạt động như nhiều AP liên kết không dây/có dây thông minh với
+                                    nhau để tạo mạng lưới phủ sóng rộng, tự động Roaming).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Conclusion -->
+            <section id="conclusion" class="bg-slate-900 text-white rounded-2xl p-8 text-center">
+                <i class="fa-solid fa-flag-checkered text-3xl text-primary mb-4 block"></i>
+                <h2 class="text-2xl font-bold mb-3">Tổng kết</h2>
+                <p class="text-slate-300 text-sm md:text-base max-w-2xl mx-auto mb-6">
+                    Mạng máy tính không phải là một phép màu, nó là sự kết hợp chặt chẽ của phần cứng với các giao thức
+                    tiêu chuẩn (OSI, TCP/IP). Hiểu rõ chức năng phân tách của <strong>Modem</strong> (dịch tín hiệu),
+                    <strong>Router</strong> (tìm đường), <strong>Switch</strong> (chia nhánh) và <strong>AP</strong>
+                    (phát vô tuyến) sẽ giúp bạn có tư duy thiết kế, gỡ lỗi (troubleshoot) và tối ưu hóa bất kỳ hệ thống
+                    mạng nào một cách khoa học nhất.
+                </p>
+                <button onclick="window.scrollTo(0,0)"
+                    class="bg-primary hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-full transition-colors text-sm">
+                    Lên đầu trang <i class="fa-solid fa-arrow-up ml-2"></i>
+                </button>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-50 border-t border-slate-200 mt-12 py-8 text-center text-sm text-slate-500">
+        <p>© 2026 NetArchDocs - Hệ thống tài liệu kiến trúc mạng trực quan.</p>
+    </footer>
+
+    <!-- Interactive Scripts -->
+    <script>
+        // 1. Accordion for FAQ
+        const faqBtns = document.querySelectorAll('.faq-btn');
+        faqBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const content = btn.nextElementSibling;
+                const icon = btn.querySelector('i');
+
+                // Toggle current
+                if (content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    content.classList.add('hidden');
+                    icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        });
+
+        // 2. Active TOC Highlighting on Scroll
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('#toc a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                // Add a small offset to trigger earlier when scrolling down
+                if (pageYOffset >= (sectionTop - 150)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('toc-active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('toc-active');
+                }
+            });
+        });
+
+        // 3. Mobile Menu Toggle for Sidebar
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.getElementById('sidebar');
+
+        mobileBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            // If shown on mobile, position it absolutely over content
+            if (!sidebar.classList.contains('hidden')) {
+                sidebar.classList.add('absolute', 'top-16', 'left-0', 'w-full', 'z-40', 'px-4', 'pb-4', 'bg-bg_light');
+            } else {
+                sidebar.classList.remove('absolute', 'top-16', 'left-0', 'w-full', 'z-40', 'px-4', 'pb-4', 'bg-bg_light');
+            }
+        });
+    </script>
+</body>
+
+</html>
