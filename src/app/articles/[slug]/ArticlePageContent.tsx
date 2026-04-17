@@ -174,14 +174,14 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
               <>
                 <span aria-hidden="true" className="text-zinc-400">/</span>
                 <Link
-                  href="/hoc-phan"
+                  href="/curriculum"
                   className="font-medium text-zinc-600 transition hover:text-zinc-900"
                 >
                   Năm {articleSubject.year}
                 </Link>
                 <span aria-hidden="true" className="text-zinc-400">/</span>
                 <Link
-                  href={`/hoc-phan/${articleSubject.slug}`}
+                  href={`/curriculum/${articleSubject.slug}`}
                   className="font-medium text-zinc-600 transition hover:text-zinc-900"
                 >
                   {articleSubject.name}
@@ -310,7 +310,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
               Bài liên quan trong cùng học phần
             </h2>
             <Link
-              href="/hoc-phan"
+              href="/curriculum"
               className="text-sm font-medium text-zinc-500 transition hover:text-zinc-900"
             >
               Xem tất cả

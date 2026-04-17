@@ -68,8 +68,8 @@ export default async function SubjectPage({
               Trang chủ
             </Link>
             <span>/</span>
-            <Link href="/hoc-phan" className="hover:text-[var(--color-text-primary)] transition">
-              Học phần
+            <Link href="/curriculum" className="hover:text-[var(--color-text-primary)] transition">
+              Curriculum
             </Link>
             <span>/</span>
             <span className="text-[var(--color-text-primary)]">{subject.name}</span>

@@ -39,7 +39,7 @@ export default async function SubjectSimulationPage({
   const canonicalPath = getCanonicalArticlePath(params.slug);
   if (!canonicalPath) notFound();
 
-  const currentPath = `/hoc-phan/${params.subject}/sim/${params.slug}`;
+  const currentPath = `/curriculum/${params.subject}/sim/${params.slug}`;
   if (canonicalPath !== currentPath) {
     redirect(canonicalPath);
   }

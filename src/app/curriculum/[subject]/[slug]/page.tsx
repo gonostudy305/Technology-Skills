@@ -43,7 +43,7 @@ export default async function SubjectArticlePage({
     redirect(canonicalPath);
   }
 
-  const currentPath = `/hoc-phan/${params.subject}/${params.slug}`;
+  const currentPath = `/curriculum/${params.subject}/${params.slug}`;
   if (canonicalPath !== currentPath) {
     redirect(canonicalPath);
   }
