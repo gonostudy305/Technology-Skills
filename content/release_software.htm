@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyên sâu: Hệ sinh thái Nhân sự Release + Gemini AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .role-btn.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-4 md:p-10">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-12 text-center">
+            <h1
+                class="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500">
+                Hệ Sinh Thái Nhân Sự & Trợ Lý Gemini ✨
+            </h1>
+            <p class="text-slate-400 max-w-2xl mx-auto text-lg">
+                Sử dụng AI để mô phỏng sự phối hợp và mở rộng đội ngũ release của bạn.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Sidebar -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass-card p-4 rounded-2xl">
+                    <h3 class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-4 px-2">Đội ngũ cốt lõi
+                    </h3>
+                    <div id="role-list" class="space-y-2 custom-scroll max-h-[400px] overflow-y-auto pr-2">
+                        <!-- Roles injected here -->
+                    </div>
+                </div>
+
+                <!-- AI Tools Section -->
+                <div class="glass-card p-5 rounded-2xl border-indigo-500/30">
+                    <h3 class="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4 flex items-center">
+                        <span class="mr-2">✨ AI Lab</span>
+                    </h3>
+                    <div class="space-y-4">
+                        <button onclick="openScenarioModal()"
+                            class="w-full py-3 px-4 bg-indigo-600/20 hover:bg-indigo-600/40 border border-indigo-500/50 rounded-xl text-sm font-semibold text-indigo-100 transition-all flex items-center justify-center">
+                            ✨ Mô phỏng Sự cố
+                        </button>
+                        <div class="relative">
+                            <input id="new-role-input" type="text" placeholder="Tên vị trí mới..."
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-indigo-500 text-white">
+                            <button onclick="generateNewRole()" id="btn-gen-role"
+                                class="mt-2 w-full py-2 bg-emerald-600 hover:bg-emerald-700 rounded-xl text-xs font-bold uppercase tracking-widest transition-all">
+                                ✨ Tạo Vai trò mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Display -->
+            <div class="lg:col-span-9 space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Radar Chart -->
+                    <div class="glass-card p-6 rounded-3xl">
+                        <h4 class="text-lg font-semibold mb-6 flex items-center text-blue-400">
+                            📊 Biểu đồ DNA Kỹ năng
+                        </h4>
+                        <div class="relative h-[300px] w-full flex justify-center">
+                            <canvas id="roleRadarChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="glass-card p-6 rounded-3xl">
+                        <h4 class="text-lg font-semibold mb-6 flex items-center text-emerald-400">
+                            📈 Chỉ số Tác động
+                        </h4>
+                        <div id="metrics-container" class="space-y-6"></div>
+                    </div>
+                </div>
+
+                <!-- Detail Section -->
+                <div class="glass-card p-8 rounded-3xl relative overflow-hidden" id="detail-card">
+                    <div class="relative z-10">
+                        <div class="flex items-center mb-6">
+                            <div id="role-avatar"
+                                class="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-3xl mr-6 shadow-lg">
+                            </div>
+                            <div>
+                                <h2 id="role-full-name" class="text-3xl font-bold text-white"></h2>
+                                <p id="role-tagline" class="text-indigo-400 font-medium"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div>
+                                <h5 class="text-slate-300 font-bold mb-4 flex items-center">
+                                    <span class="w-1.5 h-6 bg-blue-500 rounded-full mr-3"></span>
+                                    Sứ mệnh Release
+                                </h5>
+                                <p id="role-mission" class="text-slate-400 leading-relaxed"></p>
+
+                                <div class="mt-8">
+                                    <h5 class="text-slate-300 font-bold mb-4 italic">Cùng làm việc với:</h5>
+                                    <div id="role-stakeholders" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900/50 p-6 rounded-2xl border border-slate-700">
+                                <h5 class="text-slate-300 font-bold mb-4 flex items-center text-yellow-400">
+                                    📝 Checklist Sẵn sàng
+                                </h5>
+                                <ul id="role-checklist" class="space-y-3"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Scenario Simulator -->
+    <div id="scenario-modal"
+        class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-2xl rounded-3xl p-8 border-indigo-500/50">
+            <h3 class="text-2xl font-bold mb-2 text-white flex items-center">
+                ✨ Mô phỏng Xử lý Sự cố với Gemini
+            </h3>
+            <p class="text-slate-400 text-sm mb-6">Nhập một tình huống rủi ro, AI sẽ lập kịch bản phối hợp cho đội ngũ
+                của bạn.</p>
+
+            <textarea id="scenario-input"
+                placeholder="Ví dụ: Phát hiện rò rỉ dữ liệu người dùng 1 tiếng trước khi release..."
+                class="w-full h-32 bg-slate-900 border border-slate-700 rounded-2xl p-4 text-white focus:outline-none focus:border-indigo-500 mb-4"></textarea>
+
+            <div id="scenario-result"
+                class="hidden mb-6 p-4 bg-slate-900/80 rounded-2xl border border-slate-800 max-h-60 overflow-y-auto custom-scroll text-slate-300 text-sm leading-relaxed">
+                <!-- AI Result here -->
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeScenarioModal()" class="px-6 py-2 text-slate-400 font-bold">Đóng</button>
+                <button id="btn-run-scenario" onclick="runScenario()"
+                    class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl font-bold text-white shadow-lg flex items-center">
+                    <span id="scenario-loader" class="loader mr-2 hidden"></span>
+                    ✨ Chạy Mô phỏng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Config ---
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'release-master-ai';
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let radarChart;
+        const labels = ['Nghiệp vụ', 'Trải nghiệm', 'Kỹ thuật', 'Quy trình', 'Giao tiếp'];
+
+        const defaultRoles = {
+            pm: {
+                name: "Product Manager (PM)",
+                tagline: "Người định hướng giá trị sản phẩm",
+                avatar: "🎯",
+                mission: "Trả lời câu hỏi 'Tại sao?'. Cân bằng giữa nhu cầu người dùng và mục tiêu kinh doanh.",
+                skills: [95, 80, 30, 70, 90],
+                metrics: [
+                    { label: "Độ hài lòng người dùng", value: 95, color: "blue" },
+                    { label: "Giá trị kinh doanh", value: 90, color: "emerald" }
+                ],
+                stakeholders: ["Khách hàng", "Dev", "Marketing"],
+                checklist: ["Xác nhận Roadmap", "Phê duyệt AC", "Kế hoạch truyền thông"]
+            },
+            dev: {
+                name: "Software Engineer",
+                tagline: "Kiến trúc sư của giải pháp",
+                avatar: "💻",
+                mission: "Biến logic thành sản phẩm. Chịu trách nhiệm về tính ổn định của mã nguồn.",
+                skills: [20, 30, 95, 60, 50],
+                metrics: [
+                    { label: "Chất lượng Code", value: 90, color: "indigo" },
+                    { label: "Tốc độ tính năng", value: 85, color: "purple" }
+                ],
+                stakeholders: ["QA", "DevOps", "Architect"],
+                checklist: ["Unit Test hoàn tất", "Code Review xong", "API Docs cập nhật"]
+            },
+            qa: {
+                name: "QA/QC Engineer",
+                tagline: "Người gác cổng chất lượng",
+                avatar: "🛡️",
+                mission: "Bảo vệ uy tín của team. Đảm bảo sản phẩm không có lỗi nghiêm trọng.",
+                skills: [40, 50, 60, 95, 70],
+                metrics: [
+                    { label: "Tỷ lệ lọt Bug", value: 95, color: "rose" },
+                    { label: "Độ phủ Test", value: 90, color: "amber" }
+                ],
+                stakeholders: ["Dev", "PM"],
+                checklist: ["Regression Test đạt", "Performance Test ổn", "Xác nhận Bug Critical"]
+            },
+            devops: {
+                name: "DevOps Engineer",
+                tagline: "Bậc thầy tự động hóa",
+                avatar: "🚀",
+                mission: "Tối ưu luồng từ code đến server. Biến release thành một thủ tục tự động.",
+                skills: [30, 15, 90, 95, 60],
+                metrics: [
+                    { label: "Tần suất Release", value: 98, color: "cyan" },
+                    { label: "Thời gian phục hồi", value: 95, color: "red" }
+                ],
+                stakeholders: ["Infrastructure", "Dev", "Security"],
+                checklist: ["CI/CD Pipeline xanh", "Monitoring đã bật", "Kế hoạch Rollback"]
+            }
+        };
+
+        let currentRoles = { ...defaultRoles };
+
+        // --- Gemini API Call ---
+        async function callGemini(prompt, systemPrompt = "", isJson = false) {
+            const apiKey = ""; // Canvas handles this
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            if (isJson) {
+                payload.generationConfig = {
+                    responseMimeType: "application/json",
+                };
+            }
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text;
+            } catch (error) {
+                console.error("Gemini Error:", error);
+                return null;
+            }
+        }
+
+        // --- Role Generation ---
+        window.generateNewRole = async () => {
+            const roleName = document.getElementById('new-role-input').value.trim();
+            if (!roleName) return;
+
+            const btn = document.getElementById('btn-gen-role');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="loader mr-2"></span> Đang tạo...`;
+
+            const systemPrompt = `Bạn là chuyên gia tư vấn nhân sự phần mềm. Tạo một vai trò nhân sự mới dựa trên tên người dùng nhập vào. 
+            Trả về JSON theo cấu trúc: { "name": string, "tagline": string, "avatar": emoji, "mission": string, "skills": [int, int, int, int, int], "metrics": [{label, value, color}], "stakeholders": [string], "checklist": [string] }. 
+            Skills là mảng 5 số (0-100) theo thứ tự: Nghiệp vụ, Trải nghiệm, Kỹ thuật, Quy trình, Giao tiếp. Ngôn ngữ: Tiếng Việt.`;
+
+            const resultJson = await callGemini(`Tạo vai trò: ${roleName}`, systemPrompt, true);
+
+            if (resultJson) {
+                const newRole = JSON.parse(resultJson);
+                const roleId = roleName.toLowerCase().replace(/\s+/g, '_');
+
+                // Save to Firestore
+                const userId = auth.currentUser?.uid || "anonymous";
+                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom_roles', roleId), {
+                    ...newRole,
+                    createdAt: new Date().toISOString(),
+                    createdBy: userId
+                });
+
+                document.getElementById('new-role-input').value = "";
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = `✨ Tạo Vai trò mới`;
+        };
+
+        // --- Scenario Simulation ---
+        window.runScenario = async () => {
+            const scenario = document.getElementById('scenario-input').value.trim();
+            if (!scenario) return;
+
+            const loader = document.getElementById('scenario-loader');
+            const resultBox = document.getElementById('scenario-result');
+            const btn = document.getElementById('btn-run-scenario');
+
+            loader.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            btn.disabled = true;
+
+            const roleNames = Object.values(currentRoles).map(r => r.name).join(", ");
+            const prompt = `Tình huống: "${scenario}". Với đội ngũ gồm các vai trò: ${roleNames}, hãy đưa ra một kịch bản phối hợp xử lý sự cố này để bản release vẫn an toàn hoặc giảm thiểu thiệt hại. Hãy trình bày ngắn gọn, chia theo từng vai trò.`;
+
+            const advice = await callGemini(prompt, "Bạn là một Release Manager kinh nghiệm. Hãy đưa ra lời khuyên thực tế và quyết đoán.");
+
+            if (advice) {
+                resultBox.innerHTML = advice.replace(/\n/g, '<br>');
+                resultBox.classList.remove('hidden');
+            }
+
+            loader.classList.add('hidden');
+            btn.disabled = false;
+        };
+
+        // --- UI Rendering ---
+        function initChart() {
+            const ctx = document.getElementById('roleRadarChart').getContext('2d');
+            radarChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'DNA Kỹ năng',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: '#6366f1',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#6366f1',
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: '#334155' },
+                            grid: { color: '#334155' },
+                            pointLabels: { color: '#94a3b8', font: { size: 10 } },
+                            ticks: { display: false },
+                            suggestedMin: 0, suggestedMax: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } },
+                    responsive: true, maintainAspectRatio: false
+                }
+            });
+        }
+
+        function updateDisplay(roleKey) {
+            const role = currentRoles[roleKey];
+            if (!role) return;
+
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.key === roleKey);
+            });
+
+            document.getElementById('role-full-name').innerText = role.name;
+            document.getElementById('role-tagline').innerText = role.tagline;
+            document.getElementById('role-mission').innerText = role.mission;
+            document.getElementById('role-avatar').innerText = role.avatar;
+
+            document.getElementById('role-checklist').innerHTML = role.checklist.map(item => `
+                <li class="flex items-start text-slate-400 text-sm">
+                    <span class="text-emerald-500 mr-3">✔</span> ${item}
+                </li>
+            `).join('');
+
+            document.getElementById('role-stakeholders').innerHTML = role.stakeholders.map(sh => `
+                <span class="px-2 py-1 bg-slate-800 text-xs rounded-lg border border-slate-700">${sh}</span>
+            `).join('');
+
+            document.getElementById('metrics-container').innerHTML = role.metrics.map(m => `
+                <div>
+                    <div class="flex justify-between text-[10px] mb-1 font-bold uppercase text-slate-500">
+                        <span>${m.label}</span>
+                        <span>${m.value}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-${m.color}-500 h-full" style="width: ${m.value}%"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            radarChart.data.datasets[0].data = role.skills;
+            radarChart.update();
+        }
+
+        function renderRoleList() {
+            const container = document.getElementById('role-list');
+            container.innerHTML = "";
+            Object.entries(currentRoles).forEach(([key, role]) => {
+                const btn = document.createElement('button');
+                btn.className = `role-btn w-full flex items-center p-3 rounded-xl text-left transition-all hover:bg-slate-800/50 group mb-2`;
+                btn.dataset.key = key;
+                btn.innerHTML = `
+                    <span class="text-xl mr-3">${role.avatar}</span>
+                    <span class="font-bold text-xs truncate">${role.name}</span>
+                `;
+                btn.onclick = () => updateDisplay(key);
+                container.appendChild(btn);
+            });
+        }
+
+        // --- Modals ---
+        window.openScenarioModal = () => document.getElementById('scenario-modal').classList.remove('hidden');
+        window.closeScenarioModal = () => {
+            document.getElementById('scenario-modal').classList.add('hidden');
+            document.getElementById('scenario-result').classList.add('hidden');
+            document.getElementById('scenario-input').value = "";
+        };
+
+        // --- Initialization ---
+        async function startApp() {
+            if (typeof __initial_auth_token !== 'undefined') {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            initChart();
+
+            // Listen for custom roles from Firestore
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'custom_roles'), (snapshot) => {
+                currentRoles = { ...defaultRoles };
+                snapshot.forEach(doc => {
+                    currentRoles[doc.id] = doc.data();
+                });
+                renderRoleList();
+                updateDisplay(Object.keys(currentRoles)[0]);
+            });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                console.log("Authenticated as:", user.uid);
+            }
+        });
+
+        startApp();
+    </script>
+</body>
+
+</html>
