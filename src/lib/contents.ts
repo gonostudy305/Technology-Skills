@@ -3,6 +3,7 @@ import path from "path";
 import { marked } from "marked";
 import matter from "gray-matter";
 
+// Define the content directory path
 export const CONTENT_DIR = path.join(process.cwd(), "content");
 
 export interface ArticleInfo {
@@ -51,7 +52,7 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<{content: string, type: string} | null> {
+export async function getArticleBySlug(slug: string): Promise<{content: string, type: string, scripts?: string} | null> {
   try {
     let filePath = path.join(CONTENT_DIR, `${slug}.md`);
     if (fs.existsSync(filePath)) {
@@ -65,7 +66,7 @@ export async function getArticleBySlug(slug: string): Promise<{content: string, 
     if (fs.existsSync(filePath)) {
       const rawHTML = fs.readFileSync(filePath, "utf-8");
       
-      // Extract links (like FontAwesome or Google Fonts) inside head
+      // Extract links 
       const linksSet = new Set<string>();
       const linkRegex = /<link[^>]+(?:href="[^"]*")[^>]*>/gi;
       let match;
@@ -83,15 +84,25 @@ export async function getArticleBySlug(slug: string): Promise<{content: string, 
       }
       const styles = stylesList.join("\n");
 
-      // Extract body tag content
+      // Safely extract inline scripts to execute manually (drop external tailwind CDN which we dont need since app router gives us TW)
+      const scriptRegex = /<script(?![^>]*src="https:\/\/cdn\.tailwindcss\.com")[^>]*>([\s\S]*?)<\/script>/gi;
+      const scriptsList = [];
+      let scriptMatch;
+      while ((scriptMatch = scriptRegex.exec(rawHTML)) !== null) {
+        if (scriptMatch[1].trim()) {
+            scriptsList.push(scriptMatch[1]);
+        }
+      }
+      const scripts = scriptsList.join("\n");
+
+      // Extract body
       const bodyMatch = rawHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       let bodyContent = bodyMatch ? bodyMatch[1] : rawHTML;
-
-      // Extract scripts to keep (mostly inline ones)
-      // Usually body content already includes it, but just in case we need to process it
-      // Let React ClientRenderer handle script tags!
       
-      // Return combined safe HTML without the overlapping html/head structure
+      // Clear out scripts from html since NextJS dangerouslySetInnerHTML wont run them anyway
+      bodyContent = bodyContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+      // Return combined safe HTML
       const finalHTML = `
         ${links}
         ${styles}
@@ -100,7 +111,7 @@ export async function getArticleBySlug(slug: string): Promise<{content: string, 
         </div>
       `;
 
-      return { content: finalHTML, type: "html" };
+      return { content: finalHTML, type: "html", scripts };
     }
     
     return null;
@@ -109,3 +120,4 @@ export async function getArticleBySlug(slug: string): Promise<{content: string, 
     return null;
   }
 }
+
