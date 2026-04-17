@@ -457,7 +457,56 @@
         </div>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-8 mt-12 text-center text-sm border-t-4 border-brand-500">
+    <!-- Actionable Conclusion -->
+    <section class="max-w-7xl mx-auto px-4 md:px-8 mt-12 mb-8">
+        <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-white">
+            <h2 class="text-2xl font-bold mb-6">🎯 Thử ngay: Xây mini Data Warehouse trên máy</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white/10 p-5 rounded-xl border border-white/20">
+                    <h3 class="text-sm font-bold text-brand-400 uppercase tracking-wider mb-3">Bài tập 1: Thiết kế Star
+                        Schema</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-3">Vẽ diagram cho một cửa hàng bán lẻ với:</p>
+                    <ul class="text-slate-300 text-sm space-y-1 pl-5 list-disc">
+                        <li>1 Fact table: <code class="bg-slate-700 px-1 rounded">fact_sales</code> (order_id,
+                            product_key, customer_key, date_key, quantity, revenue)</li>
+                        <li>3 Dimension tables: <code class="bg-slate-700 px-1 rounded">dim_product</code>, <code
+                                class="bg-slate-700 px-1 rounded">dim_customer</code>, <code
+                                class="bg-slate-700 px-1 rounded">dim_date</code></li>
+                    </ul>
+                </div>
+                <div class="bg-white/10 p-5 rounded-xl border border-white/20">
+                    <h3 class="text-sm font-bold text-brand-400 uppercase tracking-wider mb-3">Bài tập 2: Viết SQL
+                        analytical query</h3>
+                    <pre class="bg-slate-900 p-3 rounded-lg text-sm text-slate-200 font-mono overflow-x-auto">-- Top 5 sản phẩm doanh thu cao nhất theo tháng
+SELECT 
+  d.month_name,
+  p.product_name,
+  SUM(f.revenue) AS total_revenue
+FROM fact_sales f
+JOIN dim_date d ON f.date_key = d.date_key
+JOIN dim_product p ON f.product_key = p.product_key
+GROUP BY d.month_name, p.product_name
+ORDER BY total_revenue DESC
+LIMIT 5;</pre>
+                </div>
+            </div>
+
+            <div class="p-4 bg-white/10 rounded-lg border border-white/20">
+                <p class="text-sm text-blue-200 font-semibold mb-2">Bước tiếp theo trong lộ trình</p>
+                <ul class="text-slate-300 text-sm space-y-1 pl-5 list-disc">
+                    <li><strong>dbt (data build tool):</strong> Viết transformation logic dạng SQL model có version
+                        control — kỹ năng hàng đầu cho Analytics Engineer.</li>
+                    <li><strong>Airbyte:</strong> Cấu hình data sync tự động từ Google Sheets/MySQL vào PostgreSQL —
+                        thay thế ETL thủ công bằng pipeline có monitoring.</li>
+                </ul>
+                <p class="text-slate-400 text-xs mt-3"><strong>Câu hỏi mở:</strong> Nếu Akia có 100 đại lý với dữ liệu
+                    bán hàng riêng biệt, bạn sẽ chọn Star Schema hay Snowflake Schema? Tại sao?</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-400 py-8 mt-4 text-center text-sm border-t-4 border-brand-500">
         <p>&copy; 2026 Kiến trúc đề xuất cho Akia Smart Home Việt Nam.</p>
         <p class="mt-1 opacity-70">Xây dựng dựa trên nguyên lý Kimball & Modern Data Stack thực chiến cho SME.</p>
     </footer>
