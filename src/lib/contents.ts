@@ -18,7 +18,7 @@ export interface ArticleInfo {
   viewCount?: number;
 }
 
-const FALLBACK_SUMMARY = "Kho tri thuc cong nghe duoc bien soan chuyen sau.";
+const FALLBACK_SUMMARY = "Kho tri thức công nghệ được biên soạn chuyên sâu.";
 
 function normalizeText(raw: string): string {
   return raw
@@ -73,12 +73,12 @@ function extractSummaryFromMarkdown(mdContent: string): string {
 function inferCategory(slug: string, title: string, type: string): string {
   const probe = `${slug} ${title}`.toLowerCase();
 
-  if (/(data|warehouse|etl|bi|analytics|database)/.test(probe)) return "Nen tang";
-  if (/(ui|ux|design|product)/.test(probe)) return "San pham";
-  if (/(deep|learning|ai|model|llm|prompt)/.test(probe)) return "Ung dung";
-  if (/(network|internet|router|switch|gateway|firewall|device)/.test(probe)) return "Kien thuc";
+  if (/(data|warehouse|etl|bi|analytics|database)/.test(probe)) return "Nền tảng";
+  if (/(ui|ux|design|product)/.test(probe)) return "Sản phẩm";
+  if (/(deep|learning|ai|model|llm|prompt)/.test(probe)) return "Ứng dụng";
+  if (/(network|internet|router|switch|gateway|firewall|device)/.test(probe)) return "Kiến thức";
 
-  return type === "md" ? "San pham" : "Nen tang";
+  return type === "md" ? "Sản phẩm" : "Nền tảng";
 }
 
 function pseudoViewCount(slug: string): number {
@@ -107,7 +107,7 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
       let title = slug;
       let summary = FALLBACK_SUMMARY;
       let category: string | undefined;
-      let author = "Minh Tuan";
+      let author = "Minh Tuấn";
 
       if (type === "html") {
         const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
