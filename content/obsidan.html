@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obsidian Playbook: Tổ Chức Tri Thức Cá Nhân Bằng PKM</title>
+    <meta name="description"
+        content="Obsidian Playbook hướng dẫn xây hệ thống ghi chú PKM thực chiến: folder, naming, backlinks, tags, template, review tuần và workflow viết bài từ ghi chú.">
+    <meta name="category" content="Sản phẩm">
+    <meta name="author" content="Minh Tuấn">
+    <style>
+        .obsidian-playbook {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            line-height: 1.75;
+            max-width: 100%;
+        }
+
+        .obsidian-playbook .hero {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(145deg, #f5f3ff, #ffffff);
+            margin-bottom: 20px;
+        }
+
+        .obsidian-playbook section {
+            margin-top: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            background: #ffffff;
+        }
+
+        .obsidian-playbook h2 {
+            font-size: 1.3rem;
+            margin: 0 0 10px;
+            color: #111827;
+        }
+
+        .obsidian-playbook h3 {
+            font-size: 1rem;
+            margin: 14px 0 6px;
+            color: #111827;
+        }
+
+        .obsidian-playbook p,
+        .obsidian-playbook ul,
+        .obsidian-playbook ol {
+            margin: 0;
+        }
+
+        .obsidian-playbook p+p,
+        .obsidian-playbook p+ul,
+        .obsidian-playbook p+ol,
+        .obsidian-playbook ul+p,
+        .obsidian-playbook ol+p {
+            margin-top: 8px;
+        }
+
+        .obsidian-playbook ul,
+        .obsidian-playbook ol {
+            padding-left: 20px;
+        }
+
+        .obsidian-playbook .code {
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 12px;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: pre;
+        }
+
+        .obsidian-playbook .table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .obsidian-playbook table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 660px;
+        }
+
+        .obsidian-playbook th,
+        .obsidian-playbook td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.92rem;
+        }
+
+        .obsidian-playbook th {
+            background: #f9fafb;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .obsidian-playbook .note {
+            margin-top: 10px;
+            border-left: 4px solid #8b5cf6;
+            background: #f5f3ff;
+            color: #5b21b6;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.93rem;
+        }
+
+        @media (max-width: 640px) {
+
+            .obsidian-playbook .hero,
+            .obsidian-playbook section {
+                padding: 14px;
+            }
+
+            .obsidian-playbook h2 {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="obsidian-playbook">
+        <div class="hero">
+            <p><strong>TL;DR:</strong> Obsidian mạnh nhất khi bạn xem nó là hệ điều hành tri thức cá nhân (PKM), không
+                chỉ là app ghi chú. Hệ thống bền vững cần naming rõ ràng, backlink có chủ đích, template chuẩn và nhịp
+                review định kỳ để ghi chú luôn sống, không thành "mồ chôn file markdown".</p>
+        </div>
+
+        <section>
+            <h2>1. Thiết kế cấu trúc vault ngay từ đầu</h2>
+            <h3>Folder gợi ý</h3>
+            <ul>
+                <li>00 Inbox: nơi thu thập nhanh ý tưởng thô.</li>
+                <li>10 Projects: ghi chú phục vụ công việc đang chạy.</li>
+                <li>20 Areas: kiến thức vận hành dài hạn (sức khỏe, tài chính, học tập).</li>
+                <li>30 Resources: tài liệu tham khảo, sách, bài viết, research.</li>
+                <li>40 Archives: nội dung đã đóng hoặc không còn active.</li>
+            </ul>
+            <div class="note"><strong>Mẹo:</strong> Giữ cấu trúc đơn giản. Khi không chắc để đâu, thả vào Inbox và xử lý
+                trong buổi review tuần.</div>
+        </section>
+
+        <section>
+            <h2>2. Quy ước đặt tên giúp tìm lại nhanh</h2>
+            <p>Đặt tên note theo mục đích sử dụng, không đặt theo cảm tính tại thời điểm ghi chú.</p>
+            <h3>Quy tắc thực chiến</h3>
+            <ul>
+                <li>Note evergreen: dùng tên khái niệm rõ nghĩa, ví dụ: "Mô hình doanh thu SaaS".</li>
+                <li>Meeting note: YYYY-MM-DD + chủ đề, ví dụ: "2026-04-17 Sprint Planning".</li>
+                <li>Atomic note: một ý chính trên một note để dễ link và tái sử dụng.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>3. Backlink và graph: dùng đúng thì mạnh, dùng sai thì nhiễu</h2>
+            <h3>Khi tạo link</h3>
+            <ul>
+                <li>Link khi có quan hệ ý nghĩa rõ ràng, không link vì "nhìn cho đẹp graph".</li>
+                <li>Tạo note trung tâm (hub note) cho chủ đề lớn để gom tri thức theo cụm.</li>
+            </ul>
+            <h3>Khi review graph</h3>
+            <ul>
+                <li>Tìm cụm bị cô lập để bổ sung kết nối.</li>
+                <li>Loại bớt note trùng lặp gây phân mảnh kiến thức.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>4. Template hóa để ghi chú nhất quán</h2>
+            <p>Dùng template giúp giảm ma sát khi ghi chép, đặc biệt cho meeting, research, lesson learned.</p>
+            <div class="code"># {{title}}
+                Ngày: {{date}}
+                Mục tiêu:
+                -
+
+                Ý chính:
+                -
+
+                Hành động tiếp theo:
+                - [ ]
+
+                Liên kết:
+                - [[...]]</div>
+            <div class="note"><strong>Lưu ý:</strong> Template nên ngắn, ưu tiên tốc độ ghi nhận. Template quá dài khiến
+                bạn bỏ thói quen ghi chú.</div>
+        </section>
+
+        <section>
+            <h2>5. Quy trình review hàng tuần</h2>
+            <ol>
+                <li>Dọn Inbox: phân loại, đổi tên, link về dự án/chủ đề tương ứng.</li>
+                <li>Đóng các task cũ và cập nhật note dự án đang chạy.</li>
+                <li>Chọn 3 note quan trọng để nâng cấp thành evergreen note.</li>
+                <li>Tổng kết "điều học được" trong tuần bằng một note review.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>6. Bảng lỗi phổ biến khi dùng Obsidian</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lỗi</th>
+                            <th>Biểu hiện</th>
+                            <th>Cách sửa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ghi chú trùng lặp</td>
+                            <td>Nhiều note cùng chủ đề nhưng không link với nhau</td>
+                            <td>Gộp về một hub note và giữ note cũ làm redirect.</td>
+                        </tr>
+                        <tr>
+                            <td>Inbox tồn đọng</td>
+                            <td>Ghi nhiều nhưng không xử lý lại</td>
+                            <td>Đặt lịch review cố định mỗi tuần 30-45 phút.</td>
+                        </tr>
+                        <tr>
+                            <td>Lạm dụng plugin</td>
+                            <td>Vault nặng, workflow phức tạp</td>
+                            <td>Chỉ giữ plugin phục vụ use-case rõ ràng.</td>
+                        </tr>
+                        <tr>
+                            <td>Không có output</td>
+                            <td>Thu thập nhiều nhưng ít viết/ít áp dụng</td>
+                            <td>Tạo pipeline "ghi chú -> outline -> bài viết".</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2>7. Workflow từ ghi chú sang bài viết</h2>
+            <h3>Bước 1: Chọn cụm note</h3>
+            <p>Chọn 5-10 note liên quan cùng một vấn đề thực tế.</p>
+            <h3>Bước 2: Lập outline</h3>
+            <p>Biến các note thành các heading H2/H3 theo mạch logic giải quyết vấn đề.</p>
+            <h3>Bước 3: Viết bản nháp</h3>
+            <p>Viết từ insight trong note, không copy lại nguyên văn nguồn tham khảo.</p>
+        </section>
+
+        <section>
+            <h2>8. FAQ nhanh</h2>
+            <h3>Obsidian có phù hợp người mới không?</h3>
+            <p>Có, nếu bạn bắt đầu nhỏ: Inbox + Projects + weekly review. Đừng cố tối ưu quá sớm.</p>
+            <h3>Có nên đồng bộ bằng Git hay Obsidian Sync?</h3>
+            <p>Nếu cần đơn giản và đa thiết bị ổn định, Obsidian Sync phù hợp hơn. Git tốt cho người quen workflow kỹ
+                thuật.</p>
+            <h3>Làm sao tránh ghi chú xong để đó?</h3>
+            <p>Luôn gắn mỗi note với một hành động: link vào project, thêm task, hoặc đưa vào outline bài viết.</p>
+        </section>
+    </main>
+</body>
+
+</html>

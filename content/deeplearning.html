@@ -1,1266 +1,353 @@
-import React, { useState, useEffect } from 'react';
-import {
-Network, Grid, RefreshCw, Layers, Cpu, Eye,
-Play, Pause, Sigma, AlertTriangle, Code, FastForward,
-Box, Infinity, Zap, Sparkles, Send, Loader2, Bot
-} from 'lucide-react';
-
-// --- KNOWLEDGE BASE ---
-const architectures = [
-{
-id: 'mlp',
-name: 'Multi-Layer Perceptron (MLP)',
-icon:
-<Network className="w-5 h-5" />,
-shortDesc: 'Mạng nơ-ron truyền thẳng, nền tảng của Deep Learning.',
-components: ['Dense Layers', 'Weights', 'Biases', 'Activations'],
-intuition: 'Giống như một hội đồng ra quyết định nhiều cấp bậc. Dữ liệu thô đưa cho nhân viên cấp thấp, họ xử lý một
-phần rồi chuyển kết quả cho quản lý cấp trung, và cứ thế truyền một chiều lên ban giám đốc để chốt quyết định cuối
-cùng.',
-technical: 'Là kiến trúc Feedforward Neural Network (FFN). Thông tin di chuyển theo một hướng từ Input -> Hidden ->
-Output. Mỗi nơ-ron liên kết hoàn toàn (fully connected) với lớp tiếp theo. Tính phi tuyến được tiêm vào qua các
-Activation Functions. Mạng học bằng Backpropagation để cập nhật trọng số theo hướng âm của Gradient.',
-math: `**Forward Pass:**
-$$z^{(l)} = W^{(l)} a^{(l-1)} + b^{(l)}$$
-$$a^{(l)} = f(z^{(l)})$$
-**Loss Function (MSE / Cross-Entropy):**
-$$\\mathcal{L} = -\\frac{1}{N} \\sum_{i=1}^N y_i \\log(a^{(L)}_i)$$
-**Backpropagation (Derivatives):**
-$$\\delta^{(L)} = a^{(L)} - y$$
-$$\\delta^{(l)} = (W^{(l+1)})^T \\delta^{(l+1)} \\odot f'(z^{(l)})$$
-$$\\frac{\\partial \\mathcal{L}}{\\partial W^{(l)}} = \\delta^{(l)} (a^{(l-1)})^T$$`,
-failures: `**Failure Modes:**
-1. **Overfitting:** Mạng học thuộc lòng nhiễu thay vì quy luật.
-2. **Dead ReLUs:** Nơ-ron rơi vào trạng thái gradient = 0 vĩnh viễn.
-
-**Remedies & Citations:**
-- **Dropout** để ngắt kết nối ngẫu nhiên, tạo ensemble ngầm. (Srivastava et al., 2014, *Dropout: A Simple Way to Prevent
-Neural Networks from Overfitting*)
-- **He/Xavier Initialization** để ổn định phương sai qua các lớp. (He et al., 2015, *Delving Deep into Rectifiers*)`,
-spec: `// Spec: 1 Forward/Backward Step
-state = { W: Matrix, b: Vector, a: Array }
-function step(x, y) {
-// Forward
-let z = dot(W, x) + b;
-let a = relu(z);
-// Backward
-let dZ = a - y; // simplified derivative
-let dW = dot(dZ, x.T);
-W = W - lr * dW;
-}
-
-// Unit Test: Dead ReLU detection
-function testDeadReLU() {
-const layer = new Dense(100, activation='relu');
-layer.weights.fill(-10); // Extreme negative weights
-const out = layer.forward(random_input);
-assert(out.every(val => val === 0), "All ReLUs should be dead");
-}`
-},
-{
-id: 'cnn',
-name: 'Convolutional Neural Network (CNN)',
-icon:
-<Grid className="w-5 h-5" />,
-shortDesc: 'Bộ trích xuất đặc trưng không gian (Computer Vision).',
-components: ['Conv2D', 'Kernels', 'MaxPooling', 'Stride'],
-intuition: 'Hãy tưởng tượng bạn cầm một chiếc kính lúp trượt dần qua một bức tranh. Ở những lớp đầu, kính lúp phát hiện
-các nét gạch, góc cạnh; ở lớp sâu hơn, nó ghép nét gạch thành con mắt, cái mũi, và cuối cùng nhận ra toàn bộ khuôn
-mặt.',
-technical: 'Khai thác cấu trúc lưới (grid topology) của dữ liệu ảnh bằng Phép tích chập. Sử dụng Parameter Sharing (dùng
-chung bộ lọc) và Local Connectivity (kết nối cục bộ) giúp giảm thiểu số lượng tham số so với MLP. Pooling layers tạo ra
-Translation Invariance (Bất biến với phép dịch chuyển).',
-math: `**Forward Pass (2D Convolution):**
-$$S(i, j) = (I * K)(i, j) = \\sum_m \\sum_n I(i+m, j+n) K(m, n)$$
-**Loss Function (Cross-Entropy):**
-$$\\mathcal{L} = -\\sum y_c \\log(\\hat{y}_c)$$
-**Backpropagation (w.r.t Kernel):**
-$$\\frac{\\partial \\mathcal{L}}{\\partial K(m,n)} = \\sum_i \\sum_j \\delta(i,j) I(i+m, j+n)$$
-*(Gradient của một Kernel chính là phép tích chập giữa Input và Gradient của Output)*`,
-failures: `**Failure Modes:**
-1. **Lack of Global Context:** Kernel nhỏ chỉ nhìn thấy cục bộ, khó bắt được mối quan hệ xa.
-2. **Adversarial Vulnerability:** Nhiễu nhỏ (invisible noise) có thể thay đổi hoàn toàn dự đoán.
-
-**Remedies & Citations:**
-- **Dilated Convolutions** để tăng Receptive Field. (Yu & Koltun, 2016)
-- **Adversarial Training**. (Goodfellow et al., 2014, *Explaining and Harnessing Adversarial Examples*)`,
-spec: `// Spec: Kernel Sliding
-state = { image: Matrix(NxN), kernel: Matrix(KxK) }
-function slide() {
-let featureMap = zeros(N-K+1, N-K+1);
-for i, j in (N-K+1)x(N-K+1):
-featureMap[i,j] = sum(image[i:i+K, j:j+K] * kernel)
-return featureMap
-}
-
-// Unit Test: Translation Invariance via MaxPool
-function testTranslationInvariance() {
-let img1 = [0, 1, 0, 0]; let img2 = [0, 0, 1, 0];
-let pool = new MaxPool1D(pool_size=4);
-assert(pool(img1) === pool(img2), "Output should be invariant to small shifts");
-}`
-},
-{
-id: 'rnn',
-name: 'Recurrent Neural Network (RNN)',
-icon:
-<RefreshCw className="w-5 h-5" />,
-shortDesc: 'Xử lý chuỗi tuần tự nhờ Trạng thái ẩn (Memory).',
-components: ['Hidden State', 'BPTT', 'Sequence', 'Time Steps'],
-intuition: 'Giống như cách bạn đọc câu văn này. Bạn không hiểu từ "này" một cách cô lập, mà hiểu nó dựa vào một "bộ nhớ
-ngắn hạn" lưu trữ thông tin của các từ đã đọc trước đó.',
-technical: 'Xử lý Sequential Data bằng cách duy trì một Hidden State ($h_t$). Ở mỗi bước thời gian, mô hình nhận input
-hiện tại và hidden state từ bước trước. Huấn luyện bằng Backpropagation Through Time (BPTT) - mở rộng mạng theo thời
-gian để tính Gradient.',
-math: `**Forward Pass:**
-$$h_t = \\tanh(W_{hh} h_{t-1} + W_{xh} x_t + b_h)$$
-$$\\hat{y}_t = W_{hy} h_t + b_y$$
-**Loss Function (Sum over time):**
-$$\\mathcal{L} = \\sum_{t=1}^T \\mathcal{L}_t(\\hat{y}_t, y_t)$$
-**Backpropagation Through Time (BPTT):**
-$$\\frac{\\partial \\mathcal{L}_t}{\\partial W_{hh}} = \\sum_{k=1}^t \\frac{\\partial \\mathcal{L}_t}{\\partial
-\\hat{y}_t} \\frac{\\partial \\hat{y}_t}{\\partial h_t} \\left( \\prod_{j=k+1}^t \\frac{\\partial h_j}{\\partial
-h_{j-1}} \\right) \\frac{\\partial h_k}{\\partial W_{hh}}$$
-*(Tích chuỗi đạo hàm $\\prod \\frac{\\partial h_j}{\\partial h_{j-1}}$ gây ra Vanishing/Exploding Gradient)*`,
-failures: `**Failure Modes:**
-1. **Vanishing Gradients:** Gradient suy giảm theo hàm mũ về 0 khi backprop qua chuỗi dài, mô hình "quên" quá khứ xa.
-2. **Exploding Gradients:** Gradient tăng vọt gây NaN/Overflow.
-
-**Remedies & Citations:**
-- **Gradient Clipping** để trị Exploding Gradients. (Pascanu et al., 2013, *On the difficulty of training recurrent
-neural networks*)
-- Thay thế bằng **LSTM/GRU** để tạo "luồng cao tốc" cho Gradient.`,
-spec: `// Spec: BPTT Variance Check
-state = { h: Vector, W_hh: Matrix }
-function forwardStep(x_t, h_prev) {
-return tanh(dot(W_hh, h_prev) + x_t)
-}
-
-// Unit Test: Demonstrate Vanishing Gradient
-function testVanishingGradient() {
-const rnn = new RNN(hidden_size=10);
-rnn.W_hh.fill(0.5); // Weights
-< 1 let grad=1.0; for(let t=0; t<50; t++) { grad=grad * rnn.W_hh[0][0] * (1 - Math.pow(Math.tanh(1), 2)); // derivative
-    of tanh } assert(grad < 1e-10, "Gradient approaches zero exponentially" ); }` }, { id: 'lstm' ,
-    name: 'Long Short-Term Memory (LSTM)' , icon: <FastForward className="w-5 h-5" />,
-shortDesc: 'Biến thể RNN với cơ chế Cổng (Gates) và Cell State.',
-components: ['Cell State', 'Forget Gate', 'Input Gate', 'Output Gate'],
-intuition: 'Là một cuốn nhật ký có người biên tập thông minh. Ở mỗi trang, người biên tập quyết định: Xóa đi thông tin
-gì cũ (Forget), Viết thêm gì mới (Input), và Rút ra tóm tắt gì để dùng ngay lập tức (Output).',
-technical: 'Giải quyết Vanishing Gradient của Vanilla RNN bằng cách tách biệt Trạng thái dài hạn (Cell State $C_t$) và
-Trạng thái ngắn hạn (Hidden State $h_t$). $C_t$ chạy dọc như một đường cao tốc (Conveyor belt) với các phép toán tuyến
-tính, cho phép gradient chảy ngược qua thời gian mà không bị triệt tiêu.',
-math: `**Forward Pass (The 3 Gates):**
-Forget: $\\quad f_t = \\sigma(W_f \\cdot [h_{t-1}, x_t] + b_f)$
-Input: $\\quad i_t = \\sigma(W_i \\cdot [h_{t-1}, x_t] + b_i)$
-Output: $\\quad o_t = \\sigma(W_o \\cdot [h_{t-1}, x_t] + b_o)$
-**Cell State & Hidden State Update:**
-$$\\tilde{C}_t = \\tanh(W_c \\cdot [h_{t-1}, x_t] + b_c)$$
-$$C_t = f_t \\odot C_{t-1} + i_t \\odot \\tilde{C}_t$$
-$$h_t = o_t \\odot \\tanh(C_t)$$
-*(Đạo hàm $\\frac{\\partial C_t}{\\partial C_{t-1}} \\approx f_t$, nếu $f_t=1$, gradient không đổi)*`,
-failures: `**Failure Modes:**
-1. **Sequential Computation:** Cấu trúc tuần tự ngăn cản việc xử lý song song (parallelization) trên GPU, khiến việc
-huấn luyện rất chậm.
-2. **Limited Bandwidth:** Vẫn gặp khó khăn khi chiều dài chuỗi vượt qua vài ngàn tokens.
-
-**Remedies & Citations:**
-- Chuyển sang kiến trúc **Transformer (Self-Attention)** để tính toán song song toàn cục.
-- **Original Paper:** Hochreiter & Schmidhuber, 1997, *Long Short-Term Memory*.`,
-spec: `// Spec: Gate Flow
-state = { C_prev, h_prev, x }
-function lstmCell() {
-let f = sigmoid(Wf * concat(h_prev, x));
-let i = sigmoid(Wi * concat(h_prev, x));
-let C_tilde = tanh(Wc * concat(h_prev, x));
-let C_new = f * C_prev + i * C_tilde; // Highway
-return C_new;
-}
-
-// Unit Test: Constant Error Carousel (CEC)
-function testGradientHighway() {
-let f = 1.0; // Assume forget gate is completely open
-let i = 0.0; // Input gate closed
-let dC_next = 1.5; // Upstream gradient
-let dC_t = dC_next * f; // local gradient passes through unchanged
-assert(dC_t === dC_next, "Gradient flows backward without vanishing");
-}`
-},
-{
-id: 'gru',
-name: 'Gated Recurrent Unit (GRU)',
-icon:
-<Zap className="w-5 h-5" />,
-shortDesc: 'Phiên bản tối ưu và gọn nhẹ hơn của LSTM.',
-components: ['Update Gate', 'Reset Gate', 'Hidden State'],
-intuition: 'Một phiên bản tinh gọn của LSTM. Nó gộp cơ chế xóa bộ nhớ và viết bộ nhớ thành một cần gạt duy nhất. Nếu cần
-gạt kéo lên, nó giữ trọn vẹn quá khứ; nếu kéo xuống, nó đè thông tin hiện tại lên.',
-technical: 'Tối ưu hóa số lượng tham số bằng cách gộp Forget Gate và Input Gate thành một Update Gate duy nhất ($z_t$).
-GRU không có Cell State độc lập mà gộp tất cả bộ nhớ vào Hidden State ($h_t$). Thường hội tụ nhanh hơn LSTM trên dữ liệu
-ít phức tạp.',
-math: `**Forward Pass (The 2 Gates):**
-Update: $\\quad z_t = \\sigma(W_z \\cdot [h_{t-1}, x_t])$
-Reset: $\\quad r_t = \\sigma(W_r \\cdot [h_{t-1}, x_t])$
-**Candidate & Final Hidden State:**
-$$\\tilde{h}_t = \\tanh(W \\cdot [r_t \\odot h_{t-1}, x_t])$$
-$$h_t = (1 - z_t) \\odot h_{t-1} + z_t \\odot \\tilde{h}_t$$
-*(Lưu ý: $(1 - z_t)$ đóng vai trò như Forget, $z_t$ đóng vai trò như Input)*`,
-failures: `**Failure Modes:**
-1. Rơi vào cùng hạn chế về tính tuần tự (không thể parallelize) như toàn bộ họ RNN.
-2. Sức mạnh biểu diễn đôi khi kém LSTM trên những task yêu cầu tách biệt nghiêm ngặt giữa bộ nhớ dài và ngắn hạn.
-
-**Remedies & Citations:**
-- **Original Paper:** Cho et al., 2014, *Learning Phrase Representations using RNN Encoder-Decoder for Statistical
-Machine Translation*.`,
-spec: `// Spec: Update Gate Interpolation
-state = { h_prev, z_gate }
-function gruInterpolation(h_prev, h_candidate, z) {
-// Linear interpolation controlled by z
-return (1 - z) * h_prev + z * h_candidate;
-}
-
-// Unit Test: Perfect Memory Retention
-function testRetainMemory() {
-let h_prev = [0.8, -0.5];
-let z = [0.0, 0.0]; // Update gate says: ignore candidate, keep history
-let h_new = gruInterpolation(h_prev, [1.0, 1.0], z);
-assert(deepEqual(h_new, h_prev), "Memory strictly retained when z=0");
-}`
-},
-{
-id: 'transformer',
-name: 'Transformer (Attention)',
-icon:
-<Layers className="w-5 h-5" />,
-shortDesc: 'Kiến trúc tính toán song song toàn cục, cốt lõi của LLMs.',
-components: ['Q-K-V', 'Self-Attention', 'Positional Encoding', 'Multi-Head'],
-intuition: 'Thay vì đọc từng từ một, Transformer nhìn toàn cảnh bức tranh. Mọi từ trong câu đồng thời đặt câu hỏi "Tôi
-nên chú ý đến ai?" (Query) và trả lời "Tôi có thông tin này" (Key) để tạo ra mạng lưới liên kết ngữ cảnh.',
-technical: 'Loại bỏ Recurrence (tính tuần tự). Sử dụng Self-Attention để mô hình hóa mọi quan hệ phụ thuộc không kể
-khoảng cách. Dùng Positional Encoding để bảo toàn thông tin về thứ tự từ. Tính toán song song cực mạnh nhưng yêu cầu
-$O(N^2)$ bộ nhớ và tính toán theo chiều dài chuỗi.',
-math: `**Scaled Dot-Product Attention:**
-$$\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{Q K^T}{\\sqrt{d_k}}\\right) V$$
-*(Trong đó: Query $Q = X W^Q$, Key $K = X W^K$, Value $V = X W^V$)*
-**Multi-Head Attention:**
-$$\\text{MultiHead}(Q,K,V) = \\text{Concat}(\\text{head}_1, ..., \\text{head}_h)W^O$$
-**Positional Encoding (Sine/Cosine):**
-$$PE_{(pos, 2i)} = \\sin(pos / 10000^{2i/d_{model}})$$`,
-failures: `**Failure Modes:**
-1. **Quadratic Bottleneck:** Chi phí tính ma trận Attention $QK^T$ là $O(N^2)$, gây cạn kiệt VRAM khi Context Length
-tăng.
-2. **Attention Dilution:** Nhiễu Attention khi dồn quá nhiều text không liên quan.
-
-**Remedies & Citations:**
-- **FlashAttention:** IO-Aware Exact Attention giúp tăng tốc phần cứng. (Dao et al., 2022)
-- **Sparse Attention / Sliding Window:** (Mistral, Longformer).
-- **Original:** Vaswani et al., 2017, *Attention Is All You Need*.`,
-spec: `// Spec: QK^T Matrix Mul
-state = { Q: Matrix(N, d), K: Matrix(N, d) }
-function computeAttentionScores(Q, K) {
-let scores = dot(Q, K.transpose()); // Shape: NxN
-scores = scores / sqrt(d);
-return softmax(scores, axis=-1);
-}
-
-// Unit Test: Quadratic Complexity Warning
-function testO2Complexity() {
-let seq_len = 1000;
-let qk_ops_1k = seq_len * seq_len;
-seq_len = 8000;
-let qk_ops_8k = seq_len * seq_len;
-assert(qk_ops_8k / qk_ops_1k === 64, "Memory/Compute grows by factor of 64 when seq length x8");
-}`
-},
-{
-id: 'gan',
-name: 'Generative Adversarial Network',
-icon:
-<Eye className="w-5 h-5" />,
-shortDesc: 'Hệ thống đối kháng sinh dữ liệu siêu thực.',
-components: ['Generator', 'Discriminator', 'Latent Space', 'Minimax'],
-intuition: 'Cuộc chiến bất tận giữa Kẻ làm giả tiền (Generator) và Cảnh sát soi tiền giả (Discriminator). Kẻ làm giả
-ngày càng điêu luyện, Cảnh sát ngày càng tinh mắt, cuối cùng tạo ra tờ tiền giả không thể phân biệt.',
-technical: 'Lý thuyết trò chơi (Game Theory) ứng dụng trong AI. Discriminator $D$ cố gắng tối đa hóa xác suất phân biệt
-đúng thật/giả. Generator $G$ cố gắng tối thiểu hóa xác suất $D$ đoán đúng mẫu của mình. Cân bằng đạt được khi $p_{data}
-= p_g$ (Nash Equilibrium).',
-math: `**Minimax Objective Function:**
-$$\\min_G \\max_D V(D,G) = \\mathbb{E}_{x \\sim p_{data}}[\\log D(x)] + \\mathbb{E}_{z \\sim p_z}[\\log(1 - D(G(z)))]$$
-**Discriminator Loss:**
-$$\\mathcal{L}_D = - \\left( \\log D(x) + \\log(1 - D(G(z))) \\right)$$
-**Generator Loss (Non-saturating heuristic):**
-$$\\mathcal{L}_G = - \\log(D(G(z)))$$
-*(Bản chất là cực tiểu hóa Jensen-Shannon Divergence giữa phân phối Thật và Giả)*`,
-failures: `**Failure Modes:**
-1. **Mode Collapse:** Generator tìm ra một mẫu duy nhất lừa được D và chỉ sinh ra đúng 1 mẫu đó, bỏ qua sự đa dạng.
-2. **Vanishing Gradients for G:** Nếu D quá giỏi, $\\log(1-D(G(z)))$ bão hòa, G không học được gì.
-
-**Remedies & Citations:**
-- **Wasserstein GAN (WGAN) + Gradient Penalty:** Dùng Earth Mover Distance thay cho JS Divergence để gradient luôn mượt.
-(Arjovsky et al., 2017)
-- **Original:** Goodfellow et al., 2014, *Generative Adversarial Nets*.`,
-spec: `// Spec: Adversarial Training Loop
-state = { G: Network, D: Network, real_data, noise }
-function trainStep() {
-// 1. Train Discriminator
-let fake_data = G.forward(noise).detach();
-let loss_D = -log(D(real_data)) - log(1 - D(fake_data));
-D.backprop(loss_D);
-
-// 2. Train Generator
-fake_data = G.forward(noise); // keep graph
-let loss_G = -log(D(fake_data)); // Non-saturating loss
-G.backprop(loss_G);
-}
-
-// Unit Test: Mode Collapse Detection
-function testModeCollapse(generated_samples) {
-let variance = computeVariance(generated_samples);
-assert(variance
-< threshold, "Generator is outputting identical images!" ); }` }, { id: 'ae' , name: 'Autoencoders (AE & VAE)' , icon:
-    <Box className="w-5 h-5" />,
-shortDesc: 'Mạng nén và biểu diễn không gian ẩn (Latent Representation).',
-components: ['Encoder', 'Bottleneck', 'Decoder', 'KL Divergence'],
-intuition: 'Một chuyên gia nén tài liệu (Encoder) tóm tắt cả cuốn sách thành một tờ giấy chú thích. Một người khác
-(Decoder) chỉ dùng tờ chú thích đó để chép lại toàn bộ cuốn sách. Tờ giấy chính là không gian ẩn hoàn hảo.',
-technical: 'Học cách copy Input sang Output thông qua một nút thắt cổ chai (Bottleneck / Latent Space). Variational
-Autoencoder (VAE) ràng buộc không gian ẩn này phải tuân theo một phân phối xác suất (thường là Gaussian) giúp mô hình có
-khả năng Sinh mẫu mới (Generative) thay vì chỉ Nén.',
-math: `**Standard AE Loss (Reconstruction):**
-$$\\mathcal{L} = || X - \\text{Decoder}(\\text{Encoder}(X)) ||^2$$
-**VAE - Evidence Lower Bound (ELBO):**
-$$\\mathcal{L}_{VAE} = -\\mathbb{E}_{q_\\phi(z|x)}[\\log p_\\theta(x|z)] + D_{KL}(q_\\phi(z|x) \\parallel p(z))$$
-**Reparameterization Trick (Để có thể Backprop qua node ngẫu nhiên):**
-$$z = \\mu + \\sigma \\odot \\epsilon \\quad \\text{with } \\epsilon \\sim \\mathcal{N}(0, I)$$
-$$\\frac{\\partial z}{\\partial \\mu} = 1, \\quad \\frac{\\partial z}{\\partial \\sigma} = \\epsilon$$`,
-failures: `**Failure Modes:**
-1. **Blurry Images:** Hàm loss MSE hoặc Cross-Entropy ở pixel-level khiến Decoder sinh ra ảnh mờ (trung bình hóa các khả
-năng).
-2. **Posterior Collapse (ở VAE kết hợp RNN/Transformer):** Decoder phớt lờ hoàn toàn biến ẩn $Z$ và tự dự đoán từ quy
-luật nội tại của nó.
-
-**Remedies & Citations:**
-- Chuyển sang **Diffusion Models** (thực chất là cấu trúc Denoising Autoencoder) để có độ nét cao hơn.
-- **Original VAE:** Kingma & Welling, 2013, *Auto-Encoding Variational Bayes*.`,
-spec: `// Spec: Reparameterization Trick
-state = { mu, log_var }
-function sampleZ(mu, log_var) {
-let std = exp(0.5 * log_var);
-let eps = random_normal(0, 1);
-return mu + eps * std; // Gradient can now flow to mu and std
-}
-
-// Unit Test: Valid Distribution
-function testKLDivergence() {
-let mu = [0.0, 0.0], log_var = [0.0, 0.0];
-// Should match Prior N(0, I) perfectly, KL = 0
-let kl_loss = -0.5 * sum(1 + log_var - mu**2 - exp(log_var));
-assert(kl_loss === 0, "Latent distribution matches Prior");
-}`
-},
-{
-id: 'flow',
-name: 'Normalizing Flows',
-icon:
-<Infinity className="w-5 h-5" />,
-shortDesc: 'Mô hình sinh dựa trên chuỗi biến đổi hình học đảo ngược được.',
-components: ['Invertible Functions', 'Jacobian Determinant', 'Change of Variables'],
-intuition: 'Hãy tưởng tượng bạn lấy một khối đất sét hình tròn hoàn hảo, bóp méo, kéo dài qua 10 bước để ra hình một bức
-tượng. Vì mỗi bước bạn làm đều được ghi chép và đảo ngược chính xác 100%, bạn có thể nặn ngược bức tượng về hình tròn.
-Tính đảo ngược tuyệt đối này là Normalizing Flow.',
-technical: 'Xây dựng một chuỗi các hàm biến đổi $f_i$ (bắt buộc phải Invertible - đảo ngược được, và có Differentiable
-Determinant). Nó ánh xạ một phân phối dữ liệu phức tạp thành một phân phối cơ bản (như Gaussian). Cho phép tính Exact
-Log-Likelihood (Xác suất chính xác) thay vì xấp xỉ như VAE hay GAN.',
-math: `**Change of Variables Formula:**
-Cho $Z \\sim p_Z(z)$, và $X = f(Z)$ (với $f$ là hàm song ánh).
-$$p_X(x) = p_Z(f^{-1}(x)) \\left| \\det \\left( \\frac{\\partial f^{-1}(x)}{\\partial x} \\right) \\right|$$
-**Log-Likelihood Loss:**
-$$\\log p_X(x) = \\log p_Z(z) + \\sum_{i=1}^K \\log \\left| \\det \\left( \\frac{\\partial h_i}{\\partial h_{i-1}}
-\\right) \\right|$$
-*(Kiến trúc màng lọc yêu cầu thiết kế khéo léo để ma trận Jacobian là tam giác, giúp $\\det$ tính trong $O(N)$ thay vì
-$O(N^3)$)*`,
-failures: `**Failure Modes:**
-1. **Expressivity Constraint:** Việc bắt buộc mọi hàm biến đổi phải Invertible (ảo chiều) khiến kiến trúc mạng bị giới
-hạn nghiêm ngặt (không thể giảm chiều/tăng chiều tùy ý như CNN/MLP).
-2. **High Dimensionality Cost:** Đòi hỏi tham số khổng lồ cho ảnh độ phân giải cao.
-
-**Remedies & Citations:**
-- **Coupling Layers (RealNVP):** Kỹ thuật chia đôi tensor, giữ nguyên một nửa và chỉ dùng nó để Scale/Translate nửa kia
-(Jacobian tam giác). (Dinh et al., 2016, *Density estimation using Real NVP*)
-- **Glow:** (Kingma & Dhariwal, 2018).`,
-spec: `// Spec: Affine Coupling Layer (Forward & Inverse)
-state = { x1, x2 }
-function RealNVPStep(x) {
-let [x1, x2] = split(x);
-let scale = exp(S_network(x1));
-let translate = T_network(x1);
-let y2 = x2 * scale + translate;
-return concat(x1, y2); // Forward
-}
-function RealNVPInverse(y) {
-let [y1, y2] = split(y);
-let scale = exp(S_network(y1)); // S_network inputs y1(which is x1)
-let translate = T_network(y1);
-let x2 = (y2 - translate) / scale;
-return concat(y1, x2); // Perfect Inverse!
-}`
-}
-];
-
-// --- VISUALIZATION COMPONENTS (SVG ANIMATIONS) ---
-
-const MLPVisualizer = ({ isPlaying }) => {
-const [activeLayer, setActiveLayer] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setActiveLayer((prev) => (prev + 1) % 4), 800);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-const layers = [3, 5, 4, 2];
-const xPositions = [100, 250, 400, 550];
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    {layers.map((numNodes, lIdx) => {
-    if (lIdx === layers.length - 1) return null;
-    const currentActive = activeLayer === lIdx;
-    return Array.from({ length: numNodes }).map((_, n1Idx) => (
-    Array.from({ length: layers[lIdx+1] }).map((_, n2Idx) => (
-    <line key={`edge-${lIdx}-${n1Idx}-${n2Idx}`} x1={xPositions[lIdx]} y1={150 - (numNodes * 25) + n1Idx * 50 + 25}
-        x2={xPositions[lIdx + 1]} y2={150 - (layers[lIdx+1] * 25) + n2Idx * 50 + 25} stroke={currentActive ? "#3b82f6"
-        : "#334155" } strokeWidth={currentActive ? 2 : 1} opacity={currentActive ? 0.8 : 0.3}
-        className="transition-all duration-300" />
-    ))
-    ));
-    })}
-    {layers.map((numNodes, lIdx) => {
-    const justActivated = activeLayer === lIdx;
-    const isPast = activeLayer > lIdx;
-    return Array.from({ length: numNodes }).map((_, nIdx) => (
-    <circle key={`node-${lIdx}-${nIdx}`} cx={xPositions[lIdx]} cy={150 - (numNodes * 25) + nIdx * 50 + 25} r={12}
-        fill={justActivated ? "#60a5fa" : (isPast ? "#1e40af" : "#1e293b" )} stroke={isPast || justActivated ? "#bfdbfe"
-        : "#475569" } strokeWidth={2} className="transition-all duration-300">
-        {justActivated &&
-        <animate attributeName="r" values="12;16;12" dur="0.3s" repeatCount="1" />}
-    </circle>
-    ));
-    })}
-</svg>
-);
-};
-
-const CNNVisualizer = ({ isPlaying }) => {
-const [filterPos, setFilterPos] = useState({ x: 0, y: 0 });
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => {
-setFilterPos((prev) => {
-let nx = prev.x + 1, ny = prev.y;
-if (nx > 2) { nx = 0; ny++; }
-if (ny > 2) { nx = 0; ny = 0; }
-return { x: nx, y: ny };
-});
-}, 600);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="150" y="50" fill="#94a3b8" fontSize="14" textAnchor="middle">Input Image (5x5)</text>
-    <text x="500" y="80" fill="#94a3b8" fontSize="14" textAnchor="middle">Feature Map (3x3)</text>
-    <g transform="translate(75, 75)">
-        {Array.from({ length: 5 }).map((_, y) => (
-        Array.from({ length: 5 }).map((_, x) => {
-        const isHighlighted = x >= filterPos.x && x < filterPos.x + 3 && y>= filterPos.y && y
-            < filterPos.y + 3; return <rect key={`in-${x}-${y}`} x={x * 30} y={y * 30} width={30} height={30}
-                fill={isHighlighted ? "#1e40af" : "transparent" } stroke="#334155" strokeWidth={1}
-                className="transition-all duration-200" />
-            })
-            ))}
-            <rect x={filterPos.x * 30} y={filterPos.y * 30} width={90} height={90} fill="none" stroke="#60a5fa"
-                strokeWidth={3} className="transition-all duration-200" />
-    </g>
-    <path d={`M ${75 + filterPos.x*30 + 90} ${75 + filterPos.y*30 + 45} L 455 ${105 + filterPos.y*40 + 20}`}
-        stroke="#3b82f6" strokeWidth={2} strokeDasharray="5,5" fill="none" opacity={0.6}
-        className="transition-all duration-200" />
-    <g transform="translate(455, 105)">
-        {Array.from({ length: 3 }).map((_, y) => (
-        Array.from({ length: 3 }).map((_, x) => {
-        const isCurrent = x === filterPos.x && y === filterPos.y;
-        return
-        <rect key={`out-${x}-${y}`} x={x * 40} y={y * 40} width={40} height={40} fill={isCurrent ? "#60a5fa" : (y <
-            filterPos.y || (y===filterPos.y && x < filterPos.x) ? "#1e3a8a" : "transparent" )} stroke="#334155"
-            strokeWidth={1} className="transition-all duration-200" />
-        })
-        ))}
-    </g>
-</svg>
-);
-};
-
-const RNNVisualizer = ({ isPlaying }) => {
-const [step, setStep] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setStep((prev) => (prev + 1) % 4), 1000);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="325" y="40" fill="#94a3b8" fontSize="14" textAnchor="middle">Unrolled RNN through Time</text>
-    <g transform="translate(100, 150)">
-        {Array.from({ length: 4 }).map((_, t) => {
-        const isActive = step === t;
-        const isPast = t <= step; return ( <g key={`t-${t}`} transform={`translate(${t * 130}, 0)`}>
-            <rect x="-20" y="60" width="40" height="30" rx="4" fill={isActive ? "#10b981" : "#1e293b" } stroke="#475569"
-                className="transition-all duration-500" />
-            <text x="0" y="80" fill="white" fontSize="12" textAnchor="middle">x_{t}</text>
-            <line x1="0" y1="60" x2="0" y2="25" stroke={isActive ? "#10b981" : "#475569" } strokeWidth="2"
-                markerEnd="url(#arrow)" />
-            <rect x="-30" y="-25" width="60" height="50" rx="8" fill={isActive ? "#3b82f6" : (isPast ? "#1e40af"
-                : "#1e293b" )} stroke="#60a5fa" className="transition-all duration-500" />
-            <text x="0" y="5" fill="white" fontSize="14" textAnchor="middle">h_{t}</text>
-            <line x1="0" y1="-25" x2="0" y2="-60" stroke={isActive ? "#f59e0b" : "#475569" } strokeWidth="2"
-                markerEnd="url(#arrow)" />
-            <rect x="-20" y="-90" width="40" height="30" rx="4" fill={isActive ? "#f59e0b" : (isPast ? "#b45309"
-                : "#1e293b" )} stroke="#475569" className="transition-all duration-500" />
-            <text x="0" y="-70" fill="white" fontSize="12" textAnchor="middle">y_{t}</text>
-            {t
-            < 3 && <line x1="30" y1="0" x2="100" y2="0" stroke={isActive ? "#60a5fa" : (isPast ? "#334155" : "#1e293b"
-                )} strokeWidth="3" markerEnd="url(#arrow)" className="transition-all duration-500" />}
-    </g>
-    );
-    })}
-    </g>
-    <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6"
-            orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" />
-        </marker>
-    </defs>
-</svg>
-);
-};
-
-const LSTMVisualizer = ({ isPlaying }) => {
-const [step, setStep] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setStep((prev) => (prev + 1) % 4), 1200);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="325" y="40" fill="#94a3b8" fontSize="14" textAnchor="middle">LSTM Gates & Conveyor Belt</text>
-    {/* Cell State Line */}
-    <line x1="50" y1="100" x2="600" y2="100" stroke="#34d399" strokeWidth="6" />
-    <text x="50" y="90" fill="#34d399" fontSize="14" fontWeight="bold">C_t (Cell State)</text>
-
-    <g transform="translate(150, 160)">
-        {/* Main Block */}
-        <rect x="0" y="0" width="350" height="100" rx="12" fill="#1e293b" stroke="#475569" strokeWidth="2" />
-
-        {/* Internal Gates */}
-        <g transform="translate(50, 50)">
-            <circle cx="0" cy="0" r="15" fill={step===1 ? "#ef4444" : "#334155" } />
-            <text x="0" y="4" fill="white" fontSize="10" textAnchor="middle">X</text>
-            <text x="0" y="30" fill="#ef4444" fontSize="10" textAnchor="middle">Forget</text>
-            {step === 1 &&
-            <path d="M 0 0 L 0 -110" stroke="#ef4444" strokeWidth="3" markerEnd="url(#arrow)" strokeDasharray="4"
-                className="animate-pulse" />}
-        </g>
-
-        <g transform="translate(150, 50)">
-            <circle cx="0" cy="0" r="15" fill={step===2 ? "#3b82f6" : "#334155" } />
-            <text x="0" y="4" fill="white" fontSize="10" textAnchor="middle">+</text>
-            <text x="0" y="30" fill="#3b82f6" fontSize="10" textAnchor="middle">Input</text>
-            {step === 2 &&
-            <path d="M 0 0 L 0 -110" stroke="#3b82f6" strokeWidth="3" markerEnd="url(#arrow)" strokeDasharray="4"
-                className="animate-pulse" />}
-        </g>
-
-        <g transform="translate(250, 50)">
-            <circle cx="0" cy="0" r="15" fill={step===3 ? "#eab308" : "#334155" } />
-            <text x="0" y="4" fill="white" fontSize="10" textAnchor="middle">O</text>
-            <text x="0" y="30" fill="#eab308" fontSize="10" textAnchor="middle">Output</text>
-            {step === 3 &&
-            <path d="M 0 -60 L 0 0 L 50 0" stroke="#eab308" strokeWidth="3" markerEnd="url(#arrow)" strokeDasharray="4"
-                fill="none" className="animate-pulse" />}
-        </g>
-
-        {/* Hidden state path */}
-        <line x1="-50" y1="50" x2="350" y2="50" stroke="#60a5fa" strokeWidth="3" strokeDasharray="5" />
-        <text x="-40" y="40" fill="#60a5fa" fontSize="12">h_{"{t-1}"}</text>
-        <text x="310" y="40" fill="#60a5fa" fontSize="12">h_t</text>
-    </g>
-</svg>
-);
-};
-
-const GRUVisualizer = ({ isPlaying }) => {
-const [pulse, setPulse] = useState(false);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setPulse(p => !p), 1000);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="325" y="50" fill="#94a3b8" fontSize="14" textAnchor="middle">GRU: Merged Cell & Hidden State</text>
-    <g transform="translate(225, 100)">
-        <rect x="0" y="0" width="200" height="140" rx="12" fill="#1e293b" stroke="#475569" strokeWidth="2" />
-
-        <circle cx="60" cy="70" r="20" fill={pulse ? "#8b5cf6" : "#4c1d95" } className="transition-all duration-700" />
-        <text x="60" y="74" fill="white" fontSize="12" textAnchor="middle">Reset (r)</text>
-
-        <circle cx="140" cy="70" r="20" fill={pulse ? "#10b981" : "#064e3b" } className="transition-all duration-700" />
-        <text x="140" y="74" fill="white" fontSize="12" textAnchor="middle">Update (z)</text>
-
-        {/* Connections */}
-        <path d="M -50 70 L 40 70" stroke="#60a5fa" strokeWidth="3" markerEnd="url(#arrow)" />
-        <text x="-40" y="60" fill="#60a5fa" fontSize="12">h_{"{t-1}"}</text>
-        <path d="M 160 70 L 250 70" stroke="#60a5fa" strokeWidth="3" markerEnd="url(#arrow)" />
-        <text x="220" y="60" fill="#60a5fa" fontSize="12">h_t</text>
-
-        <path d="M 100 180 L 100 140" stroke="#ef4444" strokeWidth="3" markerEnd="url(#arrow)" />
-        <text x="110" y="170" fill="#ef4444" fontSize="12">x_t</text>
-    </g>
-</svg>
-);
-};
-
-const TransformerVisualizer = ({ isPlaying }) => {
-const [focusIdx, setFocusIdx] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setFocusIdx((prev) => (prev + 1) % 4), 1200);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-const words = ["Con", "gà", "qua", "đường"];
-const attentionWeights = [
-[0.6, 0.3, 0.05, 0.05], [0.3, 0.5, 0.1, 0.1],
-[0.1, 0.2, 0.4, 0.3], [0.05, 0.1, 0.35, 0.5]
-];
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="325" y="30" fill="#94a3b8" fontSize="14" textAnchor="middle">Self-Attention Mechanism</text>
-    <g transform="translate(100, 150)">
-        {words.map((_, i) => words.map((_, j) => {
-        if (i === j) return null;
-        const weight = attentionWeights[focusIdx][j];
-        if (focusIdx !== i) return null;
-        const x1 = i * 150, x2 = j * 150, midX = (x1 + x2) / 2, curve = Math.abs(x1 - x2) * 0.4;
-        return
-        <path key={`att-${i}-${j}`} d={`M ${x1} -20 Q ${midX} ${-20 - curve} ${x2} -20`} fill="none" stroke="#a855f7"
-            strokeWidth={weight * 10} opacity={0.7} className="transition-all duration-500" />
-        }))}
-        {words.map((word, i) => (
-        <g key={word} transform={`translate(${i * 150}, 0)`}>
-            <circle cx="0" cy="0" r="30" fill={focusIdx===i ? "#9333ea" : "#1e293b" } stroke={focusIdx===i ? "#d8b4fe"
-                : "#475569" } strokeWidth="2" className="transition-all duration-300" />
-            <text x="0" y="5" fill="white" fontSize="14" textAnchor="middle" fontWeight={focusIdx===i ? "bold"
-                : "normal" }>{word}</text>
-            {focusIdx === i && (
-            <g transform="translate(0, 50)" className="animate-pulse">
-                <rect x="-25" y="0" width="15" height="15" fill="#f43f5e" rx="2" />
-                <text x="-17.5" y="12" fill="white" fontSize="10" textAnchor="middle">Q</text>
-                <rect x="-7.5" y="0" width="15" height="15" fill="#10b981" rx="2" />
-                <text x="0" y="12" fill="white" fontSize="10" textAnchor="middle">K</text>
-                <rect x="10" y="0" width="15" height="15" fill="#3b82f6" rx="2" />
-                <text x="17.5" y="12" fill="white" fontSize="10" textAnchor="middle">V</text>
-            </g>
-            )}
-        </g>
-        ))}
-    </g>
-</svg>
-);
-};
-
-const GANVisualizer = ({ isPlaying }) => {
-const [phase, setPhase] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setPhase((prev) => (prev + 1) % 3), 1500);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <g transform="translate(50, 150)">
-        <circle cx="0" cy="0" r="25" fill="#334155" stroke="#475569" strokeDasharray="4" />
-        <text x="0" y="5" fill="#94a3b8" fontSize="12" textAnchor="middle">Z (Noise)</text>
-        <path d="M 30 0 L 80 0" stroke={phase===0 ? "#10b981" : "#475569" } strokeWidth="2" markerEnd="url(#arrow)"
-            className="transition-all duration-300" />
-    </g>
-    <g transform="translate(160, 120)">
-        <rect x="0" y="0" width="100" height="60" rx="8" fill="#065f46" stroke="#34d399" strokeWidth={phase===0 ? 3 :
-            1} />
-        <text x="50" y="35" fill="white" fontSize="16" fontWeight="bold" textAnchor="middle">Generator</text>
-        <path d="M 105 30 Q 150 30 180 30" stroke={phase===0 ? "#10b981" : "#475569" } strokeWidth="2"
-            markerEnd="url(#arrow)" fill="none" className="transition-all duration-300" />
-    </g>
-    <g transform="translate(360, 150)">
-        <rect x="-20" y="-20" width="40" height="40" fill={phase===0 ? "#818cf8" : "#312e81" } stroke="#6366f1" />
-        <text x="0" y="-30" fill="#94a3b8" fontSize="12" textAnchor="middle">Fake</text>
-        <path d="M 25 0 Q 60 0 80 -40" stroke={phase===2 ? "#ef4444" : "#475569" } strokeWidth="2"
-            markerEnd="url(#arrow)" fill="none" className="transition-all duration-300" />
-    </g>
-    <g transform="translate(360, 50)">
-        <rect x="-20" y="-20" width="40" height="40" fill="#22c55e" stroke="#16a34a" />
-        <text x="0" y="-30" fill="#94a3b8" fontSize="12" textAnchor="middle">Real Data</text>
-        <path d="M 25 0 Q 60 0 80 40" stroke={phase===1 ? "#22c55e" : "#475569" } strokeWidth="2"
-            markerEnd="url(#arrow)" fill="none" className="transition-all duration-300" />
-    </g>
-    <g transform="translate(460, 70)">
-        <rect x="0" y="0" width="120" height="60" rx="8" fill="#7f1d1d" stroke="#f87171" strokeWidth={(phase===1 ||
-            phase===2) ? 3 : 1} />
-        <text x="60" y="35" fill="white" fontSize="14" fontWeight="bold" textAnchor="middle">Discriminator</text>
-        <text x="140" y="35" fill={(phase===1) ? "#22c55e" : (phase===2 ? "#ef4444" : "#475569" )} fontSize="14"
-            fontWeight="bold" textAnchor="start" className="transition-all">
-            {phase === 1 ? "Real (1.0)" : (phase === 2 ? "Fake (0.0)" : "...")}
-        </text>
-    </g>
-    <path d="M 520 140 L 520 220 L 210 220 L 210 185" stroke={(phase===2) ? "#ef4444" : "#475569" } strokeWidth="2"
-        strokeDasharray="5,5" fill="none" markerEnd="url(#arrow)" className="transition-all duration-300" />
-    <text x="365" y="240" fill={(phase===2) ? "#ef4444" : "#475569" } fontSize="12" textAnchor="middle">Backpropagate
-        Error to Generator</text>
-</svg>
-);
-};
-
-const AEVisualizer = ({ isPlaying }) => {
-const [pulse, setPulse] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setPulse((prev) => (prev + 1) % 3), 800);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="325" y="40" fill="#94a3b8" fontSize="14" textAnchor="middle">Information Bottleneck (Autoencoder)</text>
-
-    {/* Input */}
-    <rect x="100" y="80" width="30" height="140" fill="#1e293b" stroke="#3b82f6" />
-    <text x="115" y="240" fill="#94a3b8" fontSize="12" textAnchor="middle">X</text>
-
-    {/* Encoder Funnel */}
-    <polygon points="130,80 270,120 270,180 130,220" fill="#1e3a8a" opacity={pulse===0 ? 0.8 : 0.3}
-        className="transition-all duration-500" />
-    <text x="200" y="155" fill="white" fontSize="12" textAnchor="middle">Encoder</text>
-
-    {/* Latent Space */}
-    <rect x="270" y="120" width="30" height="60" fill="#8b5cf6" className={pulse===1 ? "animate-pulse" : "" } />
-    <text x="285" y="200" fill="#c4b5fd" fontSize="12" textAnchor="middle">Z (Latent)</text>
-
-    {/* Decoder Funnel */}
-    <polygon points="300,120 440,80 440,220 300,180" fill="#065f46" opacity={pulse===2 ? 0.8 : 0.3}
-        className="transition-all duration-500" />
-    <text x="370" y="155" fill="white" fontSize="12" textAnchor="middle">Decoder</text>
-
-    {/* Output */}
-    <rect x="440" y="80" width="30" height="140" fill="#1e293b" stroke="#10b981" />
-    <text x="455" y="240" fill="#94a3b8" fontSize="12" textAnchor="middle">X'</text>
-
-    {/* Loss */}
-    <path d="M 115 70 C 115 20, 455 20, 455 70" fill="none" stroke="#ef4444" strokeWidth="2" strokeDasharray="5"
-        markerEnd="url(#arrow)" />
-    <text x="285" y="15" fill="#ef4444" fontSize="12" textAnchor="middle">Reconstruction Loss ||X - X'||²</text>
-</svg>
-);
-};
-
-const FlowVisualizer = ({ isPlaying }) => {
-const [step, setStep] = useState(0);
-useEffect(() => {
-if (!isPlaying) return;
-const interval = setInterval(() => setStep((prev) => (prev + 1) % 4), 1000);
-return () => clearInterval(interval);
-}, [isPlaying]);
-
-return (
-<svg width="100%" height="100%" viewBox="0 0 650 300">
-    <text x="325" y="40" fill="#94a3b8" fontSize="14" textAnchor="middle">Reversible Transformations (Normalizing
-        Flow)</text>
-
-    {/* Base distribution (Gaussian) */}
-    <circle cx="100" cy="150" r="30" fill="#38bdf8" />
-    <text x="100" y="200" fill="#38bdf8" fontSize="12" textAnchor="middle">p(Z) Simple</text>
-
-    {/* Transformations */}
-    {[0, 1, 2].map(i => (
-    <g key={`flow-${i}`}>
-        <path d={`M ${140 + i*150} 140 Q ${165 + i*150} 110 ${190 + i*150} 140`} fill="none" stroke={step===i
-            ? "#a855f7" : "#475569" } strokeWidth="2" markerEnd="url(#arrow)" />
-        <path d={`M ${190 + i*150} 160 Q ${165 + i*150} 190 ${140 + i*150} 160`} fill="none" stroke={step===i
-            ? "#a855f7" : "#475569" } strokeWidth="2" markerEnd="url(#arrow)" />
-        <text x={165 + i*150} y="155" fill={step===i ? "white" : "#64748b" } fontSize="12"
-            textAnchor="middle">f_{i+1}</text>
-    </g>
-    ))}
-
-    {/* Target Distribution (Complex) */}
-    <path d="M 500 150 Q 520 100 540 150 T 580 150" fill="none" stroke="#f43f5e" strokeWidth="15"
-        strokeLinecap="round" />
-    <text x="540" y="200" fill="#f43f5e" fontSize="12" textAnchor="middle">p(X) Complex</text>
-
-    <text x="325" y="250" fill="#94a3b8" fontSize="12" fontStyle="italic" textAnchor="middle">f(x) must be perfectly
-        invertible: X ↔ Z</text>
-</svg>
-);
-};
-
-// --- RENDER HELPERS ---
-const MarkdownMathRenderer = ({ content }) => {
-const [katexReady, setKatexReady] = useState(false);
-
-useEffect(() => {
-if (window.katex) {
-setKatexReady(true);
-return;
-}
-// Tải CSS của KaTeX
-if (!document.getElementById('katex-css')) {
-const link = document.createElement('link');
-link.id = 'katex-css';
-link.rel = 'stylesheet';
-link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css';
-document.head.appendChild(link);
-}
-// Tải Script của KaTeX
-if (!document.getElementById('katex-js')) {
-const script = document.createElement('script');
-script.id = 'katex-js';
-script.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js';
-script.onload = () => setKatexReady(true);
-document.head.appendChild(script);
-} else {
-const interval = setInterval(() => {
-if (window.katex) {
-setKatexReady(true);
-clearInterval(interval);
-}
-}, 100);
-return () => clearInterval(interval);
-}
-}, []);
-
-if (!content) return null;
-
-if (!katexReady) {
-return <div className="flex items-center gap-2 text-slate-500 text-sm">
-    <Loader2 className="w-4 h-4 animate-spin" /> Đang tải thư viện Toán học (KaTeX)...
-</div>;
-}
-
-// Tách text theo block math ($$)
-const blocks = content.split('$$');
-
-return (
-<div className="text-slate-300 leading-relaxed text-[14px]">
-    {blocks.map((block, i) => {
-    // Block Math
-    if (i % 2 === 1) {
-    try {
-    const html = window.katex.renderToString(block, { displayMode: true, throwOnError: false });
-    return
-    <div key={i} className="my-4 overflow-x-auto text-emerald-300" dangerouslySetInnerHTML={{ __html: html }} />;
-    } catch (e) {
-    return <div key={i} className="my-4 text-rose-400">Lỗi render Toán: {block}</div>;
-    }
-    }
-
-    // Đoạn văn bản chứa in đậm (**) và Inline Math ($)
-    const boldParts = block.split('**');
-    return (
-    <span key={i}>
-        {boldParts.map((bPart, j) => {
-        if (j % 2 === 1) {
-        // Tiêu đề in đậm
-        return <strong key={j}
-            className="text-blue-300 mt-5 mb-2 block border-b border-slate-700/50 pb-1 text-[15px]">{bPart}</strong>;
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DL Playbook: Từ Trực Giác Đến Kỹ Thuật Deep Learning</title>
+    <meta name="description"
+        content="DL Playbook tổng hợp trực giác, công thức cốt lõi, failure modes và cách chọn kiến trúc MLP, CNN, RNN, LSTM, GRU, Transformer theo bài toán thực tế.">
+    <meta name="category" content="Ứng dụng">
+    <meta name="author" content="Minh Tuấn">
+    <style>
+        .dl-playbook {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            line-height: 1.75;
+            max-width: 100%;
         }
 
-        const inlineParts = bPart.split('$');
-        return (
-        <span key={j}>
-            {inlineParts.map((iPart, k) => {
-            // Inline Math
-            if (k % 2 === 1) {
-            try {
-            const html = window.katex.renderToString(iPart, { displayMode: false, throwOnError: false });
-            return <span key={k} className="text-amber-200" dangerouslySetInnerHTML={{ __html: html }} />;
-            } catch (e) {
-            return <span key={k} className="text-rose-400">{iPart}</span>;
+        .dl-playbook .hero {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(145deg, #eff6ff, #ffffff);
+            margin-bottom: 20px;
+        }
+
+        .dl-playbook .hero p {
+            margin: 0;
+        }
+
+        .dl-playbook .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .dl-playbook .chip {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #d1d5db;
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-size: 12px;
+            color: #374151;
+            background: #ffffff;
+        }
+
+        .dl-playbook section {
+            margin-top: 22px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            background: #ffffff;
+        }
+
+        .dl-playbook h2 {
+            font-size: 1.35rem;
+            line-height: 1.35;
+            margin: 0 0 10px;
+            color: #111827;
+        }
+
+        .dl-playbook h3 {
+            font-size: 1rem;
+            margin: 14px 0 6px;
+            color: #111827;
+        }
+
+        .dl-playbook p {
+            margin: 0;
+        }
+
+        .dl-playbook p+p,
+        .dl-playbook p+ul,
+        .dl-playbook ul+p,
+        .dl-playbook ul+ul {
+            margin-top: 8px;
+        }
+
+        .dl-playbook ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .dl-playbook li+li {
+            margin-top: 6px;
+        }
+
+        .dl-playbook .formula {
+            border-left: 4px solid #3b82f6;
+            background: #eff6ff;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+
+        .dl-playbook .table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .dl-playbook table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 680px;
+        }
+
+        .dl-playbook th,
+        .dl-playbook td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.92rem;
+        }
+
+        .dl-playbook th {
+            background: #f9fafb;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .dl-playbook .note {
+            margin-top: 10px;
+            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+            color: #78350f;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.93rem;
+        }
+
+        @media (max-width: 640px) {
+
+            .dl-playbook .hero,
+            .dl-playbook section {
+                padding: 14px;
             }
+
+            .dl-playbook h2 {
+                font-size: 1.2rem;
             }
+        }
+    </style>
+</head>
 
-            // Văn bản thông thường, xử lý ngắt dòng chính xác
-            const lines = iPart.split('\n');
-            return (
-            <span key={k}>
-                {lines.map((line, lIdx) => (
-                <React.Fragment key={lIdx}>
-                    {line}
-                    {lIdx
-                    < lines.length - 1 && <br />}
-                </React.Fragment>
-                ))}
-            </span>
-            );
-            })}
-        </span>
-        );
-        })}
-    </span>
-    );
-    })}
-</div>
-);
-};
-
-// --- AI ASSISTANT COMPONENT ---
-const AIAssistant = ({ activeArch }) => {
-const [query, setQuery] = useState('');
-const [isLoading, setIsLoading] = useState(false);
-const [response, setResponse] = useState('');
-const [error, setError] = useState('');
-
-const askGemini = async (customQuery) => {
-const textToAsk = customQuery || query;
-if (!textToAsk.trim()) return;
-
-setIsLoading(true);
-setError('');
-// Giữ lại response cũ một chút để UX mượt hơn, sau đó mới clear hoặc ghi đè khi có data mới
-if (!customQuery) setQuery('');
-
-const apiKey = ""; // API Key được môi trường runtime cung cấp tự động
-const systemPrompt = `Bạn là một giáo sư về Deep Learning. Người dùng đang tìm hiểu về kiến trúc: ${activeArch.name}
-(${activeArch.shortDesc}). Hãy trả lời câu hỏi của họ một cách trực quan, khoa học và bằng tiếng Việt. Sử dụng định dạng
-markdown cơ bản để làm nổi bật thông tin. Trình bày ngắn gọn, dễ hiểu.`;
-
-const payload = {
-contents: [{ parts: [{ text: textToAsk }] }],
-systemInstruction: { parts: [{ text: systemPrompt }] }
-};
-
-const maxRetries = 5;
-const baseDelay = 1000;
-
-for (let attempt = 0; attempt <= maxRetries; attempt++) { try { const res=await
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-    { method: 'POST' , headers: { 'Content-Type' : 'application/json' }, body: JSON.stringify(payload) }); if (!res.ok)
-    throw new Error(`HTTP Error: ${res.status}`); const data=await res.json(); const
-    text=data.candidates?.[0]?.content?.parts?.[0]?.text; setResponse(text || "Không có phản hồi từ AI." ); break; //
-    Thành công, thoát vòng lặp retry } catch (err) { if (attempt===maxRetries) { setError("Rất tiếc, đã có lỗi xảy ra
-    khi kết nối với máy chủ AI. Vui lòng thử lại sau."); } await new Promise(r=> setTimeout(r, baseDelay * Math.pow(2,
-    attempt))); // Exponential backoff
-    }
-    }
-    setIsLoading(false);
-    };
-
-    // Reset response when architecture changes
-    useEffect(() => {
-    setResponse('');
-    setError('');
-    setQuery('');
-    }, [activeArch.id]);
-
-    return (
-    <div
-        className="flex flex-col h-[400px] bg-slate-900/60 border border-slate-800 rounded-xl animate-in fade-in duration-300 overflow-hidden">
-        {/* AI Header & Prompts */}
-        <div className="p-4 border-b border-slate-800 bg-slate-900/80">
-            <h3 className="text-blue-400 font-semibold mb-3 flex items-center gap-2">
-                <Bot className="w-5 h-5 text-blue-400" /> Trợ lý AI (Gemini 2.5 Flash)
-            </h3>
-            <div className="flex flex-wrap gap-2">
-                <button onClick={()=> askGemini("✨ Giải thích khái niệm này cho một học sinh trung học hiểu được
-                    không?")}
-                    className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-full border
-                    border-slate-700 transition-colors">
-                    ✨ Giải thích đơn giản
-                </button>
-                <button onClick={()=> askGemini("✨ Cho tôi ví dụ về một ứng dụng thực tế đang dùng mô hình này hiện
-                    nay.")}
-                    className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-full border
-                    border-slate-700 transition-colors">
-                    ✨ Cho ví dụ thực tế
-                </button>
-                <button onClick={()=> askGemini(`✨ Viết mã nguồn PyTorch cơ bản (khoảng 10-15 dòng) để khởi tạo một
-                    block của mô hình ${activeArch.name} này.`)}
-                    className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-full border
-                    border-slate-700 transition-colors">
-                    ✨ Sinh mã PyTorch
-                </button>
+<body>
+    <main class="dl-playbook">
+        <div class="hero">
+            <p><strong>TL;DR:</strong> Deep Learning không phải là một mô hình duy nhất mà là họ kiến trúc với thế mạnh
+                khác nhau. MLP phù hợp dữ liệu bảng, CNN xử lý không gian ảnh, RNN/LSTM/GRU cho chuỗi thời gian và
+                Transformer cho ngữ cảnh dài. Chọn sai kiến trúc thường làm mô hình chậm, tốn tài nguyên và khó tổng
+                quát hóa.</p>
+            <div class="chips">
+                <span class="chip">MLP</span>
+                <span class="chip">CNN</span>
+                <span class="chip">RNN</span>
+                <span class="chip">LSTM</span>
+                <span class="chip">GRU</span>
+                <span class="chip">Transformer</span>
             </div>
         </div>
 
-        {/* Response Area */}
-        <div className="flex-1 p-5 overflow-y-auto custom-scrollbar bg-slate-950/50">
-            {!response && !isLoading && !error && (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500 opacity-60">
-                <Sparkles className="w-10 h-10 mb-2 text-slate-600" />
-                <p className="text-sm">Hãy đặt câu hỏi hoặc chọn một gợi ý ở trên để bắt đầu khám phá.</p>
+        <section>
+            <h2>1. MLP (Multi-Layer Perceptron)</h2>
+            <p>MLP là mạng truyền thẳng cơ bản, dữ liệu đi từ đầu vào qua các tầng ẩn rồi ra đầu ra mà không có vòng lặp
+                theo thời gian.</p>
+            <h3>Khi nào nên dùng</h3>
+            <ul>
+                <li>Dữ liệu dạng bảng (tabular) với số chiều vừa phải.</li>
+                <li>Bài toán phân loại, hồi quy truyền thống.</li>
+            </ul>
+            <h3>Failure mode thường gặp</h3>
+            <ul>
+                <li>Overfitting khi số tham số lớn hơn dữ liệu hiệu dụng.</li>
+                <li>Dead ReLU ở các lớp sâu nếu khởi tạo và learning rate không phù hợp.</li>
+            </ul>
+            <div class="formula">Forward pass:
+                z^(l) = W^(l) a^(l-1) + b^(l)
+                a^(l) = f(z^(l))</div>
+        </section>
+
+        <section>
+            <h2>2. CNN (Convolutional Neural Network)</h2>
+            <p>CNN khai thác cấu trúc không gian bằng tích chập và chia sẻ tham số, giúp nhận diện đặc trưng ảnh hiệu
+                quả hơn MLP.</p>
+            <h3>Khi nào nên dùng</h3>
+            <ul>
+                <li>Computer Vision: phân loại ảnh, phát hiện đối tượng, segmentation.</li>
+                <li>Dữ liệu lưới có tính cục bộ mạnh (2D/3D).</li>
+            </ul>
+            <h3>Failure mode thường gặp</h3>
+            <ul>
+                <li>Khó nắm bắt quan hệ xa nếu receptive field hạn chế.</li>
+                <li>Nhạy cảm với nhiễu đối kháng (adversarial perturbation).</li>
+            </ul>
+            <div class="formula">Convolution 2D:
+                S(i,j) = Σm Σn I(i+m,j+n) K(m,n)</div>
+        </section>
+
+        <section>
+            <h2>3. RNN (Recurrent Neural Network)</h2>
+            <p>RNN giữ trạng thái ẩn qua từng bước thời gian, phù hợp chuỗi tuần tự nhưng khó huấn luyện với chuỗi dài.
+            </p>
+            <h3>Khi nào nên dùng</h3>
+            <ul>
+                <li>Dự báo chuỗi thời gian ngắn.</li>
+                <li>NLP tác vụ cơ bản khi tài nguyên hạn chế.</li>
+            </ul>
+            <h3>Failure mode thường gặp</h3>
+            <ul>
+                <li>Vanishing Gradient khiến mô hình quên ngữ cảnh xa.</li>
+                <li>Exploding Gradient gây mất ổn định khi train.</li>
+            </ul>
+            <div class="formula">h_t = tanh(W_hh h_(t-1) + W_xh x_t + b_h)</div>
+        </section>
+
+        <section>
+            <h2>4. LSTM (Long Short-Term Memory)</h2>
+            <p>LSTM mở rộng RNN bằng cơ chế cổng (forget/input/output), giúp lưu ngữ cảnh dài tốt hơn.</p>
+            <h3>Khi nào nên dùng</h3>
+            <ul>
+                <li>Chuỗi dài vừa phải cần giữ thông tin quá khứ.</li>
+                <li>Dự báo tài chính, cảm biến, hoặc NLP truyền thống.</li>
+            </ul>
+            <h3>Failure mode thường gặp</h3>
+            <ul>
+                <li>Huấn luyện chậm do xử lý tuần tự theo thời gian.</li>
+                <li>Khó mở rộng với sequence cực dài.</li>
+            </ul>
+            <div class="formula">C_t = f_t ⊙ C_(t-1) + i_t ⊙ C~_t
+                h_t = o_t ⊙ tanh(C_t)</div>
+        </section>
+
+        <section>
+            <h2>5. GRU (Gated Recurrent Unit)</h2>
+            <p>GRU là phiên bản gọn hơn LSTM, giảm số cổng và tham số, thường hội tụ nhanh hơn trên một số tập dữ liệu.
+            </p>
+            <h3>Khi nào nên dùng</h3>
+            <ul>
+                <li>Cần mô hình chuỗi nhẹ và train nhanh hơn LSTM.</li>
+                <li>Bài toán không yêu cầu phân tách bộ nhớ dài-ngắn quá chi tiết.</li>
+            </ul>
+            <h3>Failure mode thường gặp</h3>
+            <ul>
+                <li>Vẫn bị giới hạn bởi tính tuần tự như họ RNN.</li>
+                <li>Có thể kém LSTM trên tác vụ cần giữ phụ thuộc rất dài.</li>
+            </ul>
+            <div class="formula">h_t = (1-z_t) ⊙ h_(t-1) + z_t ⊙ h~_t</div>
+        </section>
+
+        <section>
+            <h2>6. Transformer</h2>
+            <p>Transformer dùng self-attention để mô hình hóa quan hệ toàn cục và cho phép huấn luyện song song, hiện là
+                kiến trúc chủ đạo của LLM.</p>
+            <h3>Khi nào nên dùng</h3>
+            <ul>
+                <li>NLP hiện đại: phân loại văn bản, QA, dịch máy, LLM.</li>
+                <li>Dữ liệu đa phương thức khi cần nắm ngữ cảnh xa.</li>
+            </ul>
+            <h3>Failure mode thường gặp</h3>
+            <ul>
+                <li>Chi phí attention tăng nhanh theo độ dài chuỗi.</li>
+                <li>Nhạy với dữ liệu nhiễu hoặc lệch miền nếu thiếu regularization.</li>
+            </ul>
+            <div class="formula">Attention(Q,K,V) = softmax(QK^T / sqrt(d_k))V</div>
+            <div class="note"><strong>Lưu ý:</strong> Với bài toán sequence rất dài, nên xem xét Longformer, Performer
+                hoặc các biến thể sparse attention để giảm chi phí.</div>
+        </section>
+
+        <section>
+            <h2>7. Bảng chọn kiến trúc nhanh</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bài toán</th>
+                            <th>Kiến trúc ưu tiên</th>
+                            <th>Lý do</th>
+                            <th>Rủi ro chính</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Phân loại dữ liệu bảng</td>
+                            <td>MLP</td>
+                            <td>Đơn giản, nhanh, dễ tuning.</td>
+                            <td>Overfitting với dữ liệu nhỏ.</td>
+                        </tr>
+                        <tr>
+                            <td>Nhận diện ảnh</td>
+                            <td>CNN</td>
+                            <td>Tận dụng cấu trúc không gian cục bộ.</td>
+                            <td>Mất ngữ cảnh xa nếu kiến trúc nông.</td>
+                        </tr>
+                        <tr>
+                            <td>Dự báo chuỗi ngắn</td>
+                            <td>GRU / LSTM</td>
+                            <td>Giữ trạng thái theo thời gian ổn định.</td>
+                            <td>Train tuần tự, khó mở rộng.</td>
+                        </tr>
+                        <tr>
+                            <td>NLP ngữ cảnh dài</td>
+                            <td>Transformer</td>
+                            <td>Self-attention học phụ thuộc xa tốt.</td>
+                            <td>Tốn bộ nhớ khi sequence dài.</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            )}
+        </section>
 
-            {isLoading && (
-            <div
-                className="flex items-center gap-3 text-blue-400 font-medium p-4 bg-blue-950/20 rounded-lg border border-blue-900/30">
-                <Loader2 className="w-5 h-5 animate-spin" /> Đang phân tích và xử lý...
-            </div>
-            )}
+        <section>
+            <h2>8. Checklist triển khai thực chiến</h2>
+            <h3>Tiền xử lý dữ liệu</h3>
+            <ul>
+                <li>Chuẩn hóa đặc trưng, xử lý missing values, cân bằng lớp.</li>
+                <li>Tách train/validation/test đúng theo thời gian nếu là time-series.</li>
+            </ul>
+            <h3>Huấn luyện và đánh giá</h3>
+            <ul>
+                <li>Theo dõi loss và metric theo epoch, bật early stopping.</li>
+                <li>Đánh giá thêm robust metrics: calibration, out-of-domain checks.</li>
+            </ul>
+            <h3>Triển khai</h3>
+            <ul>
+                <li>Version hóa model + data + config để tái lập.</li>
+                <li>Giám sát drift sau triển khai và lịch retrain định kỳ.</li>
+            </ul>
+        </section>
 
-            {error && (
-            <div className="p-4 bg-rose-950/30 border border-rose-900/50 rounded-lg text-rose-400 text-sm">
-                {error}
-            </div>
-            )}
+        <section>
+            <h2>9. FAQ nhanh</h2>
+            <h3>MLP có dùng cho NLP được không?</h3>
+            <p>Có, nhưng thường chỉ phù hợp bài toán đơn giản sau khi đã trích xuất đặc trưng. Với ngữ cảnh dài,
+                Transformer vẫn là lựa chọn mạnh hơn.</p>
+            <h3>Khi nào chọn GRU thay vì LSTM?</h3>
+            <p>Khi bạn cần mô hình nhẹ, train nhanh và chấp nhận giảm một phần khả năng mô hình hóa bộ nhớ dài.</p>
+            <h3>Transformer có luôn tốt nhất không?</h3>
+            <p>Không. Nếu dữ liệu nhỏ hoặc hạ tầng hạn chế, CNN/MLP đôi khi hiệu quả hơn về chi phí-vận hành.</p>
+        </section>
+    </main>
+</body>
 
-            {response && !isLoading && (
-            <div className="text-slate-300 space-y-2 animate-in fade-in duration-300">
-                <MarkdownMathRenderer content={response} />
-            </div>
-            )}
-        </div>
-
-        {/* Input Area */}
-        <div className="p-3 bg-slate-900 border-t border-slate-800 flex items-center gap-2">
-            <input type="text" value={query} onChange={(e)=> setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && askGemini()}
-            placeholder={`Hỏi thêm về ${activeArch.name}...`}
-            className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-200
-            focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-            />
-            <button onClick={()=> askGemini()}
-                disabled={!query.trim() || isLoading}
-                className="bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 text-white p-2.5
-                rounded-lg transition-colors flex items-center justify-center"
-                >
-                <Send className="w-4 h-4" />
-            </button>
-        </div>
-    </div>
-    );
-    };
-
-    // --- MAIN APP COMPONENT ---
-    export default function DeepLearningApp() {
-    const [selectedId, setSelectedId] = useState(architectures[0].id);
-    const [isPlaying, setIsPlaying] = useState(true);
-    const [activeTab, setActiveTab] = useState('intuition'); // 'intuition', 'math', 'failures', 'spec', 'ai'
-
-    const activeArch = architectures.find(a => a.id === selectedId);
-
-    const renderVisualizer = () => {
-    switch (activeArch.id) {
-    case 'mlp': return
-    <MLPVisualizer isPlaying={isPlaying} />;
-    case 'cnn': return
-    <CNNVisualizer isPlaying={isPlaying} />;
-    case 'rnn': return
-    <RNNVisualizer isPlaying={isPlaying} />;
-    case 'lstm': return
-    <LSTMVisualizer isPlaying={isPlaying} />;
-    case 'gru': return
-    <GRUVisualizer isPlaying={isPlaying} />;
-    case 'transformer': return
-    <TransformerVisualizer isPlaying={isPlaying} />;
-    case 'gan': return
-    <GANVisualizer isPlaying={isPlaying} />;
-    case 'ae': return
-    <AEVisualizer isPlaying={isPlaying} />;
-    case 'flow': return
-    <FlowVisualizer isPlaying={isPlaying} />;
-    default: return null;
-    }
-    };
-
-    return (
-    <div className="flex h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden">
-
-        {/* SIDEBAR */}
-        <div className="w-80 bg-slate-900 border-r border-slate-800 flex flex-col z-10 shrink-0">
-            <div className="p-5 border-b border-slate-800">
-                <h1
-                    className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-                    DL Playbook
-                </h1>
-                <p className="text-xs text-slate-400 mt-1">Research & Architecture Specs</p>
-            </div>
-
-            <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
-                {architectures.map((arch) => (
-                <button key={arch.id} onClick={()=> { setSelectedId(arch.id); setIsPlaying(true); }}
-                    className={`w-full text-left px-5 py-3.5 flex items-start gap-3 transition-all duration-200
-                    border-l-4
-                    ${selectedId === arch.id ? 'border-blue-500 bg-slate-800/50 text-white' : 'border-transparent
-                    text-slate-400 hover:bg-slate-800/30 hover:text-slate-300'}`}>
-                    <div className={`mt-0.5 ${selectedId===arch.id ? 'text-blue-400' : 'text-slate-500' }`}>
-                        {arch.icon}
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-[13px]">{arch.name}</h3>
-                        <p className="text-[11px] mt-0.5 opacity-70 leading-snug truncate w-48">{arch.shortDesc}</p>
-                    </div>
-                </button>
-                ))}
-            </div>
-        </div>
-
-        {/* MAIN CONTENT */}
-        <div className="flex-1 flex flex-col h-full relative overflow-hidden">
-
-            {/* Header */}
-            <div className="px-8 py-5 flex justify-between items-end border-b border-slate-800 bg-slate-950 shrink-0">
-                <div>
-                    <h2 className="text-2xl font-bold text-white tracking-wide">{activeArch.name}</h2>
-                    <div className="flex gap-2 mt-2 flex-wrap">
-                        {activeArch.components.map((comp, idx) => (
-                        <span key={idx}
-                            className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 text-[10px] font-medium border border-slate-700">
-                            {comp}
-                        </span>
-                        ))}
-                    </div>
-                </div>
-                <button onClick={()=> setIsPlaying(!isPlaying)} className="flex items-center gap-2 px-4 py-2
-                    bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-medium transition-colors border
-                    border-slate-700">
-                    {isPlaying ?
-                    <Pause className="w-4 h-4 text-rose-400" /> :
-                    <Play className="w-4 h-4 text-emerald-400" />}
-                    {isPlaying ? 'Pause Animation' : 'Play Animation'}
-                </button>
-            </div>
-
-            {/* Canvas Area */}
-            <div
-                className="w-full h-64 bg-slate-900/40 border-b border-slate-800 relative flex justify-center items-center shrink-0">
-                <div
-                    className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20 pointer-events-none">
-                </div>
-                {renderVisualizer()}
-            </div>
-
-            {/* Content Tabs */}
-            <div className="flex-1 flex flex-col overflow-hidden bg-slate-950">
-
-                {/* Tab Navigation */}
-                <div className="flex border-b border-slate-800 px-6 shrink-0">
-                    {[
-                    { id: 'intuition', icon:
-                    <Eye className="w-4 h-4" />, label: 'Trực giác & Cốt lõi' },
-                    { id: 'math', icon:
-                    <Sigma className="w-4 h-4" />, label: 'Toán học (Forward & Backprop)' },
-                    { id: 'failures', icon:
-                    <AlertTriangle className="w-4 h-4" />, label: 'Hạn chế & Trích dẫn' },
-                    { id: 'spec', icon: <Code className="w-4 h-4" />, label: 'Code Spec & Unit Test' },
-                    { id: 'ai', icon:
-                    <Sparkles className="w-4 h-4 text-amber-400" />, label: '✨ Trợ lý AI' }
-                    ].map(tab => (
-                    <button key={tab.id} onClick={()=> setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors
-                        ${
-                        activeTab === tab.id ? 'border-blue-500 text-blue-400' : 'border-transparent text-slate-500
-                        hover:text-slate-300'
-                        }`}>
-                        {tab.icon} {tab.label}
-                    </button>
-                    ))}
-                </div>
-
-                {/* Tab Content Area */}
-                <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                    <div className="max-w-4xl mx-auto w-full">
-
-                        {/* TAB 1: Intuition & Tech */}
-                        {activeTab === 'intuition' && (
-                        <div className="space-y-6 animate-in fade-in duration-300">
-                            <div className="bg-emerald-950/20 border border-emerald-900/50 rounded-xl p-6">
-                                <h3 className="text-emerald-400 font-semibold mb-3 flex items-center gap-2">
-                                    <Eye className="w-5 h-5" /> Góc độ Trực giác (Metaphor)
-                                </h3>
-                                <p
-                                    className="text-slate-300 text-[14px] leading-relaxed italic border-l-2 border-emerald-500/50 pl-4">
-                                    {activeArch.intuition}</p>
-                            </div>
-                            <div className="bg-blue-950/20 border border-blue-900/50 rounded-xl p-6">
-                                <h3 className="text-blue-400 font-semibold mb-3 flex items-center gap-2">
-                                    <Cpu className="w-5 h-5" /> Bản chất Chuyên ngành (Technical)
-                                </h3>
-                                <p className="text-slate-300 text-[14px] leading-relaxed">{activeArch.technical}</p>
-                            </div>
-                        </div>
-                        )}
-
-                        {/* TAB 2: Math */}
-                        {activeTab === 'math' && (
-                        <div
-                            className="bg-slate-900/60 border border-slate-800 rounded-xl p-6 animate-in fade-in duration-300">
-                            <h3 className="text-amber-400 font-semibold mb-4 flex items-center gap-2">
-                                <Sigma className="w-5 h-5" /> Cấu trúc Toán học (LaTeX Format)
-                            </h3>
-                            <div className="text-slate-300">
-                                <MarkdownMathRenderer content={activeArch.math} />
-                            </div>
-                        </div>
-                        )}
-
-                        {/* TAB 3: Failures */}
-                        {activeTab === 'failures' && (
-                        <div
-                            className="bg-rose-950/20 border border-rose-900/50 rounded-xl p-6 animate-in fade-in duration-300">
-                            <h3 className="text-rose-400 font-semibold mb-4 flex items-center gap-2">
-                                <AlertTriangle className="w-5 h-5" /> Failure Modes & Remedies
-                            </h3>
-                            <div className="text-slate-300">
-                                <MarkdownMathRenderer content={activeArch.failures} />
-                            </div>
-                        </div>
-                        )}
-
-                        {/* TAB 4: Code Spec */}
-                        {activeTab === 'spec' && (
-                        <div
-                            className="bg-slate-900 border border-slate-700 rounded-xl p-0 overflow-hidden animate-in fade-in duration-300 shadow-2xl">
-                            <div
-                                className="bg-slate-800/80 px-4 py-2 border-b border-slate-700 flex items-center gap-2">
-                                <Code className="w-4 h-4 text-slate-400" />
-                                <span className="text-xs font-mono text-slate-400">interactive_spec_and_test.js</span>
-                            </div>
-                            <pre className="p-6 overflow-x-auto text-[13px] font-mono text-slate-300 leading-relaxed">
-                    <code>{activeArch.spec}</code>
-                  </pre>
-                        </div>
-                        )}
-
-                        {/* TAB 5: AI Assistant */}
-                        {activeTab === 'ai' && (
-                        <AIAssistant activeArch={activeArch} />
-                        )}
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        {/* Basic Global Styles for Scrollbar & Animation */}
-        <style dangerouslySetInnerHTML={{__html: ` .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; } `}} />
-    </div>
-    );
-    }
+</html>

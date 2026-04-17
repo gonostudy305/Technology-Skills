@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Playbook: Triển Khai Ứng Dụng Nhất Quán Từ Dev Đến Prod</title>
+    <meta name="description"
+        content="Docker Playbook giúp bạn nắm workflow build image, quản lý container, networking, volumes, Compose và checklist production để triển khai ổn định.">
+    <meta name="category" content="Nền tảng">
+    <meta name="author" content="Minh Tuấn">
+    <style>
+        .docker-playbook {
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            color: #1f2937;
+            line-height: 1.75;
+            max-width: 100%;
+        }
+
+        .docker-playbook .hero {
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(145deg, #ecfeff, #ffffff);
+            margin-bottom: 20px;
+        }
+
+        .docker-playbook section {
+            margin-top: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            background: #ffffff;
+        }
+
+        .docker-playbook h2 {
+            font-size: 1.3rem;
+            margin: 0 0 10px;
+            color: #111827;
+        }
+
+        .docker-playbook h3 {
+            font-size: 1rem;
+            margin: 14px 0 6px;
+            color: #111827;
+        }
+
+        .docker-playbook p,
+        .docker-playbook ul,
+        .docker-playbook ol {
+            margin: 0;
+        }
+
+        .docker-playbook p+p,
+        .docker-playbook p+ul,
+        .docker-playbook p+ol,
+        .docker-playbook ul+p,
+        .docker-playbook ol+p {
+            margin-top: 8px;
+        }
+
+        .docker-playbook ul,
+        .docker-playbook ol {
+            padding-left: 20px;
+        }
+
+        .docker-playbook .code {
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 12px;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            white-space: pre;
+        }
+
+        .docker-playbook .table-wrap {
+            overflow-x: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .docker-playbook table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 660px;
+        }
+
+        .docker-playbook th,
+        .docker-playbook td {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.92rem;
+        }
+
+        .docker-playbook th {
+            background: #f9fafb;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .docker-playbook .note {
+            margin-top: 10px;
+            border-left: 4px solid #06b6d4;
+            background: #ecfeff;
+            color: #155e75;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.93rem;
+        }
+
+        @media (max-width: 640px) {
+
+            .docker-playbook .hero,
+            .docker-playbook section {
+                padding: 14px;
+            }
+
+            .docker-playbook h2 {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="docker-playbook">
+        <div class="hero">
+            <p><strong>TL;DR:</strong> Docker giúp đóng gói ứng dụng thành image bất biến để chạy nhất quán từ máy dev
+                đến production. Để vận hành ổn định, bạn cần chuẩn Dockerfile, phân tách config bằng biến môi trường,
+                quản lý state qua volume và theo dõi container bằng healthcheck + logs tập trung.</p>
+        </div>
+
+        <section>
+            <h2>1. Docker là gì và vì sao cần dùng?</h2>
+            <p>Docker là nền tảng containerization cho phép bạn đóng gói source code, runtime, dependency và cấu hình
+                vào một image duy nhất.</p>
+            <h3>Lợi ích chính</h3>
+            <ul>
+                <li>Triển khai nhất quán giữa dev, staging và production.</li>
+                <li>Khởi động nhanh, tiết kiệm tài nguyên hơn VM truyền thống.</li>
+                <li>Dễ scale theo dịch vụ với Compose hoặc Kubernetes.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>2. Cấu trúc Dockerfile chuẩn</h2>
+            <h3>Nguyên tắc</h3>
+            <ul>
+                <li>Dùng base image nhỏ, rõ version.</li>
+                <li>Tận dụng layer cache (COPY package trước source).</li>
+                <li>Không chạy bằng root trong production.</li>
+            </ul>
+            <div class="code">FROM node:20-alpine
+                WORKDIR /app
+                COPY package*.json ./
+                RUN npm ci --omit=dev
+                COPY . .
+                ENV NODE_ENV=production
+                EXPOSE 3000
+                CMD ["npm", "run", "start"]</div>
+        </section>
+
+        <section>
+            <h2>3. Runtime: Container, Network, Volume</h2>
+            <h3>Container</h3>
+            <p>Chỉ nên chạy một tiến trình chính cho mỗi container để dễ quan sát và scale.</p>
+            <h3>Network</h3>
+            <p>Đặt service vào network riêng, chỉ expose cổng public thật sự cần thiết.</p>
+            <h3>Volume</h3>
+            <p>Dữ liệu trạng thái (database, uploads, logs) phải nằm ngoài container để tránh mất dữ liệu khi recreate.
+            </p>
+        </section>
+
+        <section>
+            <h2>4. Docker Compose cho môi trường nhiều dịch vụ</h2>
+            <p>Compose giúp khai báo stack theo mã, chạy đồng thời API, database, cache, queue với một lệnh duy nhất.
+            </p>
+            <div class="code">services:
+                api:
+                build: .
+                ports:
+                - "3000:3000"
+                env_file:
+                - .env
+                depends_on:
+                - db
+                db:
+                image: postgres:16-alpine
+                volumes:
+                - pgdata:/var/lib/postgresql/data
+                volumes:
+                pgdata:</div>
+            <div class="note"><strong>Lưu ý:</strong> `depends_on` chỉ đảm bảo thứ tự khởi chạy, không đảm bảo dịch vụ
+                đã sẵn sàng. Hãy bổ sung healthcheck hoặc retry logic ở ứng dụng.</div>
+        </section>
+
+        <section>
+            <h2>5. Bảng lỗi phổ biến và cách xử lý</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Triệu chứng</th>
+                            <th>Nguyên nhân thường gặp</th>
+                            <th>Cách xử lý</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Container restart liên tục</td>
+                            <td>CMD sai, thiếu env, app crash khi boot</td>
+                            <td>Kiểm tra logs, chạy lại bằng shell, thêm healthcheck.</td>
+                        </tr>
+                        <tr>
+                            <td>Kết nối DB thất bại</td>
+                            <td>Network sai, DB chưa sẵn sàng, sai host</td>
+                            <td>Dùng tên service Compose làm host, thêm retry khi startup.</td>
+                        </tr>
+                        <tr>
+                            <td>Image build quá chậm</td>
+                            <td>Dockerfile không tối ưu cache layer</td>
+                            <td>Copy lockfile trước, dùng multi-stage build.</td>
+                        </tr>
+                        <tr>
+                            <td>Deploy xong mất dữ liệu</td>
+                            <td>Không mount volume persistent</td>
+                            <td>Tách state ra volume hoặc managed storage.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2>6. Checklist production</h2>
+            <ol>
+                <li>Pin version image và dependency, tránh latest.</li>
+                <li>Bật healthcheck, log tập trung và alert cơ bản.</li>
+                <li>Không hard-code secret trong image.</li>
+                <li>Bổ sung resource limits (CPU/RAM) cho từng service.</li>
+                <li>Tự động scan lỗ hổng image trước khi phát hành.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>7. FAQ nhanh</h2>
+            <h3>Khi nào dùng Docker, khi nào dùng VM?</h3>
+            <p>Docker phù hợp ứng dụng cloud-native và microservices; VM phù hợp workload cần kernel riêng hoặc cô lập
+                mức hệ điều hành.</p>
+            <h3>Docker có thay thế hoàn toàn Kubernetes không?</h3>
+            <p>Không. Docker là nền tảng build/run container, Kubernetes là hệ điều phối container ở quy mô lớn.</p>
+            <h3>Compose có dùng được cho production không?</h3>
+            <p>Có thể ở quy mô nhỏ, nhưng hệ lớn nên dùng orchestrator chuyên dụng như Kubernetes hoặc Nomad.</p>
+        </section>
+    </main>
+</body>
+
+</html>
