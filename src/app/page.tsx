@@ -73,12 +73,12 @@ export default async function Home() {
 
                   <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                     <Link
-                      href="/hoc-phan"
+                      href="/curriculum"
                       className="inline-flex h-12 items-center justify-center rounded-xl bg-[var(--color-accent)] px-8 text-sm font-bold text-white transition hover:brightness-110 active:scale-95 shadow-lg shadow-sky-500/25"
                     >
                       Bắt đầu lộ trình
                     </Link>
-                    <form action="/hoc-phan" className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-1 pl-4 focus-within:border-[var(--color-accent)] focus-within:ring-4 focus-within:ring-sky-100 transition-all">
+                    <form action="/curriculum" className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg)]/50 p-1 pl-4 focus-within:border-[var(--color-accent)] focus-within:ring-4 focus-within:ring-sky-100 transition-all">
                       <i className="fa-solid fa-magnifying-glass text-zinc-400 text-sm" />
                       <input
                         name="q"
@@ -125,7 +125,7 @@ export default async function Home() {
                   <p className="mt-1 text-sm text-[var(--color-text-secondary)] font-medium">Chọn môn học để xem tài nguyên tương ứng</p>
                 </div>
                 <Link
-                  href="/hoc-phan"
+                  href="/curriculum"
                   className="group inline-flex items-center gap-2 text-sm font-bold text-[var(--color-accent)]"
                 >
                   Xem toàn bộ
@@ -140,7 +140,7 @@ export default async function Home() {
                   return (
                     <Link
                       key={subject.slug}
-                      href={`/hoc-phan/${subject.slug}`}
+                      href={`/curriculum/${subject.slug}`}
                       className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 transition-all hover:-translate-y-1 hover:border-[var(--color-accent)] hover:shadow-lg hover:shadow-sky-500/5"
                     >
                       <div>

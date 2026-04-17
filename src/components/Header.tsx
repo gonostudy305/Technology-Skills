@@ -54,7 +54,7 @@ export default function Header() {
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item}
-                  href={item === "Học phần" ? "/hoc-phan" : "#"}
+                  href={item === "Học phần" ? "/curriculum" : "#"}
                   className="rounded px-1 py-1 transition hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 >
                   {item}
@@ -83,7 +83,7 @@ export default function Header() {
             </button>
 
             <Link
-              href="/hoc-phan"
+              href="/curriculum"
               className="inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-sky-700 px-4 text-sm font-semibold text-white transition hover:bg-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               Xem Học Phần
@@ -114,7 +114,7 @@ export default function Header() {
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item}
-                href={item === "Học phần" ? "/hoc-phan" : "#"}
+                href={item === "Học phần" ? "/curriculum" : "#"}
                 className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-center text-sm font-medium text-zinc-700 shadow-sm"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -132,7 +132,7 @@ export default function Header() {
               Cộng đồng
             </button>
             <Link
-              href="/hoc-phan"
+              href="/curriculum"
               className="inline-flex items-center justify-center rounded-lg bg-sky-700 px-4 py-2 text-sm font-semibold text-white shadow-md active:scale-95 transition-transform"
               onClick={() => setIsMobileMenuOpen(false)}
             >
