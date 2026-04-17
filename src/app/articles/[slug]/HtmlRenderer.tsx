@@ -2,6 +2,45 @@
 
 import { useEffect, useRef } from "react";
 
+declare global {
+  interface Window {
+    __kbLoadedExternalScripts?: Record<string, true>;
+  }
+}
+
+function ensureExternalScriptLoaded(src: string): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+
+  const loadedScripts = (window.__kbLoadedExternalScripts ??= {});
+  if (loadedScripts[src]) return Promise.resolve();
+
+  const existingScript = Array.from(
+    document.querySelectorAll<HTMLScriptElement>("script[src]"),
+  ).find((scriptEl) => {
+    const attrSrc = scriptEl.getAttribute("src") ?? "";
+    return attrSrc === src || scriptEl.src === src;
+  });
+
+  if (existingScript) {
+    loadedScripts[src] = true;
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const scriptEl = document.createElement("script");
+    scriptEl.src = src;
+    scriptEl.async = false;
+    scriptEl.dataset.kbExternal = "true";
+    scriptEl.onload = () => {
+      loadedScripts[src] = true;
+      resolve();
+    };
+    scriptEl.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+
+    document.head.appendChild(scriptEl);
+  });
+}
+
 /**
  * Renders trusted HTML articles from the local content repository.
  *
@@ -11,31 +50,52 @@ import { useEffect, useRef } from "react";
 export default function HtmlRenderer({
   html,
   scripts,
+  externalScripts,
 }: {
   html: string;
   scripts?: string;
+  externalScripts?: string[];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Execute extracted inline scripts in page context so article simulations work.
+  // Load external dependencies first, then execute inline scripts in page context.
   useEffect(() => {
-    if (!scripts || scripts.trim().length === 0) return;
     if (!containerRef.current) return;
+    let isCancelled = false;
+    let inlineScriptEl: HTMLScriptElement | null = null;
 
-    const isModuleScript =
-      /^\s*import\s.+from\s+["']/m.test(scripts) || /^\s*export\s/m.test(scripts);
+    const runScripts = async () => {
+      for (const src of externalScripts ?? []) {
+        if (isCancelled) return;
 
-    const scriptEl = document.createElement("script");
-    scriptEl.type = isModuleScript ? "module" : "text/javascript";
-    scriptEl.text = scripts;
-    scriptEl.dataset.kbInjected = "true";
+        try {
+          await ensureExternalScriptLoaded(src);
+        } catch (error) {
+          console.warn("[Article external script load error]", error);
+        }
+      }
 
-    containerRef.current.appendChild(scriptEl);
+      if (isCancelled) return;
+      if (!scripts || scripts.trim().length === 0) return;
+
+      const isModuleScript =
+        /^\s*import\s.+from\s+["']/m.test(scripts) || /^\s*export\s/m.test(scripts);
+
+      inlineScriptEl = document.createElement("script");
+      inlineScriptEl.type = isModuleScript ? "module" : "text/javascript";
+      inlineScriptEl.text = scripts;
+      inlineScriptEl.dataset.kbInjected = "true";
+
+      containerRef.current?.appendChild(inlineScriptEl);
+    };
+
+    void runScripts();
 
     return () => {
-      scriptEl.remove();
+      isCancelled = true;
+      inlineScriptEl?.remove();
     };
-  }, [scripts, html]);
+  }, [externalScripts, scripts, html]);
 
   return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
 }

@@ -11,7 +11,11 @@ import {
   readingTimeInMinutes,
   titleFromSlug,
 } from "@/lib/utils";
-import { getCanonicalArticlePath } from "@/lib/subjects";
+import {
+  buildSubjectDirectory,
+  getCanonicalArticlePath,
+  getPrimarySubjectForArticle,
+} from "@/lib/subjects";
 import Link from "next/link";
 import HtmlRenderer from "./HtmlRenderer";
 import ReadingProgressBar from "./ReadingProgressBar";
@@ -114,6 +118,10 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
     article.type === "html" && embeddedLayoutMarker.test(article.content);
   const isReadingLayout = !hasEmbeddedSidebarLayout;
 
+  const subjectSlug = getPrimarySubjectForArticle(slug);
+  const allSubjects = buildSubjectDirectory(articles);
+  const articleSubject = allSubjects.find((s) => s.slug === subjectSlug);
+
   const sameCategoryArticles = articles
     .filter(
       (item) =>
@@ -155,17 +163,39 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
 
       <div className={pageContainerClassName}>
         <section className="rounded-2xl border border-zinc-200 bg-white/95 p-4 shadow-sm sm:p-6">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-500">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-zinc-700">
             <Link
               href="/"
               className="font-medium text-zinc-600 transition hover:text-zinc-900"
             >
               Trang chủ
             </Link>
-            <span aria-hidden="true">/</span>
-            <span>{articleCategory}</span>
-            <span aria-hidden="true">/</span>
-            <span className="home-line-clamp-1 max-w-[460px] text-zinc-700">
+            {articleSubject && (
+              <>
+                <span aria-hidden="true" className="text-zinc-400">/</span>
+                <Link
+                  href="/hoc-phan"
+                  className="font-medium text-zinc-600 transition hover:text-zinc-900"
+                >
+                  Năm {articleSubject.year}
+                </Link>
+                <span aria-hidden="true" className="text-zinc-400">/</span>
+                <Link
+                  href={`/hoc-phan/${articleSubject.slug}`}
+                  className="font-medium text-zinc-600 transition hover:text-zinc-900"
+                >
+                  {articleSubject.name}
+                </Link>
+              </>
+            )}
+            {!articleSubject && (
+              <>
+                <span aria-hidden="true" className="text-zinc-400">/</span>
+                <span>{articleCategory}</span>
+              </>
+            )}
+            <span aria-hidden="true" className="text-zinc-400">/</span>
+            <span className="home-line-clamp-1 max-w-[460px] font-medium text-zinc-900">
               {articleTitle}
             </span>
           </div>
@@ -266,6 +296,7 @@ export default async function ArticlePageContent({ slug }: { slug: string }) {
                   <HtmlRenderer
                     html={article.content}
                     scripts={article.scripts}
+                    externalScripts={article.externalScripts}
                   />
                 </div>
               </>

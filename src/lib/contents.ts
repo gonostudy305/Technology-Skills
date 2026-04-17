@@ -57,6 +57,7 @@ export interface ArticleContent {
   content: string;
   type: "md" | "html";
   scripts?: string;
+  externalScripts?: string[];
   toc: TocItem[];
 }
 
@@ -204,6 +205,46 @@ function pseudoViewCount(slug: string): number {
     hash = (hash * 31 + char.charCodeAt(0)) % 10000;
   }
   return 150 + (hash % 4000);
+}
+
+function collectExternalScriptSources(rawHtml: string): string[] {
+  const scriptSrcSet = new Set<string>();
+  const scriptSrcRegex = /<script\b[^>]*\ssrc=(['"])(.*?)\1[^>]*>\s*<\/script>/gi;
+  let srcMatch: RegExpExecArray | null;
+
+  while ((srcMatch = scriptSrcRegex.exec(rawHtml)) !== null) {
+    const src = srcMatch[2]?.trim();
+    if (!src) continue;
+    if (/cdn\.tailwindcss\.com/i.test(src)) continue;
+    scriptSrcSet.add(src);
+  }
+
+  return Array.from(scriptSrcSet);
+}
+
+function collectInlineBodyScripts(rawHtml: string): string {
+  const bodyMatch = rawHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const rawBodyContent = bodyMatch ? bodyMatch[1] : rawHtml;
+  const scriptRegex = /<script\b([^>]*)>([\s\S]*?)<\/script>/gi;
+  const scriptsList: string[] = [];
+
+  let scriptMatch: RegExpExecArray | null;
+  while ((scriptMatch = scriptRegex.exec(rawBodyContent)) !== null) {
+    const attrs = scriptMatch[1] ?? "";
+    const scriptContent = scriptMatch[2] ?? "";
+    const src = attrs.match(/\ssrc=(['"])(.*?)\1/i)?.[2]?.trim();
+    const typeAttr = attrs.match(/\stype=(['"])(.*?)\1/i)?.[2]?.trim().toLowerCase();
+
+    if (src) continue;
+    if (typeAttr && !["text/javascript", "application/javascript", "module"].includes(typeAttr)) {
+      continue;
+    }
+    if (scriptContent.trim().length === 0) continue;
+
+    scriptsList.push(scriptContent);
+  }
+
+  return scriptsList.join("\n\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -362,17 +403,8 @@ async function _getArticleBySlug(slug: string): Promise<ArticleContent | null> {
       }
       const styles = stylesList.join("\n");
 
-      // Safely extract inline scripts (drop external tailwind CDN)
-      const scriptRegex =
-        /<script(?![^>]*src="https:\/\/cdn\.tailwindcss\.com")[^>]*>([\s\S]*?)<\/script>/gi;
-      const scriptsList: string[] = [];
-      let scriptMatch;
-      while ((scriptMatch = scriptRegex.exec(rawHTML)) !== null) {
-        if (scriptMatch[1].trim()) {
-          scriptsList.push(scriptMatch[1]);
-        }
-      }
-      const scripts = scriptsList.join("\n");
+      const externalScripts = collectExternalScriptSources(rawHTML);
+      const scripts = collectInlineBodyScripts(rawHTML);
 
       // Keep only the primary article area
       let bodyContent = extractPrimaryHtmlContent(rawHTML);
@@ -393,7 +425,13 @@ async function _getArticleBySlug(slug: string): Promise<ArticleContent | null> {
         </div>
       `;
 
-      return { content: finalHTML, type: "html", scripts, toc: htmlResult.toc };
+      return {
+        content: finalHTML,
+        type: "html",
+        scripts,
+        externalScripts,
+        toc: htmlResult.toc,
+      };
     }
 
     return null;
