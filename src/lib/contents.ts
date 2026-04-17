@@ -1,11 +1,29 @@
 ﻿import fs from "fs";
 import path from "path";
+import { cache } from "react";
 import { marked } from "marked";
 import matter from "gray-matter";
 
-// Define the content directory path
+import {
+  stripHtml,
+  shortenText,
+  slugifyHeading,
+  withUniqueId,
+  extractPrimaryHtmlContent,
+  extractSummaryFromHtml,
+  extractSummaryFromMarkdown,
+} from "./utils";
+
+// ---------------------------------------------------------------------------
+// Directory paths
+// ---------------------------------------------------------------------------
+
 export const CONTENT_DIR = path.join(process.cwd(), "content");
 export const SKILL_DIR = path.join(process.cwd(), "skill");
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 type ArticleSource = "content" | "skill";
 
@@ -14,7 +32,6 @@ const ARTICLE_SOURCES: ReadonlyArray<{ name: ArticleSource; dir: string }> = [
   { name: "skill", dir: SKILL_DIR },
 ];
 
-// Keep article discovery in skill/ explicit to avoid pulling unrelated internal docs.
 const ENABLED_SKILL_SLUGS = new Set(["seo-aeo-blog-writer"]);
 
 export interface ArticleInfo {
@@ -43,7 +60,40 @@ export interface ArticleContent {
   toc: TocItem[];
 }
 
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
 const FALLBACK_SUMMARY = "Kho tri thức công nghệ được biên soạn chuyên sâu.";
+
+/** All valid category values that frontmatter/meta can specify. */
+export const CATEGORY_VALUES = [
+  "Nền tảng",
+  "Sản phẩm",
+  "Ứng dụng",
+  "Kiến thức",
+  "Kỹ năng",
+] as const;
+
+export type CategoryValue = (typeof CATEGORY_VALUES)[number];
+
+// ---------------------------------------------------------------------------
+// Tab ↔ category mapping (used by Home page)
+// ---------------------------------------------------------------------------
+
+export const TAB_CATEGORY_MAP: Record<string, CategoryValue | null> = {
+  "Mới nhất": null, // show all, sorted by date
+  "Môn Kỹ thuật": "Nền tảng",
+  "Môn Dữ liệu": "Ứng dụng",
+  "Môn Kinh doanh": "Sản phẩm",
+  "Kỹ năng": "Kỹ năng",
+};
+
+export const HOME_TABS = Object.keys(TAB_CATEGORY_MAP);
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
 
 interface ArticleFile {
   slug: string;
@@ -52,63 +102,28 @@ interface ArticleFile {
   source: ArticleSource;
 }
 
-function normalizeText(raw: string): string {
-  return raw
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function shortenText(raw: string, maxLength = 170): string {
-  const text = normalizeText(raw);
-  if (!text) return FALLBACK_SUMMARY;
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength).trimEnd()}...`;
-}
-
-function slugifyHeading(text: string): string {
-  const slug = text
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return slug || "section";
-}
-
-function withUniqueId(baseId: string, usedIds: Map<string, number>): string {
-  const key = baseId || "section";
-  const count = usedIds.get(key) ?? 0;
-  usedIds.set(key, count + 1);
-  return count === 0 ? key : `${key}-${count + 1}`;
-}
-
 function injectHeadingIdsAndBuildToc(html: string): { html: string; toc: TocItem[] } {
   const usedIds = new Map<string, number>();
   const toc: TocItem[] = [];
 
-  const htmlWithIds = html.replace(/<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/gi, (_, levelRaw: string, attrsRaw: string, innerHtml: string) => {
-    const level = Number(levelRaw);
-    const text = normalizeText(innerHtml);
-    const existingId = attrsRaw.match(/\sid=(["'])(.*?)\1/i)?.[2];
-    const uniqueId = withUniqueId(existingId ?? slugifyHeading(text), usedIds);
+  const htmlWithIds = html.replace(
+    /<h([1-6])([^>]*)>([\s\S]*?)<\/h\1>/gi,
+    (_, levelRaw: string, attrsRaw: string, innerHtml: string) => {
+      const level = Number(levelRaw);
+      const text = stripHtml(innerHtml);
+      const existingId = attrsRaw.match(/\sid=(['"])(.*?)\1/i)?.[2];
+      const uniqueId = withUniqueId(existingId ?? slugifyHeading(text), usedIds);
 
-    if ((level === 2 || level === 3) && text) {
-      toc.push({ id: uniqueId, text, level: level as 2 | 3 });
-    }
+      if ((level === 2 || level === 3) && text) {
+        toc.push({ id: uniqueId, text, level: level as 2 | 3 });
+      }
 
-    const attrsWithoutId = attrsRaw.replace(/\sid=(["'])(.*?)\1/i, "").trim();
-    const attrsPrefix = attrsWithoutId ? ` ${attrsWithoutId}` : "";
+      const attrsWithoutId = attrsRaw.replace(/\sid=(['"])(.*?)\1/i, "").trim();
+      const attrsPrefix = attrsWithoutId ? ` ${attrsWithoutId}` : "";
 
-    return `<h${level} id="${uniqueId}"${attrsPrefix}>${innerHtml}</h${level}>`;
-  });
+      return `<h${level} id="${uniqueId}"${attrsPrefix}>${innerHtml}</h${level}>`;
+    },
+  );
 
   return { html: htmlWithIds, toc };
 }
@@ -124,7 +139,9 @@ function listArticleFiles(): ArticleFile[] {
   for (const source of ARTICLE_SOURCES) {
     if (!fs.existsSync(source.dir)) continue;
 
-    const files = fs.readdirSync(source.dir).filter((fileName) => fileName.endsWith(".md") || fileName.endsWith(".html"));
+    const files = fs
+      .readdirSync(source.dir)
+      .filter((fileName) => fileName.endsWith(".md") || fileName.endsWith(".html"));
 
     for (const fileName of files) {
       const slug = fileName.replace(/\.(html|md)$/i, "");
@@ -161,50 +178,14 @@ function resolveArticleFileBySlug(slug: string): ArticleFile | null {
   return null;
 }
 
-function extractPrimaryHtmlContent(rawHtml: string): string {
-  const bodyMatch = rawHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  const bodyContent = bodyMatch ? bodyMatch[1] : rawHtml;
-
-  const mainMatch = bodyContent.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-  let content = mainMatch ? mainMatch[1] : bodyContent;
-
-  content = content.replace(/<header[\s\S]*?<\/header>/gi, "");
-  content = content.replace(/<aside[\s\S]*?<\/aside>/gi, "");
-
-  return content;
-}
-
-function extractSummaryFromHtml(rawHtml: string): string {
-  const metaDescription = rawHtml.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1];
-  if (metaDescription) return shortenText(metaDescription);
-
-  const firstParagraph = rawHtml.match(/<p[^>]*>([\s\S]*?)<\/p>/i)?.[1];
-  if (firstParagraph) return shortenText(firstParagraph);
-
-  const bodyContent = rawHtml.match(/<body[^>]*>([\s\S]*?)<\/body>/i)?.[1] ?? rawHtml;
-  return shortenText(bodyContent);
-}
-
-function extractSummaryFromMarkdown(mdContent: string): string {
-  const paragraphs = mdContent
-    .split(/\n{2,}/)
-    .map((section) =>
-      section
-        .replace(/```[\s\S]*?```/g, " ")
-        .replace(/`[^`]*`/g, " ")
-        .replace(/^#+\s+/gm, "")
-        .replace(/^>\s?/gm, "")
-        .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-        .replace(/[\*_~]/g, " "),
-    )
-    .map((section) => normalizeText(section))
-    .filter((section) => section.length > 20);
-
-  return shortenText(paragraphs[0] ?? "");
-}
-
-function inferCategory(slug: string, title: string, type: string, source: ArticleSource): string {
+/**
+ * Fallback category inference.
+ *
+ * Kept only for backward-compat with content files that haven't been updated
+ * yet. Prefer explicit `<meta name="category" content="...">` or
+ * `category:` in frontmatter.
+ */
+function inferCategory(slug: string, title: string, type: string, source: ArticleSource): CategoryValue {
   if (source === "skill") return "Kỹ năng";
 
   const probe = `${slug} ${title}`.toLowerCase();
@@ -225,8 +206,25 @@ function pseudoViewCount(slug: string): number {
   return 150 + (hash % 4000);
 }
 
-export async function getArticlesList(): Promise<ArticleInfo[]> {
+// ---------------------------------------------------------------------------
+// Public API – wrapped with React.cache() for request deduplication
+// ---------------------------------------------------------------------------
+
+async function _getArticlesList(): Promise<ArticleInfo[]> {
   try {
+    const manifestPath = path.join(process.cwd(), ".next", "content-manifest.json");
+    if (fs.existsSync(manifestPath)) {
+      const manifestData = fs.readFileSync(manifestPath, "utf-8");
+      const manifest = JSON.parse(manifestData) as any[];
+      return manifest.map((item) => ({
+        ...item,
+        dateStr: item.updatedAt,
+        viewCount: pseudoViewCount(item.slug),
+        summary: item.summary || FALLBACK_SUMMARY,
+        category: item.category || inferCategory(item.slug, item.title, item.type, item.source)
+      }));
+    }
+
     const files = listArticleFiles();
     if (files.length === 0) return [];
 
@@ -235,7 +233,7 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
       const content = fs.readFileSync(filePath, "utf-8");
       const fileStat = fs.statSync(filePath);
       const updatedAt = fileStat.mtime.toISOString();
-      
+
       let title = slug;
       let summary = FALLBACK_SUMMARY;
       let category: string | undefined;
@@ -244,16 +242,20 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
       if (type === "html") {
         const titleMatch = content.match(/<title[^>]*>([^<]+)<\/title>/i);
         const h1Match = content.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-        const categoryMatch = content.match(/<meta[^>]*name=["']category["'][^>]*content=["']([^"']+)["'][^>]*>/i);
-        const authorMatch = content.match(/<meta[^>]*name=["']author["'][^>]*content=["']([^"']+)["'][^>]*>/i);
-        
+        const categoryMatch = content.match(
+          /<meta[^>]*name=["']category["'][^>]*content=["']([^"']+)["'][^>]*>/i,
+        );
+        const authorMatch = content.match(
+          /<meta[^>]*name=["']author["'][^>]*content=["']([^"']+)["'][^>]*>/i,
+        );
+
         if (titleMatch) title = titleMatch[1].trim();
-        else if (h1Match) title = h1Match[1].replace(/<[^>]*>?/gm, "").trim(); 
+        else if (h1Match) title = h1Match[1].replace(/<[^>]*>?/gm, "").trim();
         else title = slug.replace(/_/g, " ").replace(/-/g, " ");
 
         summary = extractSummaryFromHtml(extractPrimaryHtmlContent(content));
-        if (categoryMatch) category = normalizeText(categoryMatch[1]);
-        if (authorMatch) author = normalizeText(authorMatch[1]);
+        if (categoryMatch) category = stripHtml(categoryMatch[1]);
+        if (authorMatch) author = stripHtml(authorMatch[1]);
       } else {
         const { data, content: mdContent } = matter(content);
         if (typeof data.title === "string" && data.title.trim().length > 0) {
@@ -264,21 +266,22 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
           else if (typeof data.name === "string" && data.name.trim().length > 0) title = data.name.trim();
         }
 
-        summary = typeof data.description === "string" && data.description.trim().length > 0
-          ? shortenText(data.description)
-          : extractSummaryFromMarkdown(mdContent);
+        summary =
+          typeof data.description === "string" && data.description.trim().length > 0
+            ? shortenText(data.description)
+            : extractSummaryFromMarkdown(mdContent);
 
         if (typeof data.category === "string") {
-          category = normalizeText(data.category);
+          category = stripHtml(data.category);
         }
 
         if (typeof data.author === "string" && data.author.trim().length > 0) {
-          author = normalizeText(data.author);
+          author = stripHtml(data.author);
         }
       }
 
       category = category ?? inferCategory(slug, title, type, source);
-      
+
       return {
         slug,
         title,
@@ -298,7 +301,7 @@ export async function getArticlesList(): Promise<ArticleInfo[]> {
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<ArticleContent | null> {
+async function _getArticleBySlug(slug: string): Promise<ArticleContent | null> {
   try {
     const articleFile = resolveArticleFileBySlug(slug);
     if (!articleFile) return null;
@@ -314,8 +317,8 @@ export async function getArticleBySlug(slug: string): Promise<ArticleContent | n
 
     if (articleFile.type === "html") {
       const rawHTML = fs.readFileSync(articleFile.filePath, "utf-8");
-      
-      // Extract links 
+
+      // Extract links
       const linksSet = new Set<string>();
       const linkRegex = /<link[^>]+(?:href="[^"]*")[^>]*>/gi;
       let match;
@@ -326,33 +329,36 @@ export async function getArticleBySlug(slug: string): Promise<ArticleContent | n
 
       // Extract styles inside head
       const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-      const stylesList = [];
+      const stylesList: string[] = [];
       let styleMatch;
       while ((styleMatch = styleRegex.exec(rawHTML)) !== null) {
         stylesList.push(styleMatch[0]);
       }
       const styles = stylesList.join("\n");
 
-      // Safely extract inline scripts to execute manually (drop external tailwind CDN which we dont need since app router gives us TW)
-      const scriptRegex = /<script(?![^>]*src="https:\/\/cdn\.tailwindcss\.com")[^>]*>([\s\S]*?)<\/script>/gi;
-      const scriptsList = [];
+      // Safely extract inline scripts (drop external tailwind CDN)
+      const scriptRegex =
+        /<script(?![^>]*src="https:\/\/cdn\.tailwindcss\.com")[^>]*>([\s\S]*?)<\/script>/gi;
+      const scriptsList: string[] = [];
       let scriptMatch;
       while ((scriptMatch = scriptRegex.exec(rawHTML)) !== null) {
         if (scriptMatch[1].trim()) {
-            scriptsList.push(scriptMatch[1]);
+          scriptsList.push(scriptMatch[1]);
         }
       }
       const scripts = scriptsList.join("\n");
 
-      // Keep only the primary article area to avoid nested layout conflicts.
+      // Keep only the primary article area
       let bodyContent = extractPrimaryHtmlContent(rawHTML);
-      
-      // Clear out scripts from html since NextJS dangerouslySetInnerHTML wont run them anyway
-      bodyContent = bodyContent.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+      // Clear out scripts from html
+      bodyContent = bodyContent.replace(
+        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+        "",
+      );
 
       const htmlResult = injectHeadingIdsAndBuildToc(bodyContent);
 
-      // Return combined safe HTML
       const finalHTML = `
         ${links}
         ${styles}
@@ -363,7 +369,7 @@ export async function getArticleBySlug(slug: string): Promise<ArticleContent | n
 
       return { content: finalHTML, type: "html", scripts, toc: htmlResult.toc };
     }
-    
+
     return null;
   } catch (error) {
     console.error(`Error reading article ${slug}:`, error);
@@ -371,3 +377,10 @@ export async function getArticleBySlug(slug: string): Promise<ArticleContent | n
   }
 }
 
+/**
+ * React.cache() de-duplicates calls within the same server-request,
+ * so multiple components calling `getArticlesList()` only hit the
+ * filesystem once per render cycle.
+ */
+export const getArticlesList = cache(_getArticlesList);
+export const getArticleBySlug = cache(_getArticleBySlug);

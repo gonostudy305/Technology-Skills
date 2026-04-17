@@ -1,7 +1,20 @@
 ﻿import Link from "next/link";
-import { type ArticleInfo, getArticlesList } from "@/lib/contents";
+import {
+  type ArticleInfo,
+  getArticlesList,
+  HOME_TABS,
+  TAB_CATEGORY_MAP,
+} from "@/lib/contents";
+import { formatDateVi, formatNumberVi } from "@/lib/utils";
 
-const HOME_TABS = ["Mới nhất", "Môn Kỹ thuật", "Môn Dữ liệu", "Môn Kinh doanh", "Case Study Akia/GoClaw"];
+// ---------------------------------------------------------------------------
+// ISR – rebuild Home at most once every 60 seconds
+// ---------------------------------------------------------------------------
+export const revalidate = 60;
+
+// ---------------------------------------------------------------------------
+// Gradients & helpers
+// ---------------------------------------------------------------------------
 
 const HERO_GRADIENTS = [
   "from-sky-300 via-blue-600 to-slate-950",
@@ -19,24 +32,6 @@ const CARD_GRADIENTS = [
   "from-zinc-100 via-slate-200 to-stone-200",
 ];
 
-function formatDate(dateValue?: string): string {
-  if (!dateValue) return "Khong ro ngay";
-
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return "Khong ro ngay";
-
-  return new Intl.DateTimeFormat("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }).format(date);
-}
-
-function formatViews(value?: number): string {
-  if (!value) return "0";
-  return new Intl.NumberFormat("vi-VN").format(value);
-}
-
 function getHeroGradient(index: number): string {
   return HERO_GRADIENTS[index % HERO_GRADIENTS.length];
 }
@@ -49,7 +44,14 @@ function getTypeLabel(type: string): string {
   return type === "md" ? "Markdown" : "HTML";
 }
 
-function renderSecondaryHeroCard(article: ArticleInfo | undefined, index: number) {
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+function renderSecondaryHeroCard(
+  article: ArticleInfo | undefined,
+  index: number,
+) {
   if (!article) return null;
 
   return (
@@ -59,7 +61,9 @@ function renderSecondaryHeroCard(article: ArticleInfo | undefined, index: number
       href={`/articles/${article.slug}`}
       className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900 p-5 text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
     >
-      <div className={`absolute inset-0 bg-gradient-to-br ${getHeroGradient(index + 1)} opacity-90`} />
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${getHeroGradient(index + 1)} opacity-90`}
+      />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_12%,rgba(255,255,255,0.25),transparent_35%)]" />
 
       <div className="relative flex min-h-[154px] flex-col justify-end">
@@ -69,49 +73,75 @@ function renderSecondaryHeroCard(article: ArticleInfo | undefined, index: number
         <h3 className="mt-3 home-line-clamp-2 text-xl font-semibold leading-tight text-white transition group-hover:text-cyan-100">
           {article.title}
         </h3>
-        <p className="mt-2 home-line-clamp-2 text-sm leading-relaxed text-white/80">{article.summary}</p>
+        <p className="mt-2 home-line-clamp-2 text-sm leading-relaxed text-white/80">
+          {article.summary}
+        </p>
       </div>
     </Link>
   );
 }
 
-export default async function Home() {
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { tab?: string };
+}) {
   const articles = await getArticlesList();
   const sortedArticles = [...articles].sort((a, b) => {
     const dateA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
     const dateB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
-
-    if (dateA !== dateB) {
-      return dateB - dateA;
-    }
-
+    if (dateA !== dateB) return dateB - dateA;
     return a.title.localeCompare(b.title, "vi");
   });
+
+  // -----------------------------------------------------------------------
+  // Tab filtering via searchParams (?tab=...)
+  // -----------------------------------------------------------------------
+  const activeTab = searchParams.tab ?? HOME_TABS[0];
+  const activeCategory = TAB_CATEGORY_MAP[activeTab] ?? null;
+
+  const filteredArticles = activeCategory
+    ? sortedArticles.filter((a) => a.category === activeCategory)
+    : sortedArticles;
 
   const heroArticle = sortedArticles[0];
   const secondaryHeroArticles = sortedArticles.slice(1, 3);
   const spotlightArticle = sortedArticles[3] ?? sortedArticles[0];
-  const listArticles = sortedArticles;
+  const listArticles = filteredArticles;
 
   return (
     <main className="min-h-screen bg-[#f3f4f6] px-3 pb-14 pt-6 sm:px-5 lg:px-0">
       <div className="mx-auto w-full max-w-[1180px]">
         {sortedArticles.length === 0 ? (
           <section className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-20 text-center shadow-sm">
-            <h1 className="text-3xl font-semibold text-zinc-900">HTTT UEL Resources</h1>
+            <h1 className="text-3xl font-semibold text-zinc-900">
+              HTTT UEL Resources
+            </h1>
             <p className="mx-auto mt-3 max-w-xl text-zinc-500">
-              Đang chuẩn bị nội dung và simulation tương tác cho sinh viên HTTT. Hãy quay lại sau!
+              Đang chuẩn bị nội dung và simulation tương tác cho sinh viên
+              HTTT. Hãy quay lại sau!
             </p>
           </section>
         ) : (
           <>
             <section className="mb-12 mt-4 text-center max-w-4xl mx-auto space-y-4 px-4 bg-white/50 py-10 rounded-3xl border border-zinc-200/50 backdrop-blur-sm">
-              <span className="inline-block rounded-full bg-sky-100 px-3 py-1 font-medium tracking-wide text-sky-800 text-sm mb-2 shadow-sm border border-sky-200/60 uppercase">Dành riêng cho sinh viên UEL</span>
+              <span className="inline-block rounded-full bg-sky-100 px-3 py-1 font-medium tracking-wide text-sky-800 text-sm mb-2 shadow-sm border border-sky-200/60 uppercase">
+                Dành riêng cho sinh viên UEL
+              </span>
               <h1 className="text-[2.5rem] sm:text-5xl font-serif font-bold text-zinc-900 tracking-tight !leading-tight">
-                Tài nguyên Học tập & Simulation Trực quan
+                Tài nguyên Học tập &amp; Simulation Trực quan
               </h1>
               <p className="text-lg text-zinc-600 max-w-2xl mx-auto mt-4">
-                Hơn 35 module kiến thức cho ngành <strong className="text-zinc-800 font-medium">HTTT, TMĐT, KDS & AI</strong>. Tiếp cận kiến thức chuyên ngành trực quan qua interactive simulations và case study thực tế từ doanh nghiệp.
+                Hơn 35 module kiến thức cho ngành{" "}
+                <strong className="text-zinc-800 font-medium">
+                  HTTT, TMĐT, KDS &amp; AI
+                </strong>
+                . Tiếp cận kiến thức chuyên ngành trực quan qua interactive
+                simulations và case study thực tế từ doanh nghiệp.
               </p>
               <div className="pt-6 flex flex-wrap items-center justify-center gap-4">
                 <Link
@@ -136,7 +166,9 @@ export default async function Home() {
                   href={`/articles/${heroArticle.slug}`}
                   className="group relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-900 p-6 text-white shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 sm:p-8"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${getHeroGradient(0)} opacity-95`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${getHeroGradient(0)} opacity-95`}
+                  />
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_90%_15%,rgba(255,255,255,0.33),transparent_38%)]" />
                   <div className="absolute inset-0 bg-[linear-gradient(140deg,rgba(8,47,73,0.2),rgba(2,6,23,0.9))]" />
 
@@ -155,15 +187,21 @@ export default async function Home() {
 
                     <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium text-white/80 sm:text-sm">
                       <span>{heroArticle.author}</span>
-                      <span>{formatDate(heroArticle.updatedAt)}</span>
-                      <span>{formatViews(heroArticle.viewCount)} luot xem</span>
+                      <span>
+                        {formatDateVi(heroArticle.updatedAt, "Khong ro ngay")}
+                      </span>
+                      <span>
+                        {formatNumberVi(heroArticle.viewCount)} luot xem
+                      </span>
                     </div>
                   </div>
                 </Link>
               ) : null}
 
               <div className="grid gap-4">
-                {secondaryHeroArticles.map((article, index) => renderSecondaryHeroCard(article, index))}
+                {secondaryHeroArticles.map((article, index) =>
+                  renderSecondaryHeroCard(article, index),
+                )}
               </div>
 
               <aside className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
@@ -177,7 +215,9 @@ export default async function Home() {
                     href={`/articles/${spotlightArticle.slug}`}
                     className="group mt-4 block overflow-hidden rounded-xl border border-zinc-200"
                   >
-                    <div className={`flex h-[150px] items-center justify-center bg-gradient-to-br ${getCardGradient(1)} p-4`}>
+                    <div
+                      className={`flex h-[150px] items-center justify-center bg-gradient-to-br ${getCardGradient(1)} p-4`}
+                    >
                       <div className="rounded-full border border-white/60 bg-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-zinc-700">
                         {getTypeLabel(spotlightArticle.type)}
                       </div>
@@ -186,7 +226,9 @@ export default async function Home() {
                       <h3 className="home-line-clamp-2 text-xl font-semibold leading-tight text-zinc-900 transition group-hover:text-sky-700">
                         {spotlightArticle.title}
                       </h3>
-                      <p className="mt-3 home-line-clamp-3 text-sm leading-relaxed text-zinc-600">{spotlightArticle.summary}</p>
+                      <p className="mt-3 home-line-clamp-3 text-sm leading-relaxed text-zinc-600">
+                        {spotlightArticle.summary}
+                      </p>
                       <div className="mt-4 flex items-center justify-between text-xs text-zinc-500">
                         <span>{spotlightArticle.author}</span>
                         <span>{spotlightArticle.category}</span>
@@ -197,89 +239,136 @@ export default async function Home() {
               </aside>
             </section>
 
-            <section id="latest-articles" className="mt-12 rounded-xl border border-zinc-200 bg-white shadow-sm">
+            {/* ─── Filterable Tabs ─── */}
+            <section
+              id="latest-articles"
+              className="mt-12 rounded-xl border border-zinc-200 bg-white shadow-sm"
+            >
               <div className="no-scrollbar overflow-x-auto px-4">
                 <ul className="flex min-w-max items-center gap-7 py-3.5 text-sm">
-                  {HOME_TABS.map((tab, index) => (
-                    <li key={tab}>
-                      <button
-                        type="button"
-                        className={
-                          index === 0
-                            ? "font-semibold text-orange-600"
-                            : "font-medium text-zinc-500 transition hover:text-zinc-900"
-                        }
-                      >
-                        {tab}
-                      </button>
-                    </li>
-                  ))}
+                  {HOME_TABS.map((tab) => {
+                    const isActive = tab === activeTab;
+                    const href =
+                      tab === HOME_TABS[0]
+                        ? "/"
+                        : `/?tab=${encodeURIComponent(tab)}`;
+                    return (
+                      <li key={tab}>
+                        <Link
+                          href={href}
+                          scroll={false}
+                          className={
+                            isActive
+                              ? "font-semibold text-orange-600"
+                              : "font-medium text-zinc-500 transition hover:text-zinc-900"
+                          }
+                        >
+                          {tab}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             </section>
 
             <section className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
               <ul className="space-y-3">
-                {listArticles.map((article, index) => (
-                  <li key={article.slug}>
-                    <Link
-                      prefetch
-                      href={`/articles/${article.slug}`}
-                      className="group flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-start sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
-                    >
-                      <div
-                        className={`flex h-[108px] w-full shrink-0 items-center justify-center rounded-xl border border-white/40 bg-gradient-to-br ${getCardGradient(index)} sm:w-[170px]`}
-                      >
-                        <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-700">
-                          {getTypeLabel(article.type)}
-                        </span>
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <h2 className="home-line-clamp-2 text-[1.62rem] font-semibold leading-tight text-zinc-900 transition group-hover:text-sky-700 sm:text-[1.95rem]">
-                          {article.title}
-                        </h2>
-
-                        <p className="mt-2 home-line-clamp-2 text-base leading-relaxed text-zinc-600">{article.summary}</p>
-
-                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-500">
-                          <span>{article.author}</span>
-                          <span>{formatDate(article.updatedAt)}</span>
-                          <span>{formatViews(article.viewCount)} luot xem</span>
-                        </div>
-
-                        <div className="mt-3 flex flex-wrap items-center gap-2">
-                          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-zinc-600">
-                            {article.category}
-                          </span>
-                          <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-zinc-600">
-                            {article.slug}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
+                {listArticles.length === 0 ? (
+                  <li className="rounded-2xl border border-dashed border-zinc-300 bg-white px-6 py-14 text-center shadow-sm">
+                    <p className="text-zinc-500">
+                      Không có bài viết nào trong danh mục &ldquo;
+                      {activeTab}&rdquo;.
+                    </p>
                   </li>
-                ))}
+                ) : (
+                  listArticles.map((article, index) => (
+                    <li key={article.slug}>
+                      <Link
+                        prefetch
+                        href={`/articles/${article.slug}`}
+                        className="group flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-start sm:p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
+                      >
+                        <div
+                          className={`flex h-[108px] w-full shrink-0 items-center justify-center rounded-xl border border-white/40 bg-gradient-to-br ${getCardGradient(index)} sm:w-[170px]`}
+                        >
+                          <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-zinc-700">
+                            {getTypeLabel(article.type)}
+                          </span>
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <h2 className="home-line-clamp-2 text-[1.62rem] font-semibold leading-tight text-zinc-900 transition group-hover:text-sky-700 sm:text-[1.95rem]">
+                            {article.title}
+                          </h2>
+
+                          <p className="mt-2 home-line-clamp-2 text-base leading-relaxed text-zinc-600">
+                            {article.summary}
+                          </p>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-zinc-500">
+                            <span>{article.author}</span>
+                            <span>
+                              {formatDateVi(
+                                article.updatedAt,
+                                "Khong ro ngay",
+                              )}
+                            </span>
+                            <span>
+                              {formatNumberVi(article.viewCount)} luot xem
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-zinc-600">
+                              {article.category}
+                            </span>
+                            <span className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.1em] text-zinc-600">
+                              {article.slug}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    </li>
+                  ))
+                )}
               </ul>
 
               <aside className="space-y-4">
                 <div className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
                   <div className="bg-[radial-gradient(circle_at_top_left,#fed7aa,#ea580c)] p-5 text-white">
-                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">Su kien</span>
-                    <h3 className="mt-2 text-2xl font-semibold leading-tight">Nam tay dat nhau cung lam chu Claude AI</h3>
-                    <p className="mt-2 text-sm text-white/85">Offline/Online workshop voi lo trinh prompt va automation thuc chien.</p>
+                    <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/80">
+                      Su kien
+                    </span>
+                    <h3 className="mt-2 text-2xl font-semibold leading-tight">
+                      Nam tay dat nhau cung lam chu Claude AI
+                    </h3>
+                    <p className="mt-2 text-sm text-white/85">
+                      Offline/Online workshop voi lo trinh prompt va automation
+                      thuc chien.
+                    </p>
                   </div>
                   <div className="space-y-3 p-4 text-sm text-zinc-600">
                     <p className="font-medium text-zinc-800">18/04/2026</p>
                     <p>Online (Lark/Zoom) + Offline: TP.HCM</p>
-                    <p className="font-semibold text-orange-600">2,092 nguoi da dang ky</p>
+                    <p className="font-semibold text-orange-600">
+                      2,092 nguoi da dang ky
+                    </p>
                   </div>
                 </div>
 
                 <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                  <h3 className="text-sm font-semibold uppercase tracking-[0.11em] text-zinc-500">Chu de nhanh</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.11em] text-zinc-500">
+                    Chu de nhanh
+                  </h3>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {["Prompt Engineering", "AI Product", "Automation", "Data Stack", "UX Writing"].map((tag) => (
+                    {[
+                      "Prompt Engineering",
+                      "AI Product",
+                      "Automation",
+                      "Data Stack",
+                      "UX Writing",
+                    ].map((tag) => (
                       <span
                         key={tag}
                         className="rounded-full border border-zinc-200 bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700"
