@@ -197,7 +197,7 @@ export function buildSubjectDirectory(
   const list = SUBJECT_DEFINITIONS.map((subject) => {
     const links = SUBJECT_RESOURCE_MAP[subject.slug] ?? [];
 
-    const resources: SubjectResourceResolved[] = links
+    const resources = links
       .map((link) => {
         const article = articleMap.get(link.slug);
         if (!article) return null;
