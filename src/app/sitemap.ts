@@ -6,7 +6,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://httt-uel-hub.vercel.app';
   
   // Base routes
-  const routes = [
+  const routes: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     subject.resources.forEach((res) => {
       routes.push({
-        url: `${baseUrl}/curriculum/${subject.slug}${res.type === 'sim' ? '/sim/' : '/'}${res.slug}`,
+        url: `${baseUrl}${res.routePath}`,
         lastModified: res.updatedAt ? new Date(res.updatedAt) : new Date(),
         changeFrequency: 'monthly' as const,
         priority: 0.7,

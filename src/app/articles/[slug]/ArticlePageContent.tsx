@@ -61,7 +61,7 @@ export async function generateArticleMetadataBySlug(
     if (subjPath) {
       canonicalPath = subjPath;
     }
-  } catch (e) {
+  } catch {
     // Ignore if not available
   }
 
